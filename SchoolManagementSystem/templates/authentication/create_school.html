@@ -1,0 +1,27 @@
+{% extends "_partials/base.html" %}
+{% load static %}
+{% block content %}
+<div class="form-container">
+    <h2>Create School</h2>
+    {% include '_partials/messages.html' %}
+   <form method="post" action="{% url 'create_school' %}">
+    {% csrf_token %}
+    <div class="ui input">
+        <input type="text" name="name" placeholder="School Name" required>
+    </div>
+    <div class="ui input">
+        <input type="email" name="email" placeholder="School Email" required>
+    </div>
+    <div class="ui input">
+        <input type="text" name="address" placeholder="School Address" required>
+    </div>
+    <div class="ui input">
+        <input type="password" name="password" placeholder="Password" required>
+    </div>
+    <div class="ui input">
+        <input type="password" name="password2" placeholder="Repeat Password" required>
+    </div>
+    <button type="submit" class="ui button">Create School</button>
+</form>
+</div>
+{% endblock %}

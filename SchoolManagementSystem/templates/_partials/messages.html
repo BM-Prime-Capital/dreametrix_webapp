@@ -1,0 +1,23 @@
+{% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+            <div class="ui {{ message.tags }} message" id="message-{{ forloop.counter }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Fonction pour masquer le message après 4 secondes
+        setTimeout(function() {
+            var messageContainer = document.getElementById('message-container');
+            if (messageContainer) {
+                messageContainer.style.transition = "opacity 0.5s ease-out";
+                messageContainer.style.opacity = "0";
+                setTimeout(function() {
+                    messageContainer.style.display = "none";
+                }, 500); // Délai supplémentaire pour cacher l'élément après l'animation
+            }
+        }, 4000); // Le message reste visible pendant 4 secondes
+    </script>
+{% endif %}

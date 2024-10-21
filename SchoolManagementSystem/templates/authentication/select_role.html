@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Role</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+        .role-selection-container {
+            text-align: center;
+        }
+        .role-selection-container img {
+            margin-bottom: 20px;
+            width: 150px;
+        }
+        .role-button {
+            margin-top: 10px;
+            width: 100%;
+            background-color: #29a1e8;
+            color: white;
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .role-button:hover {
+            background-color: #217bb4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="role-selection-container">
+    <img src="{% static 'img/logo.png' %}" alt="DreamMetrix Logo"> <!-- Static file -->
+    <div>
+        <a href="{% url 'login' %}?user_type=teacher">
+            <button class="role-button">Teachers</button>
+        </a>
+    </div>
+    <div>
+        <a href="{% url 'login' %}?user_type=student">
+            <button class="role-button">Students</button>
+        </a>
+    </div>
+    <div>
+        <a href="{% url 'login' %}?user_type=parent">
+            <button class="role-button">Parents</button>
+        </a>
+    </div>
+    <!-- Ajouter le rôle pour l'administration de l'école -->
+    <div>
+        <a href="{% url 'login' %}?user_type=admin">
+            <button class="role-button">School Administration</button>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

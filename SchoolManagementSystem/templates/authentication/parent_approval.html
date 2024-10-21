@@ -1,0 +1,18 @@
+<h2>Parent Approval Requests</h2>
+{% if parent_requests %}
+    <ul>
+    {% for request in parent_requests %}
+        <li>
+            {{ request.user.first_name }} {{ request.user.last_name }} has registered as your parent.
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="parent_id" value="{{ request.id }}">
+                <button type="submit" name="action" value="approve">Approve</button>
+                <button type="submit" name="action" value="reject">Reject</button>
+            </form>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No pending requests.</p>
+{% endif %}
