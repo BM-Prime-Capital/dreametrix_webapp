@@ -1,0 +1,33 @@
+{% extends "_partials/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="form-container">
+    <img src="{% static 'img/logo.png' %}" alt="logo" style="width: 145px; margin-bottom: 15px;">
+
+    <h2>Email Verification</h2>
+    <p>Please check your email to verify your account.</p>
+    <p>Your verification link will expire in <span id="countdown">60</span> seconds.</p>
+
+    <!-- Bouton pour renvoyer l'email de vérification -->
+    <div id="resend-btn" style="display:none;">
+        <form method="POST" action="{% url 'resend_verification_email' user.id %}">
+            {% csrf_token %}
+            <button type="submit">Resend Verification Email</button>
+        </form>
+    </div>
+
+    <!-- Compte à rebours en JavaScript -->
+    <script>
+        let countdown = 60;
+        const interval = setInterval(() => {
+            document.getElementById('countdown').innerText = countdown;
+            countdown -= 1;
+            if (countdown < 0) {
+                clearInterval(interval);
+                document.getElementById('resend-btn').style.display = 'block';  // Affiche le bouton
+            }
+        }, 1000);
+    </script>
+</div>
+{% endblock %}

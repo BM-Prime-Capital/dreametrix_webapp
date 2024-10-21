@@ -1,0 +1,70 @@
+{% extends "_partials/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="form-container">
+    <img src="{% static 'img/logo.png' %}" alt="logo" style="width: 145px; margin-bottom: 15px;">
+
+    {% include '_partials/messages.html' %}
+
+    <p>Register as a {{ user_type|title }}</p>
+
+    <form method="post" action="{% url 'register_user' user_type %}">
+    {% csrf_token %}
+
+    {% if user_type == 'school_admin' %}
+        <!-- Fields for School Admin Registration -->
+        <div class="ui left icon input" style="margin-bottom: 15px;">
+            <i class="building icon" style="color: #1A73E8;"></i>
+            <input type="text" required name="school_name" placeholder="School Name" value="{{ data.school_name }}">
+        </div>
+
+        <div class="ui left icon input" style="margin-bottom: 15px;">
+            <i class="map marker icon" style="color: #1A73E8;"></i>
+            <input type="text" required name="address" placeholder="School Address" value="{{ data.address }}">
+        </div>
+    {% else %}
+        <!-- Fields for Other User Types (Students, Teachers, Parents) -->
+        <div class="ui left icon input" style="margin-bottom: 15px;">
+            <i class="user icon" style="color: #1A73E8;"></i>
+            <input type="text" required name="first_name" placeholder="First Name" value="{{ data.first_name }}">
+        </div>
+
+        <div class="ui left icon input" style="margin-bottom: 15px;">
+            <i class="user icon" style="color: #1A73E8;"></i>
+            <input type="text" required name="last_name" placeholder="Last Name" value="{{ data.last_name }}">
+        </div>
+    {% endif %}
+
+    <div class="ui left icon input" style="margin-bottom: 15px;">
+        <i class="user icon" style="color: #1A73E8;"></i>
+        <input type="text" required name="username" placeholder="Username" value="{{ data.username }}">
+    </div>
+
+    <div class="ui left icon input" style="margin-bottom: 15px;">
+        <i class="mail icon" style="color: #1A73E8;"></i>
+        <input type="email" required name="email" placeholder="{% if user_type == 'school_admin' %}School Email{% else %}Email{% endif %}" value="{{ data.email }}">
+    </div>
+
+    <div class="ui left icon input" style="margin-bottom: 15px;">
+        <i class="lock icon" style="color: #1A73E8;"></i>
+        <input type="password" required name="password" placeholder="Password">
+    </div>
+
+    <div class="ui left icon input" style="margin-bottom: 10px;">
+        <i class="lock icon" style="color: #1A73E8;"></i>
+        <input type="password" required name="password2" placeholder="Repeat Password">
+    </div>
+
+    {% if user_type == 'parent' %}
+        <div class="ui left icon input" style="margin-bottom: 15px;">
+            <i class="user icon" style="color: #1A73E8;"></i>
+            <input type="text" required name="student_code" placeholder="Student Code">
+        </div>
+    {% endif %}
+
+    <button type="submit" class="ui fluid large button" style="margin-top: 15px;">Register</button>
+</form>
+
+</div>
+{% endblock %}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dreametrix Landing Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/admin/index.css' %}">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="{% static 'img/logo.png' %}" height="80" width="200" alt="Dreametrix logo">
+        </div>
+        <nav class="nav">
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+        </nav>
+        <div class="login">
+            <a href='login/'>Log In</a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <div class="content">
+                <h1>Empowering Your <span class="highlight">Classrooms</span></h1>
+                <p>Take control of your teaching with Dreametrix’s online class management system. Built for educators, loved by students.</p>
+                <div class="buttons">
+                    <div class="ui floating dropdown labeled button">
+                        <button class="btn btn-dropdown">Select School</button>
+                        <div class="menu" id="school-menu"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="image">
+                <img src="{% static 'img/teacher.webp' %}" alt="Teacher Image">
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2024 Dreametrix. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Fetch the list of schools via API and populate the dropdown menu
+        async function fetchSchools() {
+            try {
+                const response = await fetch('/api/schools/');
+                const schools = await response.json();
+                const menu = document.getElementById('school-menu');
+
+                // Boucle pour afficher chaque école dans la liste
+                schools.forEach(school => {
+                    const option = document.createElement('div');
+                    option.className = 'item';
+                    option.innerText = `${school.name} - ${school.code}`;
+
+                    // Lors du clic sur une école, redirection avec le sous-domaine
+                    option.addEventListener('click', () => {
+                        window.location.href = `http://${school.subdomain}.dreametrix.com/select_role/`;
+                    });
+
+                    menu.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching schools:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchSchools);
+    </script>
+</body>
+</html>
