@@ -32,6 +32,12 @@
                         <button class="btn btn-dropdown">Select School</button>
                         <div class="menu" id="school-menu"></div>
                     </div>
+
+                    <!-- Bouton "Register your School" restauré -->
+                    <a href="{% url 'register_user' 'school_admin' %}">
+                        <button class="btn btn-register">Register your School</button>
+                    </a>
+
                 </div>
             </div>
             <div class="image">
@@ -56,7 +62,7 @@
                 schools.forEach(school => {
                     const option = document.createElement('div');
                     option.className = 'item';
-                    option.innerText = `${school.name} - ${school.code}`;
+                    option.innerText = `${school.school_name} - ${school.code}`;
 
                     // Lors du clic sur une école, redirection avec le sous-domaine
                     option.addEventListener('click', () => {
