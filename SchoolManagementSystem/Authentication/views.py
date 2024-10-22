@@ -101,8 +101,8 @@ def register_user(request, user_type):
             )
 
             send_activation_email(user, request)
-            messages.success(request, "School Admin account created successfully. Please check your email for activation.")
-            return redirect('home_page')
+            # Rediriger vers la page de vérification de l'email pour le school_admin
+            return redirect('verify_email', user.id)
 
         # Création pour parents, étudiants, enseignants avec sous-domaine
         elif user_type in ['parent', 'student', 'teacher']:
@@ -142,7 +142,6 @@ def register_user(request, user_type):
 
             # Envoyer un email avec sous-domaine
             send_activation_email(user, request)
-            messages.success(request, f"{user_type.title()} account created successfully. Please check your email for activation.")
 
             # Redirige vers la page de vérification d'email avec le sous-domaine
             return redirect(f"http://{school_admin.subdomain}.127.0.0.1:8000/verify_email/{user.id}")
@@ -215,11 +214,16 @@ def activate_user(request, uidb64, token):
     if user and generate_token.check_token(user, token):
         user.is_email_verified = True
         user.save()
-        messages.success(request, 'Email verified successfully! Your account has been created, and you can now log in.')
-        return redirect('login')
+        messages.success(request, 'Email verified successfully! Your account has been created.')
+
+        # Si c'est un school_admin, redirige vers la page d'accueil (index.html)
+        if user.user_type == 'school_admin':
+            return redirect('home_page')
+        else:
+            # Pour les autres utilisateurs, redirige vers la page de connexion
+            return redirect('login')
 
     return render(request, 'authentication/activate-failed.html', {"user": user})
-
 
 
 def resend_verification_email(request, user_id):
@@ -231,7 +235,6 @@ def resend_verification_email(request, user_id):
     send_activation_email(user, request)
     messages.success(request, 'A new verification email has been sent.')
     return redirect('verify_email', user.id)
-
 
 def verify_email(request, user_id):
     """ Page to wait for email verification with a countdown """
@@ -246,6 +249,7 @@ def verify_email(request, user_id):
         'user': user,
         'expiration_time': expiration_time,
     })
+
 
 def send_app_notification_to_student(student_user, parent_user):
     """ Fonction pour envoyer une notification dans l'application """
