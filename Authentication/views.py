@@ -144,7 +144,7 @@ def register_user(request, user_type):
             send_activation_email(user, request)
 
             # Redirige vers la page de vérification d'email avec le sous-domaine
-            return redirect(f"http://{school_admin.subdomain}.127.0.0.1:8000/verify_email/{user.id}")
+            return redirect(f"https://{school_admin.subdomain}.dreametrix.onrender.com/verify_email/{user.id}")
 
     return render(request, 'authentication/register.html', {'user_type': user_type})
 
@@ -181,13 +181,13 @@ def login_user(request):
 
                 # Redirect to the correct dashboard based on user type
                 if user.user_type == 'student':
-                    return redirect(f"http://{request.school_admin.subdomain}.127.0.0.1:8000/student_dashboard/")
+                    return redirect(f"https://{request.school_admin.subdomain}.dreametrix.onrender.com/student_dashboard/")
                 elif user.user_type == 'teacher':
-                    return redirect(f"http://{request.school_admin.subdomain}.127.0.0.1:8000/teacher_dashboard/")
+                    return redirect(f"https://{request.school_admin.subdomain}.dreametrix.onrender.com/teacher_dashboard/")
                 elif user.user_type == 'parent':
-                    return redirect(f"http://{request.school_admin.subdomain}.127.0.0.1:8000/parent_dashboard/")
+                    return redirect(f"https://{request.school_admin.subdomain}.dreametrix.onrender.com/parent_dashboard/")
                 elif user.user_type == 'school_admin':
-                    return redirect(f"http://{user.subdomain}.127.0.0.1:8000/school_admin_dashboard/")
+                    return redirect(f"https://{user.subdomain}.dreametrix.onrender.com/school_admin_dashboard/")
             else:
                 messages.error(request, 'Invalid school or mismatch with credentials')
         else:
@@ -288,7 +288,7 @@ def parent_approval(request):
 def select_school(request, school_subdomain):
     """Redirects user to the selected school's subdomain"""
     # Redirect to the subdomain's role selection page
-    return redirect(f"http://{school_subdomain}.127.0.0.1:8000/select_role/")
+    return redirect(f"https://{school_subdomain}.dreametrix.onrender.com/select_role/")
 
 def get_schools(request):
     """API endpoint to get the list of schools with subdomains"""
