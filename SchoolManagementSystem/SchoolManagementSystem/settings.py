@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import sys
 from decouple import config, Csv
 import dj_database_url
 
@@ -11,6 +12,9 @@ SECRET_KEY = config('SECRET_KEY')
 
 # DEBUG = True pour local et False pour production, par défaut production
 DEBUG = config('DEBUG', default=False, cast=bool)
+
+# Test if the application is running in test mode
+TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
 
 # Gestion des hôtes autorisés
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1', cast=Csv())
