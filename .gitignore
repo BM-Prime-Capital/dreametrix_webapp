@@ -1,0 +1,66 @@
+# Python files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+
+# Django migrations
+School/migrations/__init__.py
+!*/migrations/__init__.py
+
+# Environment Variables
+.env
+
+# Virtual Environments
+venv/
+.env/
+*.env
+*.venv
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs and Editors
+.vscode/
+*.swp
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+.testmondata
+
+# Django stuff:
+*.log
+staticfiles/
+media/
+
+# Local database files
+db.sqlite3
+
+# Backup files
+*.bak
+*.tmp
+*.old
+*.orig
+*.rej
