@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # DEBUG = True pour local et False pour production, par défaut production
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = False
 
 # Test if the application is running in test mode
 TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
