@@ -6,12 +6,11 @@ certifi
 coverage
 distlib
 dj-database-url
-django-heroku
 Faker
 filelock
 gunicorn
 pipenv
-psycopg2
+psycopg2-binary
 pycodestyle
 python-dateutil
 pytz
@@ -22,4 +21,4 @@ validate-email
 virtualenv
 virtualenv-clone
 whitenoise
-collectstatic
+python-decouple
