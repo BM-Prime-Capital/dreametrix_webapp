@@ -18,7 +18,7 @@ a.button {
 }
 
 body {
-    background-image: url("{% static 'img/background.jpg' %}");
+    background-image: url('/static/img/bg.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
