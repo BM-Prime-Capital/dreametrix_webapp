@@ -1,0 +1,63 @@
+#header{
+    background-color:#10284e;
+}
+.module caption{
+    background-color: #30caa0;
+}
+
+div .breadcrumbs{
+    background-color: #30caa0;
+}
+
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button {
+  background: #10284e;
+}
+
+body {
+    background-image: url("/static/img/bg.42e15b44b40a.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.form-container {
+    background-color: rgba(255, 255, 255, 0.8); /* Apply the transparent effect */
+    padding: 20px;
+    border-radius: 10px;
+}
+
+img {
+    display: block;
+    margin: 0 auto 20px auto;
+    width: 145px;
+}
+
+p {
+    text-align: center;
+    font-size: 24px; /* Adjust to match the desired heading size */
+    color: #1A73E8;
+    margin-bottom: 20px;
+}
+
+.ui.fluid.large.button {
+    background-color: #10284e;
+    color: white;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.form-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+#message-container {
+    transition: opacity 0.5s ease-out;
+}
+
+

@@ -1,0 +1,102 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    background-color: #F5F5F5; /* Couleur de fond modifiée */
+    color: #333; /* Couleur du texte modifiée pour plus de lisibilité sur fond clair */
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.content {
+    max-width: 50%;
+}
+
+h1 {
+    font-size: 3.5rem;
+    margin: 0;
+    color: #333; /* Couleur du titre adaptée pour plus de contraste sur fond clair */
+}
+
+p {
+    font-size: 1.25rem;
+    margin: 20px 0;
+    color: #555; /* Couleur du paragraphe adaptée */
+}
+
+.buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 20px; /* Ajout de l'écart entre les boutons */
+    align-items: center;
+}
+
+.btn {
+    padding: 15px 30px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-pricing,
+.btn-more {
+    background-color: #25AAE1; /* Couleur du bouton modifiée */
+    color: #fff;
+}
+
+.btn:hover {
+    opacity: 0.8;
+}
+
+.image {
+    max-width: 40%;
+}
+
+.image img {
+    max-width: 100%;
+    border-radius: 50%;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 50px;
+    background-color: #DFECF1; /* Couleur de l'en-tête modifiée */
+    color: #333; /* Couleur du texte dans l'en-tête modifiée */
+}
+
+.nav {
+    display: flex;
+    gap: 20px;
+}
+
+.nav a {
+    color: #333; /* Couleur des liens dans la navigation */
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s;
+}
+
+.nav a:hover {
+    color: #40c057;
+}
+
+.login {
+    background-color: #444;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+.login a {
+    color: #fff;
+    text-decoration: none;
+}
