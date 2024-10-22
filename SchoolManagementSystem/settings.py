@@ -8,7 +8,9 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Chargement des variables d'environnement depuis le fichier .env
-SECRET_KEY = config('SECRET_KEY')
+
+SECRET_KEY = config('SECRET_KEY', default='mAvtlbIYPcy4ATQz625BVLl2Jw365xYLQCHX/DIqOpDQdTD8/0/n0STIK2EhftIw')
+
 
 # DEBUG = True pour local et False pour production, par défaut production
 DEBUG = True
@@ -17,7 +19,7 @@ DEBUG = True
 TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
 
 # Gestion des hôtes autorisés
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1', cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='dreametrix.onrender.com', cast=Csv())
 
 # Application definition
 INSTALLED_APPS = [
