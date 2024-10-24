@@ -14,6 +14,7 @@ import threading
 from django.utils.timezone import now
 from datetime import timedelta
 from django.http import JsonResponse
+from django.conf import settings
 from django.contrib.auth.hashers import make_password
 
 
@@ -286,9 +287,18 @@ def parent_approval(request):
 
 
 def select_school(request, school_subdomain):
-    """Redirects user to the selected school's subdomain"""
-    # Redirect to the subdomain's role selection page
-    return redirect(f"https://{school_subdomain}.dreametrix.onrender.com/select_role/")
+    """Redirects user to the selected school's subdomain and renders the select_role template"""
+
+    # In development mode, render the role selection page
+    if settings.DEBUG:
+        return render(request, 'authentication/select_role.html')
+
+    # In production, redirect and render the select_role template for the subdomain
+    else:
+        return render(request, 'authentication/select_role.html', {
+            'subdomain_url': f"https://{school_subdomain}.dreametrix.onrender.com/select_role/"
+        })
+
 
 
 def get_schools(request):
