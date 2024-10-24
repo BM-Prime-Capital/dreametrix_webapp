@@ -16,7 +16,7 @@
 
         /* Body Styling */
         body {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3)), url("{% static 'img/school_class.avif' %}") no-repeat center center fixed;
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.3)), url("{% static 'img/school_class.avif' %}") no-repeat center center fixed;
             background-size: cover;
             font-family: 'Roboto', sans-serif;
             color: white;
@@ -31,19 +31,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 40px;
+            padding: 20px 70px;
             background-color: rgba(255, 255, 255, 0.9);
         }
 
         .header .logo img {
-            height: 100px;
+            height: 80px;
         }
 
         .header .nav a {
             margin: 0 20px;
             color: #0056b3;
             text-decoration: none;
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 700;
         }
 
@@ -151,7 +151,7 @@
 
         /* Image Styling - Special Design */
         .image img {
-            max-width: 700px;  /* Agrandissement de l'image */
+            max-width: 700px;
             clip-path: polygon(20% 0%, 100% 0%, 100% 80%, 80% 100%, 0% 100%, 0% 20%);
             border-radius: 20px;
             box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
@@ -194,7 +194,7 @@
             }
 
             .image img {
-                max-width: 450px;  /* Ajustement pour mobile */
+                max-width: 450px;
             }
 
             h1 {
@@ -260,9 +260,16 @@
                     option.className = 'item';
                     option.innerText = `${school.school_name} - ${school.code}`;
 
-                    // On click, redirect to subdomain
+                    // On click, redirect to subdomain or localhost based on the environment
                     option.addEventListener('click', () => {
-                        window.location.href = `https://${school.subdomain}.dreametrix.com/select_role/`;
+                        const isLocalhost = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+                        if (isLocalhost) {
+                            // Localhost environment (without subdomains)
+                            window.location.href = `/select_school/${school.subdomain}`;
+                        } else {
+                            // Production with subdomain
+                            window.location.href = `https://${school.subdomain}.dreametrix.onrender.com/select_role/`;
+                        }
                     });
 
                     menu.appendChild(option);
