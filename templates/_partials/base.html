@@ -1,15 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% load static %}
+    {% load static %}  <!-- Charger les fichiers statiques -->
+
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}DreamMetrix{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>{% block title %}{% endblock %}</title>
+
+    <!-- Charger Semantic UI -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" integrity="sha512-8bHTC73gkZ7rZ7vpqUQThUDhqcNFyYi2xgDgPDHc+GXVGHXq+xPjynxIopALmOPqzo9JZj0k6OqqewdGO3EsrQ==" crossorigin="anonymous" />
+
+    <style>
+        body {
+            background: url("{% static 'img/bg.png' %}") no-repeat center center fixed;  /* Image de fond */
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+
+
+        /* Centrer le conteneur */
+        .ui.container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;  /* Utiliser toute la largeur de l'écran */
+            height: 100%; /* Utiliser toute la hauteur de l'écran */
+        }
+
+        /* Style du formulaire */
+        .form-container {
+            background: rgba(230, 230, 230, 0.90); /* Fond blanc avec opacité */
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1); /* Ombre pour effet de profondeur */
+            width: 100%;  /* Prendre toute la largeur disponible */
+            max-width: 450px;  /* Limiter à 450px pour éviter une trop grande largeur */
+            text-align: center;
+        }
+
+        /* Logo */
+        .form-container img {
+            width: 150px; /* Augmentez la taille du logo */
+            margin-bottom: 30px; /* Espace entre le logo et le texte */
+        }
+
+        .form-container p, .form-container h2 {
+            text-align: left;
+            margin-bottom: 5px;
+            font-size: 18px;
+            color: #1A73E8;
+            margin-left: 10px;  /* Align the title text with the input fields */
+        }
+
+        /* Conteneur des champs de saisie pour qu'il prenne toute la largeur */
+        .form-container .ui.input {
+            width: 100%; /* Assurer que le conteneur des champs de saisie prend toute la largeur */
+            margin-bottom: 15px; /* Ajouter un espacement entre les champs */
+        }
+
+        /* Style des champs de saisie */
+        .form-container .ui.input > input {
+            border-radius: 50px; /* Bords arrondis */
+            border: 1px solid #ddd;
+            padding: 10px; /* Réduction de la hauteur des champs de saisie */
+            width: 100%; /* Champs de saisie prennent toute la largeur */
+            box-sizing: border-box; /* Inclure le padding dans le calcul de la largeur */
+        }
+
+        /* Style des boutons */
+        .form-container .ui.button {
+            background-color: #25AAE1 !important;
+            color: #fff !important;
+            border-radius: 50px; /* Bords arrondis */
+            padding: 12px;
+            font-size: 16px;
+            width: 100%; /* Bouton prend toute la largeur */
+        }
+
+        /* Changer la couleur du bouton au survol */
+        .form-container .ui.button:hover {
+            background-color: #1453B8 !important;
+        }
+
+        /* Style des liens */
+        .form-container a {
+            color: #1A73E8;
+            font-size: 14px;
+        }
+
+        /* Style pour le lien "Forgot Password" */
+        .form-container .forgot-password-link {
+            display: block;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        /* Style pour le lien "Register" */
+        .form-container .register-link {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
 
+<!-- Conteneur centré -->
 <div class="ui container">
     {% block content %}{% endblock %}
 </div>
