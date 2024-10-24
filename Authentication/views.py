@@ -296,7 +296,7 @@ def select_school(request, school_subdomain):
     # In production, redirect and render the select_role template for the subdomain
     else:
         return render(request, 'authentication/select_role.html', {
-            'subdomain_url': f"https://{school_subdomain}.dreametrix.onrender.com/select_role/"
+            'subdomain_url': f"https://dreametrix.onrender.com/select_role/{school_subdomain}"
         })
 
 
