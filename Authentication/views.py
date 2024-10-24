@@ -286,7 +286,7 @@ def parent_approval(request):
     return render(request, 'student/parent_approval.html', {'parent_requests': parent_requests})
 
 
-def select_school(request, school_subdomain):
+def select_school(request):
     """Redirects user to the selected school's subdomain and renders the select_role template"""
 
     # In development mode, render the role selection page
@@ -295,9 +295,7 @@ def select_school(request, school_subdomain):
 
     # In production, redirect and render the select_role template for the subdomain
     else:
-        return render(request, 'authentication/select_role.html', {
-            'subdomain_url': f"https://{school_subdomain}.dreametrix.onrender.com/select_role/"
-        })
+        return render(request, 'authentication/select_role.html')
 
 
 
