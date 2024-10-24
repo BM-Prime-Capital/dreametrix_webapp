@@ -166,7 +166,7 @@ def login_user(request):
                 username = user.username  # Retrieve the username based on the email
             except User.DoesNotExist:
                 messages.error(request, 'Invalid email or password')
-                return render(request, 'authentication/login.html', {'user_type': user_type})
+                return render(request, 'authentication/select_role.html', {'user_type': user_type})
         else:
             username = identifier  # If it's not an email, treat it as a username
 
@@ -290,7 +290,9 @@ def select_school(request, school_subdomain):
     # Redirect to the subdomain's role selection page
     return redirect(f"https://{school_subdomain}.dreametrix.onrender.com/select_role/")
 
+
 def get_schools(request):
-    """API endpoint to get the list of schools with subdomains"""
-    schools = User.objects.filter(user_type='school_admin').values('school_name', 'code', 'subdomain')
+    """API endpoint to get the list of schools with verified emails"""
+    # Filtrer les schools_admin dont l'email est vérifié
+    schools = User.objects.filter(user_type='school_admin', is_email_verified=True).values('school_name', 'code', 'subdomain')
     return JsonResponse(list(schools), safe=False)
