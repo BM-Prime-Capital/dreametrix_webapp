@@ -9,15 +9,16 @@ urlpatterns = [
     path('', views.home_page, name='home_page'),
 
     # School selection endpoint for redirecting to the appropriate subdomain
-    path('select_school/<str:school_subdomain>/', views.select_school, name='select_school'),
+    path('select_school/', views.select_school, name='select_school'),
+
+    # Registration paths for all user types
+    path('register/<str:user_type>/', views.register_user, name='register_user'),
 
     # Login path
     path('login/', views.login_user, name='login'),
 
     # Logout path
     path('logout/', views.logout_user, name='logout_user'),
-
-    path('register/<str:user_type>/', views.register_user, name='register_user'),
 
     # Email activation path
     path('activate-user/<uidb64>/<token>/', views.activate_user, name='activate'),
