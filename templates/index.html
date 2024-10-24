@@ -266,10 +266,10 @@
                         const isLocalhost = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
                         if (isLocalhost) {
                             // Localhost environment (without subdomains)
-                            window.location.href = `/select_school/${school.subdomain}`;
+                            window.location.href = `/select_school/`;
                         } else {
                             // Production with subdomain
-                            window.location.href = `https://dreametrix.onrender.com/select_role/${school.subdomain}`;
+                            window.location.href = `https://dreametrix.onrender.com/select_role/`;
                         }
                     });
 
