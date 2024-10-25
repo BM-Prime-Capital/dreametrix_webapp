@@ -38,25 +38,102 @@ class EmailThread(threading.Thread):
     def run(self):
         self.email.send()
 
-# Pure function to send an activation email
-# Function to send activation email
+
+def register_user(request, user_type):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        # Enregistrement pour les administrateurs d'école
+        if user_type == 'school_admin':
+            school_name = request.POST.get('school_name')
+            address = request.POST.get('address')
+
+            # Création du compte pour le school_admin
+            user = User.objects.create_user(
+                school_name=school_name,
+                address=address,
+                username=username,
+                email=email,
+                password=password,
+                user_type='school_admin'
+            )
+
+            # Envoyer un email d'activation pour le school_admin
+            send_activation_email(user, request)
+            return redirect('verify_email', user.id)
+
+        # Enregistrement pour les étudiants et enseignants
+        elif user_type in ['student', 'teacher']:
+            school_code = request.POST.get('school_code')
+            school_admin = User.objects.filter(code=school_code, user_type='school_admin').first()
+
+            if not school_admin:
+                messages.error(request, "Le code de l'école est invalide.")
+                return render(request, 'authentication/register.html', {'user_type': user_type})
+
+            if User.objects.filter(email=email).exists():
+                messages.error(request, "Un utilisateur avec cet email existe déjà.")
+                return render(request, 'authentication/register.html', {'user_type': user_type})
+
+            user = User.objects.create_user(
+                first_name=request.POST.get('first_name'),
+                last_name=request.POST.get('last_name'),
+                username=username,
+                email=email,
+                password=password,
+                user_type=user_type
+            )
+
+            # Lier le compte utilisateur au `school_admin` via les profils étudiants ou enseignants
+            if user_type == 'student':
+                Student.objects.create(user=user, school=school_admin)
+            elif user_type == 'teacher':
+                Teacher.objects.create(user=user, school=school_admin)
+
+            # Envoyer un email d'activation
+            send_activation_email(user, request)
+            return redirect('verify_email', user.id)
+
+        # Enregistrement pour les parents
+        elif user_type == 'parent':
+            student_code = request.POST.get('student_code')
+            student = Student.objects.filter(user__code=student_code).first()
+
+        if not student:
+            messages.error(request, "Le code de l'élève est invalide.")
+            return render(request, 'authentication/register.html', {'user_type': user_type})
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Un utilisateur avec cet email existe déjà.")
+            return render(request, 'authentication/register.html', {'user_type': user_type})
+
+        user = User.objects.create_user(
+            first_name=request.POST.get('first_name'),
+            last_name=request.POST.get('last_name'),
+            username=username,
+            email=email,
+            password=password,
+            user_type='parent'
+        )
+
+        # Lier le parent à l'étudiant spécifié
+        Parent.objects.create(user=user, student=student)
+
+        send_activation_email(user, request)
+        return redirect('verify_email', user.id)
+
+    return render(request, 'authentication/register.html', {'user_type': user_type})
+
+
+# Fonction d'envoi de l'email d'activation
 def send_activation_email(user, request):
-    current_site = get_current_site(request)
+    current_site = request.get_host()
     email_subject = 'Activate Your Account'
-
-    # Construction de l'URL avec ou sans sous-domaine
-    if user.user_type in ['student', 'teacher', 'parent']:
-        # Utiliser le sous-domaine de l'école si c'est un étudiant, un enseignant ou un parent
-        subdomain = user.school.subdomain if user.user_type != 'school_admin' else None
-        domain = f"{subdomain}.{current_site.domain}" if subdomain else current_site.domain
-    else:
-        # Pas de sous-domaine pour les school_admins
-        domain = current_site.domain
-
-    # Render the email body using the template and context
     email_body = render_to_string('authentication/activate.html', {
         'user': user,
-        'domain': domain,
+        'domain': current_site,
         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
         'token': generate_token.make_token(user)
     })
@@ -67,97 +144,23 @@ def send_activation_email(user, request):
         from_email=settings.EMAIL_HOST_USER,
         to=[user.email]
     )
-
-    email.content_subtype = "html"  # Ensures the email is sent as HTML
-
-    if not settings.TESTING:
-        email.send()
-
-def register_user(request, user_type):
-    if request.method == "POST":
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-
-        # Création pour les admins d'école
-        if user_type == 'school_admin':
-            school_name = request.POST.get('school_name')
-            address = request.POST.get('address')
-
-            # Vérification de l'existence du sous-domaine
-            subdomain = school_name.replace(" ", "").lower()
-            if User.objects.filter(subdomain=subdomain).exists():
-                messages.error(request, "A school with this subdomain already exists")
-                return render(request, 'authentication/register.html', {'user_type': user_type})
-
-            # Création du compte school_admin sans sous-domaine dans le lien d'email
-            user = User.objects.create_user(
-                school_name=school_name,
-                address=address,
-                subdomain=subdomain,
-                username=username,
-                email=email,
-                password=password,
-                user_type='school_admin'
-            )
-
-            send_activation_email(user, request)
-            # Rediriger vers la page de vérification de l'email pour le school_admin
-            return redirect('verify_email', user.id)
-
-        # Création pour parents, étudiants, enseignants avec sous-domaine
-        elif user_type in ['parent', 'student', 'teacher']:
-            school_code = request.POST.get('school_code')
-            school_admin = User.objects.filter(code=school_code, user_type='school_admin').first()
-
-            if not school_admin:
-                messages.error(request, "Invalid school code")
-                return render(request, 'authentication/register.html', {'user_type': user_type})
-
-            if User.objects.filter(email=email).exists():
-                messages.error(request, "A user with this email already exists")
-                return render(request, 'authentication/register.html', {'user_type': user_type})
-
-            user = User.objects.create_user(
-                first_name=request.POST.get('first_name'),
-                last_name=request.POST.get('last_name'),
-                username=username,
-                email=email,
-                password=password,
-                school=school_admin,
-                user_type=user_type
-            )
-
-            # Création des profils étudiants ou enseignants
-            if user_type == 'student':
-                Student.objects.create(user=user, school=school_admin)
-            elif user_type == 'teacher':
-                Teacher.objects.create(user=user, school=school_admin)
-            elif user_type == 'parent':
-                student_code = request.POST.get('student_code')
-                student = Student.objects.filter(user__code=student_code).first()
-                if not student:
-                    messages.error(request, "Invalid student code")
-                    return render(request, 'authentication/register.html', {'user_type': user_type})
-                Parent.objects.create(user=user, student=student)
-
-            # Envoyer un email avec sous-domaine
-            send_activation_email(user, request)
-
-            # Redirige vers la page de vérification d'email avec le sous-domaine
-            return redirect(f"https://{school_admin.subdomain}.dreametrix.onrender.com/verify_email/{user.id}")
-
-    return render(request, 'authentication/register.html', {'user_type': user_type})
+    email.content_subtype = "html"
+    email.send()
 
 
 # ================= Authentication (Login/Logout) =================
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import authenticate, login
+from .models import User
+
 def login_user(request):
     """ Login view that handles authentication for all user types, including school admins """
-    user_type = request.GET.get('user_type', 'student')  # Get the user type from query parameters, default to 'student'
+    user_type = request.GET.get('user_type', 'student')  # Default to 'student' if no type is provided
 
     if request.method == 'POST':
-        identifier = request.POST.get('identifier')  # This can be either username or email
+        identifier = request.POST.get('identifier')  # Can be either username or email
         password = request.POST.get('password')
 
         # Check if the identifier is an email or username
@@ -167,34 +170,43 @@ def login_user(request):
                 username = user.username  # Retrieve the username based on the email
             except User.DoesNotExist:
                 messages.error(request, 'Invalid email or password')
-                return render(request, 'authentication/select_role.html', {'user_type': user_type})
+                return render(request, 'authentication/login.html', {'user_type': user_type})
         else:
-            username = identifier  # If it's not an email, treat it as a username
+            username = identifier  # If not an email, treat as a username
 
         # Authenticate the user
         user = authenticate(request, username=username, password=password)
 
-        # Check if the user exists and is associated with the correct school (subdomain)
         if user:
-            if user.user_type == 'school_admin' or (
-                    user.school and request.school_admin and user.school == request.school_admin):
-                login(request, user)
+            login(request, user)
 
-                # Redirect to the correct dashboard based on user type
-                if user.user_type == 'student':
-                    return redirect(f"https://{request.school_admin.subdomain}.dreametrix.onrender.com/student_dashboard/")
-                elif user.user_type == 'teacher':
-                    return redirect(f"https://{request.school_admin.subdomain}.dreametrix.onrender.com/teacher_dashboard/")
-                elif user.user_type == 'parent':
-                    return redirect(f"https://{request.school_admin.subdomain}.dreametrix.onrender.com/parent_dashboard/")
-                elif user.user_type == 'school_admin':
-                    return redirect(f"https://{user.subdomain}.dreametrix.onrender.com/school_admin_dashboard/")
-            else:
-                messages.error(request, 'Invalid school or mismatch with credentials')
+            # Render the correct dashboard based on user type
+            if user.user_type == 'student':
+                return student_dashboard(request)
+            elif user.user_type == 'teacher':
+                return teacher_dashboard(request)
+            elif user.user_type == 'parent':
+                return parent_dashboard(request)  # Dashboard for parent users
+            elif user.user_type == 'school_admin':
+                return school_dashboard(request)
         else:
             messages.error(request, 'Invalid username/email or password')
 
     return render(request, 'authentication/login.html', {'user_type': user_type})
+
+# Views for each dashboard
+def student_dashboard(request):
+    return render(request, 'dashboard/student/student_dashboard.html')
+
+def teacher_dashboard(request):
+    return render(request, 'dashboard/teacher/teacher_dashboard.html')
+
+def parent_dashboard(request):
+    return render(request, 'dashboard/parent/parent_dashboard.html')
+
+def school_dashboard(request):
+    return render(request, 'dashboard/school/school_dashboard.html')
+
 
 def logout_user(request):
     """ View for logging out users """

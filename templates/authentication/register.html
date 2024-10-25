@@ -34,6 +34,14 @@
             <i class="user icon" style="color: #1A73E8;"></i>
             <input type="text" required name="last_name" placeholder="Last Name" value="{{ data.last_name }}">
         </div>
+
+        <!-- School Code Field for Students and Teachers -->
+        {% if user_type in 'student' or user_type in 'teacher' %}
+            <div class="ui left icon input" style="margin-bottom: 15px;">
+                <i class="building icon" style="color: #1A73E8;"></i>
+                <input type="text" required name="school_code" placeholder="School Code" value="{{ data.school_code }}">
+            </div>
+        {% endif %}
     {% endif %}
 
     <div class="ui left icon input" style="margin-bottom: 15px;">

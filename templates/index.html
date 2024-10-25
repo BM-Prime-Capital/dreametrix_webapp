@@ -31,20 +31,29 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 70px;
+            padding: 20px 50px;
             background-color: rgba(255, 255, 255, 0.9);
         }
 
         .header .logo img {
-            height: 60px; /* Reduced logo size */
+            height: 50px;
+        }
+
+        .header .nav {
+            display: flex;
+            gap: 15px; /* Espace entre les éléments */
         }
 
         .header .nav a {
-            margin: 0 20px;
             color: #0056b3;
             text-decoration: none;
-            font-size: 14px; /* Reduced font size for the nav items */
-            font-weight: 600; /* Slightly lighter font-weight */
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .header .login {
+            display: flex;
+            justify-content: flex-end;
         }
 
         .header .login a {
@@ -52,9 +61,10 @@
             text-decoration: none;
             font-weight: bold;
             background-color: #217bb4;
-            padding: 12px 20px; /* Reduced padding for the button */
+            padding: 12px 20px;
             border-radius: 5px;
             transition: background-color 0.3s ease;
+            white-space: nowrap; /* Empêche le texte de se découper sur plusieurs lignes */
         }
 
         .header .login a:hover {
@@ -72,13 +82,12 @@
 
         .content {
             max-width: 500px;
-            max-width: 500px;
             text-align: left;
             animation: fadeIn 1s ease;
         }
 
         h1 {
-            font-size: 3.5rem; /* Reduced the size of the title */
+            font-size: 3.5rem;
             color: #ffffff;
             margin-bottom: 20px;
         }
@@ -89,7 +98,7 @@
         }
 
         p {
-            font-size: 1.4rem; /* Slightly reduced paragraph size */
+            font-size: 1.4rem;
             margin-top: 20px;
             line-height: 1.6;
         }
@@ -107,8 +116,8 @@
         .btn-dropdown {
             background-color: #29a1e8;
             color: white;
-            padding: 16px 40px; /* Reduced padding */
-            font-size: 20px; /* Reduced font size */
+            padding: 16px 40px;
+            font-size: 20px;
             border-radius: 8px;
             border: none;
             cursor: pointer;
@@ -152,7 +161,7 @@
 
         /* Image Styling - Special Design */
         .image img {
-            max-width: 650px; /* Slightly reduced image size */
+            max-width: 650px;
             clip-path: polygon(20% 0%, 100% 0%, 100% 80%, 80% 100%, 0% 100%, 0% 20%);
             border-radius: 20px;
             box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
@@ -185,6 +194,11 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: center;
+            }
+
             .hero {
                 flex-direction: column;
                 text-align: center;
@@ -205,6 +219,50 @@
             .btn-dropdown {
                 font-size: 18px;
                 padding: 15px 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                flex-direction: column;
+                padding: 10px 20px;
+            }
+
+            .header .logo img {
+                height: 40px;
+            }
+
+            .header .nav {
+                flex-direction: column;
+                gap: 10px; /* Réduit l'espacement entre les liens */
+            }
+
+            .header .login a {
+                font-size: 14px;
+                padding: 10px 15px; /* Ajuste le bouton pour les petits écrans */
+                text-align: center;
+            }
+
+            .hero {
+                flex-direction: column;
+                padding: 40px;
+            }
+
+            .content {
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .btn-dropdown {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+
+            .image img {
+                max-width: 300px;
             }
         }
     </style>
@@ -229,6 +287,7 @@
 
     <section class="hero">
         <div class="content">
+            {% include '_partials/messages.html' %}
             <h1>Empowering Your <span class="highlight">Classrooms</span></h1>
             <p>Take control of your teaching with Dreametrix’s online class management system. Built for educators, loved by students.</p>
             <div class="buttons">
