@@ -16,6 +16,10 @@ urlpatterns = [
 
     # Login path
     path('login/', views.login_user, name='login'),
+    path('dashboard/student/', views.student_dashboard, name='student_dashboard'),
+    path('dashboard/teacher/', views.teacher_dashboard, name='teacher_dashboard'),
+    path('dashboard/parent/', views.parent_dashboard, name='parent_dashboard'),
+    path('dashboard/school_admin/', views.school_dashboard, name='school_dashboard'),
 
     # Logout path
     path('logout/', views.logout_user, name='logout_user'),
