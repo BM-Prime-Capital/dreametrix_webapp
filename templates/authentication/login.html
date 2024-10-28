@@ -18,9 +18,11 @@
         <button type="submit" class="ui button">Login</button>
     </form>
 
-
-    <div class="register-link">
-        Not registered yet? <a href="{% url 'register_user' user_type %}">Sign up as a {{ user_type|title }} here</a>.
-    </div>
+    <!-- Show register link only if the user type is not school_admin -->
+    {% if user_type != 'school_admin' %}
+        <div class="register-link">
+            Not registered yet? <a href="{% url 'register_user' user_type %}">Sign up as a {{ user_type|title }} here</a>.
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

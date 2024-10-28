@@ -6,17 +6,13 @@ from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import EmailMessage
-from django.conf import settings
 from .models import User, Student, Teacher, Parent, Notification
 from .utils import generate_token
-from django.contrib.sites.shortcuts import get_current_site
 import threading
 from django.utils.timezone import now
 from datetime import timedelta
 from django.http import JsonResponse
 from django.conf import settings
-from django.contrib.auth.hashers import make_password
-
 
 # ================= Role Selection =================
 def select_role(request):
@@ -37,7 +33,6 @@ class EmailThread(threading.Thread):
 
     def run(self):
         self.email.send()
-
 
 def register_user(request, user_type):
     if request.method == "POST":
@@ -126,7 +121,6 @@ def register_user(request, user_type):
 
     return render(request, 'authentication/register.html', {'user_type': user_type})
 
-
 # Fonction d'envoi de l'email d'activation
 def send_activation_email(user, request):
     current_site = request.get_host()
@@ -147,13 +141,7 @@ def send_activation_email(user, request):
     email.content_subtype = "html"
     email.send()
 
-
 # ================= Authentication (Login/Logout) =================
-
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth import authenticate, login
-from .models import User
 
 def login_user(request):
     """ Login view that handles authentication for all user types, including school admins """
@@ -238,7 +226,6 @@ def activate_user(request, uidb64, token):
 
     return render(request, 'authentication/activate-failed.html', {"user": user})
 
-
 def resend_verification_email(request, user_id):
     user = User.objects.get(pk=user_id)
     if user.is_email_verified:
@@ -263,16 +250,12 @@ def verify_email(request, user_id):
         'expiration_time': expiration_time,
     })
 
-
 def send_app_notification_to_student(student_user, parent_user):
     """ Fonction pour envoyer une notification dans l'application """
     Notification.objects.create(
         user=student_user,
         message=f"User {parent_user.first_name} {parent_user.last_name} has registered as your parent. Please approve or reject this request."
     )
-
-
-
 
 def parent_approval(request):
     """ Vue où l'élève voit et gère les demandes de validation parent-enfant """
@@ -297,7 +280,6 @@ def parent_approval(request):
 
     return render(request, 'student/parent_approval.html', {'parent_requests': parent_requests})
 
-
 def select_school(request):
     """Redirects user to the selected school's subdomain and renders the select_role template"""
 
@@ -308,8 +290,6 @@ def select_school(request):
     # In production, redirect and render the select_role template for the subdomain
     else:
         return render(request, 'authentication/select_role.html')
-
-
 
 def get_schools(request):
     """API endpoint to get the list of schools with verified emails"""
