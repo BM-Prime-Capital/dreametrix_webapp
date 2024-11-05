@@ -21,6 +21,22 @@ TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
 # Gestion des hôtes autorisés
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='dreametrix.onrender.com', cast=Csv())
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',  # développement local
+    'http://localhost:8000',   # développement local
+    'https://dreametrix.onrender.com'  # production
+]
+
+# Temps d'expiration de la session (en secondes)
+SESSION_COOKIE_AGE = 60 * 60 * 24  # Par exemple, 1 jour
+
+# Active la session seulement si l'utilisateur ferme le navigateur
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Pour activer la rotation des cookies à chaque login
+CSRF_COOKIE_AGE = None  # Renouvelle le jeton CSRF automatiquement
+
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',

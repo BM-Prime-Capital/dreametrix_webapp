@@ -1,6 +1,4 @@
 from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -13,15 +11,12 @@ from django.utils.timezone import now
 from datetime import timedelta
 from django.http import JsonResponse
 from django.conf import settings
-
-# ================= Role Selection =================
-def select_role(request):
-    """ View to display role selection screen for Teachers, Students, and Parents """
-    return render(request, 'authentication/select_role.html')
-
-def home_page(request):
-    """ View to display role selection screen for Teachers, Students, and Parents """
-    return render(request, 'index.html')
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.middleware.csrf import get_token  # Import for generating CSRF token
+from django.views.decorators.cache import never_cache
 
 # ================= Helper Functions =================
 
@@ -121,31 +116,16 @@ def register_user(request, user_type):
 
     return render(request, 'authentication/register.html', {'user_type': user_type})
 
-# Fonction d'envoi de l'email d'activation
-def send_activation_email(user, request):
-    current_site = request.get_host()
-    email_subject = 'Activate Your Account'
-    email_body = render_to_string('authentication/activate.html', {
-        'user': user,
-        'domain': current_site,
-        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-        'token': generate_token.make_token(user)
-    })
-
-    email = EmailMessage(
-        subject=email_subject,
-        body=email_body,
-        from_email=settings.EMAIL_HOST_USER,
-        to=[user.email]
-    )
-    email.content_subtype = "html"
-    email.send()
-
 # ================= Authentication (Login/Logout) =================
 
+@never_cache # To clear cach on the brower when the user authenticate
 def login_user(request):
-    """ Login view that handles authentication for all user types, including school admins """
+    """Login view that handles authentication for all user types, including school admins."""
     user_type = request.GET.get('user_type', 'student')  # Default to 'student' if no type is provided
+
+    # Generate a CSRF token if it's missing
+    if not request.session.get('csrf_token'):
+        get_token(request)
 
     if request.method == 'POST':
         identifier = request.POST.get('identifier')  # Can be either username or email
@@ -166,34 +146,62 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
 
         if user:
-            login(request, user)
-
-            # Render the correct dashboard based on user type
+            login(request, user)  # Starts a session for the authenticated user
+            # Redirect based on user type
             if user.user_type == 'student':
-                return student_dashboard(request)
+                return redirect('student_dashboard')
             elif user.user_type == 'teacher':
-                return teacher_dashboard(request)
+                return redirect('teacher_dashboard')
             elif user.user_type == 'parent':
-                return parent_dashboard(request)  # Dashboard for parent users
+                return redirect('parent_dashboard')
             elif user.user_type == 'school_admin':
-                return school_dashboard(request)
+                return redirect('school_dashboard')
         else:
             messages.error(request, 'Invalid username/email or password')
 
     return render(request, 'authentication/login.html', {'user_type': user_type})
 
-# Views for each dashboard
+
+@login_required
 def student_dashboard(request):
-    return render(request, 'dashboard/student/student_dashboard.html')
+    context = {
+        'username': request.user.username,
+        'firstname': request.user.first_name,
+        'lastname': request.user.last_name,
+        'email': request.user.email,
+    }
+    return render(request, 'dashboard/student/student_dashboard.html', context)
 
+@login_required
 def teacher_dashboard(request):
-    return render(request, 'dashboard/teacher/teacher_dashboard.html')
+    context = {
+        'username': request.user.username,
+        'firstname': request.user.first_name,
+        'lastname': request.user.last_name,
+        'email': request.user.email,
+    }
+    return render(request, 'dashboard/teacher/teacher_dashboard.html', context)
 
+@login_required
 def parent_dashboard(request):
-    return render(request, 'dashboard/parent/parent_dashboard.html')
+    context = {
+        'username': request.user.username,
+        'firstname': request.user.first_name,
+        'lastname': request.user.last_name,
+        'email': request.user.email,
+    }
+    return render(request, 'dashboard/parent/parent_dashboard.html', context)
 
+@login_required
 def school_dashboard(request):
-    return render(request, 'dashboard/school/school_dashboard.html')
+    # Pass user data to the template
+    context = {
+        'username': request.user.username,
+        'email': request.user.email,
+        'school': request.user.school_name,
+        'role': 'School Leader/Principal'  # Replace with actual role if available
+    }
+    return render(request, 'dashboard/school/school_dashboard.html', context)
 
 
 def logout_user(request):
@@ -201,6 +209,39 @@ def logout_user(request):
     logout(request)
     messages.success(request, 'Successfully logged out')
     return redirect(reverse('login'))
+
+# Fonction d'envoi de l'email d'activation
+def send_activation_email(user, request):
+    current_site = request.get_host()
+    email_subject = 'Activate Your Account'
+    email_body = render_to_string('authentication/activate.html', {
+        'user': user,
+        'domain': current_site,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': generate_token.make_token(user)
+    })
+
+    email = EmailMessage(
+        subject=email_subject,
+        body=email_body,
+        from_email=settings.EMAIL_HOST_USER,
+        to=[user.email]
+    )
+    email.content_subtype = "html"
+    email.send()
+
+# ================= Role Selection =================
+def select_role(request):
+    """ View to display role selection screen for Teachers, Students, and Parents """
+    return render(request, 'authentication/select_role.html')
+
+def home_page(request):
+    """ View to display role selection screen for Teachers, Students, and Parents """
+    return render(request, 'index.html')
+
+def to_delete_after_dashboard_brige(request):
+    """ View to display role selection screen for Teachers, Students, and Parents """
+    return render(request, 'dashboard/school/school_dashboard.html')
 
 # ================= Email Activation =================
 
