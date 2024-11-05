@@ -32,7 +32,6 @@ class User(AbstractUser):
         return f"{self.username} ({self.user_type})"
 
 
-
 # Modèle pour Student avec clé étrangère vers un User de type School Admin
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
@@ -40,6 +39,7 @@ class Student(models.Model):
 
     def __str__(self):
         return self.user.username
+
 
 # Modèle pour Teacher avec clé étrangère vers un User de type School Admin
 class Teacher(models.Model):
@@ -49,6 +49,7 @@ class Teacher(models.Model):
     def __str__(self):
         return self.user.username
 
+
 class Parent(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='parent_profile')
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
@@ -57,6 +58,7 @@ class Parent(models.Model):
 
     def __str__(self):
         return f"{self.user.username} (Parent of {self.student.user.username})"
+
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
