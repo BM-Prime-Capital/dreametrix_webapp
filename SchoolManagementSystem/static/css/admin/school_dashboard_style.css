@@ -118,12 +118,20 @@ button:hover{
     display: flex;
     flex-direction: column;
     width: 23%;
+    padding-left: 2rem;
     position: sticky;
     
 }
 
+.left .btn i {
+    font-size: 1.5em; /* Change this value to increase or decrease icon size */
+    margin-right: 8px; /* Optional: Add space between the icon and the text */
+}
+
 .container-right{
 
+    height: calc(100vh - 70px); /* Full height minus header */
+    overflow-y: auto;
     width: 75%;
 }
 
