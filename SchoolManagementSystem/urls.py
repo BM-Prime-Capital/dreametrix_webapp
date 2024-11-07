@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     #path('', include('School.urls')),  # Uncomment and ensure School app exists
     path('', include('Authentication.urls')),  # Application d'authentification
+    path('', include('School.urls')),
     #path('select-school/', views.select_school, name='select_school'),  # Ajout d'une page pour la sélection de l'école
 ]
 if settings.DEBUG:

@@ -1,0 +1,22 @@
+{% load static %}
+
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/admin/school_dashboard_style.css' %}">
+    <style>
+        .dashboard { margin-bottom: 10px; width: 150px; }
+        .woman11 { width: 35px; height: 35px; border-radius: 100%; object-fit: cover; }
+    </style>
+  </head>
+
+  <div class="header">
+      <a href="{% url 'school_dashboard' %}">
+          <img src="{% static 'img/logo.png' %}" alt="DreamMetrix Logo" class="dashboard">
+          <button class="btn-dashboard text-color btn">
+              <img src="{% static 'img/woman.jpg' %}" alt="User Profile" class="woman11">
+              Dashboard
+              <i class="bi bi-chevron-down iconColor"></i>
+          </button>
+      </a>
+  </div>
+</html>
