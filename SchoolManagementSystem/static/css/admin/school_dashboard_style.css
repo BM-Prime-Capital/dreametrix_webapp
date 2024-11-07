@@ -1,5 +1,9 @@
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
 
+a {
+    text-decoration: none; /* Supprime le soulignement de la balise 'a' */
+}
+
 .green{
     color:green
 }

@@ -10,11 +10,13 @@
   </head>
 
   <div class="header">
-      <img src="{% static 'img/logo.png' %}" alt="DreamMetrix Logo" class="dashboard">
-      <button class="btn-dashboard text-color btn">
-          <img src="{% static 'img/woman.jpg' %}" alt="User Profile" class="woman11">
-          Dashboard
-          <i class="bi bi-chevron-down iconColor"></i>
-      </button>
+      <a href="{% url 'school_dashboard' %}">
+          <img src="{% static 'img/logo.png' %}" alt="DreamMetrix Logo" class="dashboard">
+          <button class="btn-dashboard text-color btn">
+              <img src="{% static 'img/woman.jpg' %}" alt="User Profile" class="woman11">
+              Dashboard
+              <i class="bi bi-chevron-down iconColor"></i>
+          </button>
+      </a>
   </div>
 </html>

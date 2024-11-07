@@ -1,0 +1,36 @@
+{% load static %}
+
+<div class="container-left">
+    <div class="left">
+        <a href="{% url 'home_school_dashboard' %}">
+            <button class="btn-1 btn" onclick="location.href='#'">
+                    <i class="bi bi-house blue"></i> HOME
+            </button>
+        </a>
+
+        <a href="{% url 'teachers_school_dashboard' %}">
+            <button class="btn-1 btn" onclick="location.href='#'">
+                <i class="bi bi-journal-text orange"></i> TEACHERS
+            </button>
+        </a>
+
+        <a href="{% url 'parents_school_dashboard' %}">
+            <button class="btn-1 btn" onclick="location.href='#'">
+                <i class="bi bi-door-open green"></i> PARENTS
+            </button>
+        </a>
+
+        <a href="{% url 'students_school_dashboard' %}">
+            <button class="btn-1 btn" onclick="location.href='#'">
+                <i class="bi bi-mortarboard orange"></i> STUDENTS
+            </button>
+        </a>
+
+        <a href="{% url 'communicate_school_dashboard' %}">
+            <button class="btn-1 btn" onclick="location.href='#'">
+                <i class="bi bi-send green"></i> COMMUNICATE
+            </button>
+        </a>
+    </div>
+
+</div>
