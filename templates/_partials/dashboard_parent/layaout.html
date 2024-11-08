@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/admin/school_dashboard_style.css' %}">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+    <!-- Inclure le header et la barre de menu -->
+    {% include '_partials/dashboard_parent/header_dashboard.html' %}
+
+    <div class="mycontainer">
+        {% include '_partials/dashboard_parent/sidebar_parent_dashboard.html' %}
+
+        <!-- Bloc de contenu dynamique -->
+        <div class="container-right">
+            {% block content %}
+            <!-- Le contenu spécifique à chaque page sera inséré ici -->
+            {% endblock %}
+        </div>
+    </div>
+    <script>
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    </script>
+</body>
+</html>

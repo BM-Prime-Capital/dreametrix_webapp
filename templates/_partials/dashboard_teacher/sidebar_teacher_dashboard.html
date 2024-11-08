@@ -2,53 +2,58 @@
 
 <div class="container-left">
     <div class="left">
-        <a href="{% url 'class_student_dashboard' %}">
+        <a href="{% url 'home_teacher_dashboard' %}">
             <button class="btn-1 btn" onclick="location.href='#'">
-                    <i class="bi bi-house blue"></i> CLASS
+                    <i class="bi bi-house blue"></i> HOME
             </button>
         </a>
 
-        <a href="{% url 'assignments_student_dashboard' %}">
+        <a href="{% url 'assignments_teacher_dashboard' %}">
             <button class="btn" onclick="location.href='#'">
                 <i class="bi bi-clipboard-data orange"></i> ASSIGNMENTS
             </button>
         </a>
 
-        <a href="{% url 'gradebook_student_dashboard' %}">
+        <a href="{% url 'gradebook_teacher_dashboard' %}">
             <button class="btn" onclick="location.href='#'">
                 <i class="bi bi-clipboard-data orange"></i> GRADEBOOK
             </button>
         </a>
 
-        <a href="{% url 'attendance_student_dashboard' %}">
+        <a href="{% url 'attendance_teacher_dashboard' %}">
             <button class="btn" onclick="location.href='#'">
                 <i class="bi bi-journal-text orange"></i> ATTENDANCE
             </button>
         </a>
 
-        <a href="{% url 'character_student_dashboard' %}">
+        <a href="{% url 'character_teacher_dashboard' %}">
             <button class="btn" onclick="location.href='#'">
                 <i class="bi bi-door-open green"></i> CHARACTER
             </button>
         </a>
-        <a href="{% url 'communicate_student_dashboard' %}">
+        <a href="{% url 'seating_teacher_dashboard' %}">
+            <button class="btn" onclick="location.href='#'">
+                <i class="bi bi-mortarboard orange"></i> SEATING
+            </button>
+        </a>
+        <a href="{% url 'communicate_teacher_dashboard' %}">
             <button class="btn-4 btn" onclick="location.href='#'">
                 <i class="bi bi-send green"></i> COMMUNICATE
             </button>
         </a>
-        <a href="{% url 'library_student_dashboard' %}">
+        <a href="{% url 'reports_teacher_dashboard' %}">
             <button class="btn" onclick="location.href='#'">
-                <i class="bi bi-book blue"></i> LIBRARY
+                <i class="bi bi-book blue"></i> REPORTS
             </button>
         </a>
-        <a href="{% url 'reward_student_dashboard' %}">
+        <a href="{% url 'teach_teacher_dashboard' %}">
             <button class="btn-4 btn" onclick="location.href='#'">
-                <i class="bi bi-send green"></i> REWARD
+                <i class="bi bi-send green"></i> TEACH
             </button>
         </a>
-        <a href="{% url 'tutor_student_dashboard' %}">
+        <a href="{% url 'polis_teacher_dashboard' %}">
             <button class="btn" onclick="location.href='#'">
-                <i class="bi bi-book blue"></i> TUTOR
+                <i class="bi bi-book blue"></i> POLIS
             </button>
         </a>
     </div>
