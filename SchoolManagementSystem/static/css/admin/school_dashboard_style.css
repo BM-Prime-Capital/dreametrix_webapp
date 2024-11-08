@@ -405,3 +405,103 @@ p{
 .separator{
     height: 5px;
 }
+
+
+/* Gradebook container styling */
+.gradebook-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex: 1;
+    margin: 30px auto;
+    padding: 0 20px;
+
+}
+
+.content {
+    background-color: #ffffff;
+    width: 100%;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.content-header h2 {
+    font-size: 24px;
+    color: #d53fcb;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.button {
+    padding: 10px 20px;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.button-report {
+    background-color: #d53fcb;
+}
+
+.button-print {
+    background-color: #3da6d4;
+}
+
+.dropdown {
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+/* Table styling */
+.table-container {
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+table th, table td {
+    padding: 12px;
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+}
+
+table th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.view-link {
+    color: #0077b6;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.icon {
+    color: #ff0000;
+    margin-left: 5px;
+}
