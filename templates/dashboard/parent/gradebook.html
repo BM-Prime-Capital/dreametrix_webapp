@@ -7,11 +7,16 @@
     <div class="gradebook-container">
             <div class="content">
                 <div class="content-header">
-                    <h2>Gradebook</h2>
                     <div class="button-group">
                         <button class="button button-report">Report</button>
-                        <button class="button button-print">Print</button>
+                        <button class="button button-print"><i class="bi bi-printer white"></i></button>
                     </div>
+                    <select class="dropdown">
+                        <option>Student</option>
+                        <option>John</option>
+                        <option>Mia</option>
+                        <option>All the student</option>
+                    </select>
                     <select class="dropdown">
                         <option>All Classes</option>
                         <option>Class 5</option>
@@ -20,30 +25,62 @@
                 </div>
 
                 <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Class</th>
-                                <th>Average</th>
-                                <th>Exam (3)</th>
-                                <th>Tests (2)</th>
-                                <th>Assignments (14)</th>
-                                <th>Teacher</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Class 5 - Sci</td>
-                                <td>85% (C)</td>
-                                <td><span class="view-link">View</span> <span class="icon">🎤</span></td>
-                                <td><span class="view-link">View</span> <span class="icon">🎤</span></td>
-                                <td><span class="view-link">View</span> <span class="icon">🎤</span></td>
-                                <td>Eva Parker</td>
-                            </tr>
-                            <!-- Ajoutez d'autres lignes si nécessaire -->
-                        </tbody>
-                    </table>
-                </div>
+                <table class="gradebook-table">
+                    <thead>
+                        <tr>
+                            <th>STUDENT</th>
+                            <th>AVERAGE</th>
+                            <th>EXAM (3)</th>
+                            <th>TESTS (2)</th>
+                            <th>ASSIGNMENTS (14)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Rae, Martha</td>
+                            <td>65% (C)</td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                        </tr>
+                        <tr>
+                            <td>John, Smith</td>
+                            <td>100% (A)</td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                        </tr>
+                        <tr>
+                            <td>Rae, Martha</td>
+                            <td>65% (C)</td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                        </tr>
+                        <tr>
+                            <td>Rae, Martha</td>
+                            <td>65% (C)</td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                        </tr>
+                        <tr>
+                            <td>Rae, Martha</td>
+                            <td>65% (C)</td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                        </tr>
+                        <tr>
+                            <td>Rae, Martha</td>
+                            <td>65% (C)</td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
             </div>
         </div>
 {% endblock %}
