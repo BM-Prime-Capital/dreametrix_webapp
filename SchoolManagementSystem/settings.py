@@ -19,7 +19,7 @@ DEBUG = False
 TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
 
 # Gestion des hôtes autorisés
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='dreametrix.onrender.com', cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='dreametrix-u5gk.onrender.com', cast=Csv())
 
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',  # développement local
