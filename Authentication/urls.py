@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from .views import ResetPasswordView
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     # Role selection page (main entry point)
@@ -37,4 +39,9 @@ urlpatterns = [
 
     # Path for parent approval requests
     path('parent-approval/', views.parent_approval, name='parent_approval'),
+
+    #Password reset
+    path('password-reset/', ResetPasswordView.as_view(), name='password_reset'),
+    path('password-reset-confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='authentication/reset_password/password_reset_confirm.html'), name='password_reset_confirm'),
+    path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='authentication/reset_password/password_reset_complete.html'), name='password_reset_complete'),
 ]
