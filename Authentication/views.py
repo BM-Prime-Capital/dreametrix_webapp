@@ -17,6 +17,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.middleware.csrf import get_token  # Import for generating CSRF token
 from django.views.decorators.cache import never_cache
+#RESET PASSWORD IMPORTS
+from django.urls import reverse_lazy
+from django.contrib.auth.views import PasswordResetView
+from django.contrib.messages.views import SuccessMessageMixin
 
 # ================= Helper Functions =================
 
@@ -203,7 +207,6 @@ def school_dashboard(request):
     }
     return render(request, 'dashboard/school/school_dashboard.html', context)
 
-
 def logout_user(request):
     """ View for logging out users """
     logout(request)
@@ -337,3 +340,15 @@ def get_schools(request):
     # Filtrer les schools_admin dont l'email est vérifié
     schools = User.objects.filter(user_type='school_admin', is_email_verified=True).values('school_name', 'code', 'subdomain')
     return JsonResponse(list(schools), safe=False)
+
+#RESET PASSWORD
+
+class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
+    template_name = 'authentication/reset_password/password_reset.html'
+    email_template_name = 'authentication/reset_password/reset_password_email.html'
+    subject_template_name = 'authentication/reset_password/test.html'
+    success_message = "We've emailed you instructions for setting your password, " \
+                      "if an account exists with the email you entered. You should receive them shortly." \
+                      " If you don't receive an email, " \
+                      "please ensure you've entered the correct address and check your spam folder."
+    success_url = reverse_lazy('login')
