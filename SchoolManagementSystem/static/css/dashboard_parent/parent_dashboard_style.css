@@ -408,6 +408,7 @@ p{
 
 
 /* Gradebook container styling */
+/* Gradebook container styling */
 .gradebook-container {
     display: flex;
     justify-content: center;
@@ -455,10 +456,16 @@ p{
 
 .button-report {
     background-color: #d53fcb;
+
 }
 
 .button-print {
     background-color: #3da6d4;
+    width: 25%;
+    position: center;
+}
+.button-print i {
+    font-size: 25px;
 }
 
 .dropdown {
