@@ -21,6 +21,7 @@ from django.views.decorators.cache import never_cache
 from django.urls import reverse_lazy
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.mail import EmailMultiAlternatives
 
 # ================= Helper Functions =================
 
@@ -342,13 +343,33 @@ def get_schools(request):
     return JsonResponse(list(schools), safe=False)
 
 #RESET PASSWORD
-
 class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
     template_name = 'authentication/reset_password/password_reset.html'
     email_template_name = 'authentication/reset_password/reset_password_email.html'
-    subject_template_name = 'authentication/reset_password/test.html'
+    #subject_template_name = 'authentication/reset_password/test.html'
     success_message = "We've emailed you instructions for setting your password, " \
                       "if an account exists with the email you entered. You should receive them shortly." \
                       " If you don't receive an email, " \
                       "please ensure you've entered the correct address and check your spam folder."
     success_url = reverse_lazy('login')
+    success_message = (
+        "We've emailed you instructions for setting your password, if an account exists with the email you entered."
+        " You should receive them shortly. If you don't receive an email, please check your spam folder."
+    )
+
+    def send_mail(self, subject_template_name, email_template_name,
+                  context, from_email, to_email, html_email_template_name=None):
+        """
+        Custom send_mail method to use HTML email.
+        """
+        # Generate subject and body
+        subject = render_to_string(subject_template_name, context).strip()
+        body_text = render_to_string(email_template_name, context)
+        body_html = render_to_string(self.email_template_name, context)
+
+        # Create email message
+        email_message = EmailMultiAlternatives(subject, body_text, from_email, [to_email])
+        email_message.attach_alternative(body_html, "authentication/reset_password/reset_password_email.html")  # Attach HTML version
+
+        # Send email
+        email_message.send()
