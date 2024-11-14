@@ -24,7 +24,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='dreametrix.onrender.com', cast=
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',  # développement local
     'http://localhost:8000',   # développement local
-    'https://dreametrix.onrender.com'  # production
+    'https://dreametrix-u5gk.onrender.com'  # production
 ]
 
 # Temps d'expiration de la session (en secondes)
