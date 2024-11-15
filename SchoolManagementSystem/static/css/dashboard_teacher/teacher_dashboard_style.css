@@ -473,14 +473,27 @@ p{
 .button {
     border-radius: 8px;
     font-size: 16px;
-    padding: 12px 24px;
+    padding: 12px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
+/* Button ADD NEW ITEM of the gradebook */
 .button-add-new-item {
+    width: 170px; /* Or use auto/min-width based on preference */
+    height: 60px; /* Or use auto/min-width based on preference */
     background-color: #4285F4;
     color: white;
+    text-align: center;
+    padding: 9px 13px; /* Adjust padding to fit content */
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.button-add-new-item i {
+    font-size: 1.8em; /* Increase icon size */
 }
 
 .button-add-new-item:hover {
@@ -488,22 +501,65 @@ p{
 }
 
 .button-calculations {
+    width: 170px; /* Or use auto/min-width based on preference */
+    height: 60px; /* Or use auto/min-width based on preference */
     background-color: #AB47BC;
     color: white;
+    text-align: center;
+    padding: 9px 13px; /* Adjust padding to fit content */
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .button-calculations:hover {
     background-color: #8E24AA;
 }
+.button-calculations i {
+    font-size: 1.8em; /* Increase icon size */
+}
 
 .button-layout {
     background-color: #FFCA28;
-    color: #333;
+    width: 170px; /* Or use auto/min-width based on preference */
+    height: 60px; /* Or use auto/min-width based on preference */
+    color: white;
+    text-align: center;
+    padding: 9px 13px; /* Adjust padding to fit content */
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .button-layout:hover {
     background-color: #FFA000;
 }
+
+.button-layout i {
+    font-size: 1.8em; /* Increase icon size */
+}
+
+.button-print {
+    background-color: rgb(62, 179, 227);
+    width: 70px; /* Or use auto/min-width based on preference */
+    height: 60px; /* Or use auto/min-width based on preference */
+    color: white;
+    align-item: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.button-print i {
+    font-size: 1.9em; /* Increase icon size */
+    color: white;
+}
+
 
 .dropdown {
     padding: 8px 16px;
