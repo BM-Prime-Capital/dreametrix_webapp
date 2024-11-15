@@ -12,7 +12,7 @@
   <div class="header">
       <a href="{% url 'teacher_dashboard' %}">
           <img src="{% static 'img/logo.png' %}" alt="DreamMetrix Logo" class="dashboard">
-          <button class="btn-dashboard text-color btn">
+          <button class="btn-dashboard text-color btn {% if request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">
               <img src="{% static 'img/woman.jpg' %}" alt="User Profile" class="woman11">
               Dashboard
               <i class="bi bi-chevron-down iconColor"></i>
