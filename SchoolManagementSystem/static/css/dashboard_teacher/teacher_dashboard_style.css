@@ -4,20 +4,64 @@ a {
     text-decoration: none; /* Supprime le soulignement de la balise 'a' */
 }
 
-.green{
-    color:green
+/* Icon colors */
+.green {
+    color: green;
 }
 
-.orange{
-    color:orange
+.orange {
+    color: orange;
 }
 
-.blue{
-    color: rgb(62,179,227);
+.blue {
+    color: rgb(62, 179, 227);
 }
 
-.blue:hover{
-    color:white
+/* Hover state for icons */
+.blue:hover,
+.orange:hover,
+.green:hover {
+    color: white;
+}
+
+/* General button styling */
+button {
+    border: 0 solid transparent;
+    height: 50px;
+    width: 200px;
+    text-align: left;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    background-color: white;
+    cursor: pointer;
+}
+
+.btn {
+    padding-left: 2rem;
+}
+
+/* Hover styling for buttons */
+button:hover {
+    background-color: rgb(62, 179, 227);
+    color: white;
+}
+
+.btn:hover .blue,
+.btn:hover .orange,
+.btn:hover .green {
+    color: white; /* Ensure icons turn white on hover */
+}
+
+/* Active state for menu buttons */
+.btn.active {
+    background-color: rgb(62, 179, 227); /* Same blue as hover */
+    color: white; /* Text turns white */
+}
+
+.btn.active i {
+    color: white; /* Icon in active button also turns white */
 }
 
 *{
@@ -67,7 +111,7 @@ button:hover{
     cursor: pointer;
     background-color: rgb(62,179,227);
     color: white;
-    
+
 }
 
 
@@ -100,7 +144,7 @@ button:hover{
     height: 70px;
     border-radius: 100%;
     object-fit: cover;
-    
+
 }
 .mycontainer{
     display: flex;
@@ -124,7 +168,7 @@ button:hover{
     width: 23%;
     padding-left: 2rem;
     position: sticky;
-    
+
 }
 
 .left .btn i {
@@ -410,9 +454,8 @@ p{
 /* Gradebook container styling */
 .gradebook-container {
     background-color: #f5f5f5;
-    padding: 20px;
+
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .content-header {
