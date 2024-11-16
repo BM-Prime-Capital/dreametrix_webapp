@@ -9,6 +9,10 @@ a {
     color: green;
 }
 
+.red {
+    color: #d25c5c;
+}
+
 .orange {
     color: orange;
 }
@@ -43,8 +47,9 @@ button {
 }
 
 /* Hover styling for buttons */
-button:hover {
-    background-color: rgb(62, 179, 227);
+button:hover{
+    cursor: pointer;
+    background-color: rgb(62,179,227);
     color: white;
 }
 
@@ -52,6 +57,17 @@ button:hover {
 .btn:hover .orange,
 .btn:hover .green {
     color: white; /* Ensure icons turn white on hover */
+}
+
+.no-hover:hover {
+    background-color: transparent; /* or the original background color */
+    color: inherit; /* or the original text color */
+    cursor: default; /* Optional: Change cursor style */
+}
+
+/* Active state for dashboard buttons */
+.btn-dashboard.active {
+    color:rgb(62,179,227)
 }
 
 /* Active state for menu buttons */
@@ -107,12 +123,7 @@ button{
      padding-left: 2rem;
 }
 
-button:hover{
-    cursor: pointer;
-    background-color: rgb(62,179,227);
-    color: white;
 
-}
 
 
 .iconColor{
@@ -127,9 +138,11 @@ button:hover{
 }
 
 .btn-dashboard{
+    background: none;
     position: absolute;
     right:100px;
-    border-radius: 1rem;
+    font-weight: bold;
+    font-size: 15px;
 }
 
 .woman{
@@ -168,7 +181,6 @@ button:hover{
     width: 23%;
     padding-left: 2rem;
     position: sticky;
-
 }
 
 .left .btn i {
@@ -211,8 +223,17 @@ button:hover{
     gap:20px
 }
 
+ /* Text color of the dashboard icon */
 .text-color{
-    color:rgb(62,179,227)
+    color: black;
+}
+
+.text-color-pink{
+    color: #AB47BC;
+}
+
+.text-color-blue{
+    color: rgb(62,179,227)
 }
 
 .middleZone-2{
@@ -426,31 +447,6 @@ p{
     /* background-color: aqua; */
 }
 
-.aligner{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    /* background-color: red; */
-    align-items: center;
-
-}
-
-.vertical-element{
-    height: 20px;
-    width: 1px;
-    background-color: rgb(207, 207, 207);
-    margin: 5px 0;
-}
-
-.divider{
-    height: 25px;
-}
-
-.separator{
-    height: 5px;
-}
-
-
 /* Gradebook container styling */
 .gradebook-container {
     background-color: #f5f5f5;
@@ -467,7 +463,7 @@ p{
 
 .button-group {
     display: flex;
-    gap: 10px;
+    gap: 15px;
 }
 
 .button {
@@ -556,41 +552,91 @@ p{
 }
 
 .button-print i {
-    font-size: 1.9em; /* Increase icon size */
+    font-size: 1.8em; /* Increase icon size */
     color: white;
 }
 
+.button-print:hover {
+    background-color: #4285F4;
+}
+
+.button-fa-sliders:hover {
+    background-color: #4285F4;
+}
+
+.button-fa-sliders {
+    background-color: #FFFFFF;
+    width: 40px; /* Or use auto/min-width based on preference */
+    height: 30px; /* Or use auto/min-width based on preference */
+    color: white;
+    align-item: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.button-fa-sliders i {
+    font-size: 1.2em; /* Increase icon size */
+    color: black;
+}
+
+.button-fa-sliders:hover {
+    background-color: #D3D3D3;
+}
 
 .dropdown {
-    padding: 8px 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 9px 45px;
+    border: 1px solid white;
+    border-radius: 9px;
     font-size: 14px;
 }
 
 .gradebook-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  border-radius: 9px;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.gradebook-table th, .gradebook-table td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #f0f0f0;
+.gradebook-table th{
+  padding: 15px;
+  text-align: center;
+  font-size: 14px;
+  color: #333; /* Change the text color to a light gray */
 }
 
-.gradebook-table th {
-    background-color: #f5f5f5;
-    font-weight: bold;
+.gradebook-table td {
+  padding: 17px;
+  text-align: center;
+  font-size: 14px;
+  color: #777; /* Change the text color to a light gray */
+}
+
+.gradebook-table i {
+  padding: 4px;
+}
+
+.header-row {
+  background-color: white;
+  color: black;
+  font-weight: bold;
+}
+
+.white-row {
+  background-color: white;
+}
+
+.colored-row {
+  background-color: #DEECF1;
 }
 
 .view-link {
-    color: #0073b1;
-    cursor: pointer;
+  color: #0073b1;
+  cursor: pointer;
 }
 
 .icon {
-    margin-left: 5px;
+  margin-left: 5px;
 }}
