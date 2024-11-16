@@ -180,6 +180,7 @@ button{
     flex-direction: column;
     width: 23%;
     padding-left: 2rem;
+    padding-right: 2rem;
     position: sticky;
 }
 
@@ -192,7 +193,7 @@ button{
 
     height: calc(100vh - 70px); /* Full height minus header */
     overflow-y: auto;
-    width: 75%;
+    width: 100%;
 }
 
 .middle-container{
@@ -203,7 +204,7 @@ button{
 }
 
 .left{
-    margin-right: 10px;
+    margin-right: 16px;
 }
 .middle{
     width: 65%;
@@ -443,7 +444,7 @@ p{
 .card-container{
     display: flex;
     align-items: flex-start;
-    gap: 10px;
+    gap: 12px;
     /* background-color: aqua; */
 }
 
