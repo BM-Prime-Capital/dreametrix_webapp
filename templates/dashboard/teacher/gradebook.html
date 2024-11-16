@@ -3,7 +3,7 @@
 
 {% block content %}
     <!-- Assistance Section -->
-    <h3 class="text-gray">Grade Book Page..... Teacher</h3>
+    <h4 class="text-color-pink">GRADEBOOK</h4>
     <div class="gradebook-container">
         <div class="content">
             <div class="content-header">
@@ -35,65 +35,70 @@
                     <option>Class 5</option>
                     <option>Class 6</option>
                 </select>
+                <a href="">
+                        <button class="button button-fa-sliders">
+                            <i class="bi bi-sliders noir"></i>
+                        </button>
+                    </a>
             </div>
 
             <div class="table-container">
-                <table class="gradebook-table">
-                    <thead>
-                        <tr>
-                            <th>STUDENT</th>
-                            <th>AVERAGE</th>
-                            <th>EXAM (3)</th>
-                            <th>TESTS (2)</th>
-                            <th>ASSIGNMENTS (14)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Rae, Martha</td>
-                            <td>65% (C)</td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                        </tr>
-                        <tr>
-                            <td>John, Smith</td>
-                            <td>100% (A)</td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                        </tr>
-                        <tr>
-                            <td>Rae, Martha</td>
-                            <td>65% (C)</td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                        </tr>
-                        <tr>
-                            <td>Rae, Martha</td>
-                            <td>65% (C)</td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                        </tr>
-                        <tr>
-                            <td>Rae, Martha</td>
-                            <td>65% (C)</td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                        </tr>
-                        <tr>
-                            <td>Rae, Martha</td>
-                            <td>65% (C)</td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                            <td><span class="view-link">View</span><span class="icon">🎤</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+  <table class="gradebook-table">
+    <thead>
+      <tr class="header-row">
+        <th>STUDENT</th>
+        <th>AVERAGE</th>
+        <th>EXAM (3)</th>
+        <th>TESTS (2)</th>
+        <th>ASSIGNMENTS (14)</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr class="colored-row">
+        <td>John, Smith</td>
+        <td>100% (A)</td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+      </tr>
+      <tr class="white-row">
+        <td>Rae, Martha</td>
+        <td>65% (C)</td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+      </tr>
+      <tr class="colored-row">
+        <td>Rae, Martha</td>
+        <td>65% (C)</td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+      </tr>
+    <tr class="white-row">
+        <td>Rae, Martha</td>
+        <td>65% (C)</td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+      </tr>
+      <tr class="colored-row">
+        <td>Rae, Martha</td>
+        <td>65% (C)</td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+      </tr>
+    <tr class="white-row">
+        <td>Rae, Martha</td>
+        <td>65% (C)</td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
         </div>
     </div>
 {% endblock %}
