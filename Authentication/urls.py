@@ -34,6 +34,10 @@ urlpatterns = [
     path('verify-email/<int:user_id>/', views.verify_email, name='verify_email'),
     path('resend-verification-email/<int:user_id>/', views.resend_verification_email, name='resend_verification_email'),
 
+    # OTP Verification
+    path('verify-otp/<int:user_id>/', views.verify_otp, name='verify_otp'),
+
+
     # API endpoint to fetch school data
     path('api/schools/', views.get_schools, name='get_schools'),
 

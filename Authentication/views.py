@@ -22,6 +22,8 @@ from django.urls import reverse_lazy
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.mail import EmailMultiAlternatives
+from .utils import get_image_url_or_base64
+from random import randint
 
 # ================= Helper Functions =================
 
@@ -214,25 +216,6 @@ def logout_user(request):
     messages.success(request, 'Successfully logged out')
     return redirect(reverse('login'))
 
-# Fonction d'envoi de l'email d'activation
-def send_activation_email(user, request):
-    current_site = request.get_host()
-    email_subject = 'Activate Your Account'
-    email_body = render_to_string('authentication/activate.html', {
-        'user': user,
-        'domain': current_site,
-        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-        'token': generate_token.make_token(user)
-    })
-
-    email = EmailMessage(
-        subject=email_subject,
-        body=email_body,
-        from_email=settings.EMAIL_HOST_USER,
-        to=[user.email]
-    )
-    email.content_subtype = "html"
-    email.send()
 
 # ================= Role Selection =================
 def select_role(request):
@@ -249,8 +232,44 @@ def to_delete_after_dashboard_brige(request):
 
 # ================= Email Activation =================
 
+# Fonction d'envoi de l'email d'activation
+def send_activation_email(user, request):
+    """
+        Generate a 4-digit OTP, save it to the user, and send the activation email.
+        """
+    # Generate OTP
+    otp = randint(1000, 9999)
+    user.otp_code = otp
+    user.save()  # Save OTP to the database
+
+    # Send Activation Email
+    current_site = request.get_host()
+    email_subject = 'Activate your DreaMetrix account'
+    logo_path = 'img/logo.png'  # Path relative to STATIC_ROOT or STATIC_URL
+
+    # Get dynamic image URL or Base64
+    logo_url_or_base64 = get_image_url_or_base64(logo_path, request)
+
+    email_body = render_to_string('authentication/activate.html', {
+        'user': user,
+        'domain': current_site,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': generate_token.make_token(user),
+        'logo_url_or_base64': logo_url_or_base64,
+        'otp_code': user.otp_code,  # Pass the saved OTP to the template
+    })
+
+    email = EmailMessage(
+        subject=email_subject,
+        body=email_body,
+        from_email=settings.EMAIL_HOST_USER,
+        to=[user.email]
+    )
+    email.content_subtype = "html"
+    email.send()
+
 def activate_user(request, uidb64, token):
-    """ View for activating user accounts via email """
+    """ View for activating user accounts via email and redirecting to OTP validation. """
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
@@ -258,18 +277,11 @@ def activate_user(request, uidb64, token):
         user = None
 
     if user and generate_token.check_token(user, token):
-        user.is_email_verified = True
-        user.save()
-        messages.success(request, 'Email verified successfully! Your account has been created.')
+        # Redirect the user to the OTP verification page
+        return redirect('verify_otp', user_id=user.id)
 
-        # Si c'est un school_admin, redirige vers la page d'accueil (index.html)
-        if user.user_type == 'school_admin':
-            return redirect('home_page')
-        else:
-            # Pour les autres utilisateurs, redirige vers la page de connexion
-            return redirect('login')
-
-    return render(request, 'authentication/activate-failed.html', {"user": user})
+    messages.error(request, 'Activation link is invalid or has expired.')
+    return render(request, 'authentication/activate-failed.html')
 
 def resend_verification_email(request, user_id):
     user = User.objects.get(pk=user_id)
@@ -288,12 +300,33 @@ def verify_email(request, user_id):
     except User.DoesNotExist:
         return redirect('login')  # Redirect if the user is already verified
 
-    expiration_time = now() + timedelta(minutes=1)
+    expiration_time = now() + timedelta(minutes=5)
 
     return render(request, 'authentication/verify_email.html', {
         'user': user,
         'expiration_time': expiration_time,
     })
+
+#Verify otp
+def verify_otp(request, user_id):
+    """ View for OTP validation """
+    try:
+        user = User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        messages.error(request, "Invalid request.")
+        return redirect('register')
+
+    if request.method == 'POST':
+        otp_input = request.POST.get('otp')
+        if str(user.otp_code) == otp_input:
+            user.is_email_verified = True
+            user.save()
+            messages.success(request, "Your account has been successfully verified!")
+            return redirect('login')
+        else:
+            messages.error(request, "Invalid OTP. Please try again.")
+
+    return render(request, 'authentication/verify_otp.html', {'user': user})
 
 def send_app_notification_to_student(student_user, parent_user):
     """ Fonction pour envoyer une notification dans l'application """
