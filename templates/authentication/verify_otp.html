@@ -1,0 +1,48 @@
+{% extends "_partials/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="form-container" style="max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+    <img src="{% static 'img/logo.png' %}" alt="logo" style="width: 145px; margin-bottom: 15px;">
+    {% include '_partials/messages.html' %}
+    <h2>OTP Verification</h2>
+    <p>Please enter the OTP sent to your registered email.</p>
+
+    <form method="POST" action="{% url 'verify_otp' user.id %}">
+        {% csrf_token %}
+        <div class="otp-inputs" style="display: flex; justify-content: center; margin-bottom: 15px;">
+            <input type="text" name="otp1" maxlength="1" required class="otp-input">
+            <input type="text" name="otp2" maxlength="1" required class="otp-input">
+            <input type="text" name="otp3" maxlength="1" required class="otp-input">
+            <input type="text" name="otp4" maxlength="1" required class="otp-input">
+        </div>
+        <button type="submit" class="ui fluid large button">Verify</button>
+    </form>
+</div>
+
+<style>
+    .otp-inputs {
+        display: flex;
+        justify-content: space-evenly; /* Evenly distribute space */
+        gap: 8px; /* Smaller space between inputs */
+        margin-top: 15px;
+        margin-bottom: 20px;
+    }
+    .otp-input {
+        width: 40px; /* Smaller width */
+        height: 40px; /* Smaller height */
+        font-size: 18px; /* Slightly smaller font */
+        text-align: center;
+        border: 1px solid #1A73E8;
+        border-radius: 6px;
+        outline: none;
+        transition: border-color 0.3s ease;
+    }
+    .otp-input:focus {
+        border-color: #0056b3;
+    }
+    .otp-input::placeholder {
+        color: #ccc;
+    }
+</style>
+{% endblock %}

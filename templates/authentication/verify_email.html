@@ -7,7 +7,7 @@
 
     <h2>Email Verification</h2>
     <p>Please check your email to verify your account.</p>
-    <p>Your verification link will expire in <span id="countdown">60</span> seconds.</p>
+    <p>Your verification link will expire in <span id="countdown">300</span> seconds.</p>
 
     <!-- Bouton pour renvoyer l'email de vérification -->
     <div id="resend-btn" style="display:none;">
@@ -19,7 +19,7 @@
 
     <!-- Compte à rebours en JavaScript -->
     <script>
-        let countdown = 60;
+        let countdown = 300;
         const interval = setInterval(() => {
             document.getElementById('countdown').innerText = countdown;
             countdown -= 1;
