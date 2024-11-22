@@ -317,7 +317,7 @@ def verify_otp(request, user_id):
         return redirect('register')
 
     if request.method == 'POST':
-        otp_input = request.POST.get('otp')
+        otp_input = request.POST.get('otp')  # Get the combined OTP from the hidden input
         if str(user.otp_code) == otp_input:
             user.is_email_verified = True
             user.save()

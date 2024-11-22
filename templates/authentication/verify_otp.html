@@ -8,30 +8,59 @@
     <h2>OTP Verification</h2>
     <p>Please enter the OTP sent to your registered email.</p>
 
-    <form method="POST" action="{% url 'verify_otp' user.id %}">
+    <form id="otp-form" method="POST" action="{% url 'verify_otp' user.id %}">
         {% csrf_token %}
         <div class="otp-inputs" style="display: flex; justify-content: center; margin-bottom: 15px;">
-            <input type="text" name="otp1" maxlength="1" required class="otp-input">
-            <input type="text" name="otp2" maxlength="1" required class="otp-input">
-            <input type="text" name="otp3" maxlength="1" required class="otp-input">
-            <input type="text" name="otp4" maxlength="1" required class="otp-input">
+            <input type="text" id="otp1" maxlength="1" required class="otp-input">
+            <input type="text" id="otp2" maxlength="1" required class="otp-input">
+            <input type="text" id="otp3" maxlength="1" required class="otp-input">
+            <input type="text" id="otp4" maxlength="1" required class="otp-input">
         </div>
+        <!-- Hidden input to hold the combined OTP -->
+        <input type="hidden" id="otp-full" name="otp" value="">
         <button type="submit" class="ui fluid large button">Verify</button>
     </form>
 </div>
 
+<script>
+    // Automatically focus on the next input field when a character is entered
+    const otpInputs = document.querySelectorAll('.otp-input');
+
+    otpInputs.forEach((input, index) => {
+        input.addEventListener('input', () => {
+            // Move to the next field if the user types a character
+            if (input.value.length === 1 && index < otpInputs.length - 1) {
+                otpInputs[index + 1].focus();
+            }
+        });
+
+        input.addEventListener('keydown', (event) => {
+            // Allow backspace to move focus to the previous field
+            if (event.key === 'Backspace' && input.value.length === 0 && index > 0) {
+                otpInputs[index - 1].focus();
+            }
+        });
+    });
+
+    document.getElementById('otp-form').addEventListener('submit', function (event) {
+        // Combine the values of the four input fields
+        const fullOtp = Array.from(otpInputs).map(input => input.value).join('');
+        document.getElementById('otp-full').value = fullOtp;
+    });
+</script>
+
 <style>
     .otp-inputs {
         display: flex;
-        justify-content: space-evenly; /* Evenly distribute space */
-        gap: 8px; /* Smaller space between inputs */
+        justify-content: space-evenly;
+        gap: 8px;
         margin-top: 15px;
         margin-bottom: 20px;
     }
     .otp-input {
-        width: 40px; /* Smaller width */
-        height: 40px; /* Smaller height */
-        font-size: 18px; /* Slightly smaller font */
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
         text-align: center;
         border: 1px solid #1A73E8;
         border-radius: 6px;
