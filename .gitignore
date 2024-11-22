@@ -7,6 +7,7 @@ __pycache__/
 
 # Django migrations
 School/migrations/__init__.py
+Authentication/migrations/
 !*/migrations/__init__.py
 
 # Environment Variables
