@@ -22,6 +22,9 @@ class User(AbstractUser):
     )
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='student')
 
+    # OTP Code for email verification
+    otp_code = models.IntegerField(null=True, blank=True)
+
     def save(self, *args, **kwargs):
         # Génère un code unique de 8 chiffres si ce n'est pas encore défini
         if not self.code:
