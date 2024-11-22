@@ -1,14 +1,130 @@
-{% load static %}
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
-    <title>Activate Your Account</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+     <style>
+        /* General Reset */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+        }
+        table {
+            border-spacing: 0;
+            width: 100%;
+        }
+        td {
+            padding: 0;
+        }
+        img {
+            border: 0;
+            max-width: 100%;
+        }
+
+        /* Container */
+        .email-wrapper {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Header and Footer */
+        .email-header,
+        .email-footer {
+            text-align: center;
+        }
+        .email-header img {
+            margin: 20px 0;
+            width: 150px;
+            height: auto;
+        }
+
+        /* Body */
+        .email-body {
+            padding: 30px;
+            text-align: left; /* Align text to the left */
+            color: #333333;
+        }
+        .email-body p {
+            font-size: 16px;
+            line-height: 1.5;
+            margin: 10px 0;
+        }
+
+        /* Button Style */
+        .email-footer a {
+            display: inline-block;
+            margin: 20px auto;
+            padding: 15px 30px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #007bff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .email-footer a:hover {
+            background-color: #0056b3;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            .email-body {
+                padding: 20px;
+            }
+            .email-footer a {
+                font-size: 14px;
+                padding: 12px 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <p>Hello {{ user.username }},</p>
-    <p>Thank you for registering at DreamMetrix. Please click the link below to verify your email address and activate your account:</p>
-    <p><a href="http://{{ domain }}{% url 'activate' uidb64=uid token=token %}">Activate Your Account</a></p>
-    <p>If you did not request this, please ignore this email.</p>
+    <table>
+        <tr>
+            <td align="center">
+                <!-- Email Wrapper -->
+                <table class="email-wrapper">
+                    <!-- Logo Section -->
+                    <tr>
+                        <td class="email-header">
+                            <img src="{{ logo_url_or_base64 }}" alt="Dreametrix Logo">
+                        </td>
+                    </tr>
+
+                    <!-- Body Section -->
+                    <tr>
+                        <td class="email-body">
+                            <p>Hello {{ user.username }}, Dreametrix welcomes you to our platform. <br> Your access credentials are:</p>
+                            <p>Email: {{ user.email }}</p>
+                            <p>OTP: {{ user.otp_code }}</p>
+                            <p>
+                                To complete registration and access Dreametrix, please activate your account by clicking the button below:
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Button Section -->
+                    <tr>
+                        <td class="email-footer">
+                            <a href="http://{{ domain }}{% url 'activate' uidb64=uid token=token %}">
+                                Activate Account
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
