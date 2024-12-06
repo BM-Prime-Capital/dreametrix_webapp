@@ -91,6 +91,38 @@
                         </div>
                     </form>
                 </div>
+
+                <!-- Seattings Section -->
+                <div class="middleZone-3">
+                    <h3 class="text-gray">Seattings</h3>
+                    <div class="profile-picture-container">
+                        <img src="{% static 'img/woman.jpg' %}" alt="Profile Picture" class="woman1">
+                        <h4 class="text-gray">{{ role }}</h4>
+                    </div>
+                    <form>
+                        {% csrf_token %}
+                        <div class="subjects">
+                            <label>Add Subjects</label>
+                            <div class="subject-tags">
+                                <span class="tag">Science <span class="close">&times;</span></span>
+                                <span class="tag">Mathematics <span class="close">&times;</span></span>
+                            </div>
+                        </div>
+
+                        <div class="duration">
+                            <label>Maximum duration for feedback audio (minutes)</label>
+                            <div class="duration-control">
+                                <button class="decrement">−</button>
+                                <input type="number" value="02" min="0" class="duration-input">
+                                <button class="increment">+</button>
+                            </div>
+                        </div>
+                        <div class="btns-container">
+                            <button class="update-button">UPDATE</button>
+                            <button class="cancel-button">Cancel</button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <!-- Activity Section -->
