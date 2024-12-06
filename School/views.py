@@ -107,6 +107,8 @@ def teacher_dashboard(request):
         'firstname': request.user.first_name,
         'lastname': request.user.last_name,
         'email': request.user.email,
+        'role_user': request.user.user_type,
+        'school': request.user.school_name
     }
     return render(request, 'dashboard/teacher/teacher_dashboard.html', context)
 
