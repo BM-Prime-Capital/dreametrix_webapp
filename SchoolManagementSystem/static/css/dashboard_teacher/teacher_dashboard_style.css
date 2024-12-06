@@ -334,8 +334,8 @@ input{
 .right{
     background-color: white;
     /* margin-left: 10px; */
-    width: 32%;
-    border-radius: 10px;
+    width: 24%;
+    border-radius: 19px;
     padding: 10px 25px;
 
 }
@@ -641,3 +641,52 @@ p{
 .icon {
   margin-left: 5px;
 }}
+
+
+.subjects {
+    margin-bottom: 20px;
+}
+
+.subjects label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.subject-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Space between tags */
+}
+
+.tag {
+    background-color: #e0e0e0;
+    border-radius: 20px;
+    padding: 5px 15px;
+    display: flex;
+    align-items: center;
+}
+
+.close {
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.duration {
+    margin-top: 20px;
+}
+
+.duration label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.duration-control {
+    display: flex;
+    align-items: center;
+}
+
+.duration-input {
+    width: 50px;
+    text-align: center;
+    margin: 0 10px;
+}
