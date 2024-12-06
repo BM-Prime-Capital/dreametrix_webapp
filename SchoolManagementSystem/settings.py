@@ -13,7 +13,7 @@ SECRET_KEY = config('SECRET_KEY', default='mAvtlbIYPcy4ATQz625BVLl2Jw365xYLQCHX/
 
 
 # DEBUG = True pour local et False pour production, par défaut production
-DEBUG = True
+DEBUG = False
 
 # Test if the application is running in test mode
 TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
@@ -87,7 +87,6 @@ WSGI_APPLICATION = 'SchoolManagementSystem.wsgi.application'
 
 # Configuration de la base de données
 
-"""
 if DEBUG:
     # Configuration pour le mode local
     DATABASES = {
@@ -103,11 +102,6 @@ if DEBUG:
 else:
     # Configuration pour Railway ou production avec dj_database_url
     DATABASES = {
-        'default': dj_database_url.parse(os.environ.get("DATABASE_URL"))
-    }
-"""
-
-DATABASES = {
         'default': dj_database_url.parse(os.environ.get("DATABASE_URL"))
     }
 
