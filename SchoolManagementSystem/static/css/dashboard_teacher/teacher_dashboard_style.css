@@ -152,13 +152,6 @@ button{
     object-fit: cover;
 }
 
-.woman1{
-    width: 70px;
-    height: 70px;
-    border-radius: 100%;
-    object-fit: cover;
-
-}
 .mycontainer{
     display: flex;
     flex-direction: row;
@@ -213,14 +206,14 @@ button{
 
 
 .middleZone{
-    height:8rem;
+    height:9rem;
     background-color: white;
-    border-radius: 10px;
+    border-radius: 20px;
     /* margin: 1rem 0; */
     padding:2rem;
     display: flex;
     flex-direction: row;
-    padding:20px 100px;
+    padding:33px 100px;
     gap:20px
 }
 
@@ -238,29 +231,12 @@ button{
 }
 
 .middleZone-2{
-    height:14rem;
+    height:15rem;
     background-color: rgb(223,236,241);
-    border-radius: 10px;
+    border-radius: 20px;
     margin: 1rem 0;
-    padding:20px 100px
+    padding:25px 100px
 
-}
-
-.middleZone-3{
-    /* height:18rem; */
-    background-color: white;
-    border-radius: 10px;
-    margin: 1rem 0;
-    padding:20px 100px
-
-}
-
-.profile-picture-container{
-    display: flex;
-    flex-direction: row;
-    gap:15px;
-    /* justify-content: center; */
-    align-items: center;
 }
 
 .form-line{
@@ -270,14 +246,6 @@ button{
     margin: 20px 0;
 
 }
-
-
-.btns-container{
-    display: flex;
-    flex-direction: column;
-    gap:10px
-}
-
 
 .update-button{
     background-color: rgb(62,179,227);
@@ -317,36 +285,11 @@ label{
     font-weight: 600;
 }
 
-.input-container{
-    display: flex;
-    flex-direction: column;
-    /* width:45% ; */
-
-}
-
 input{
     height: 30px;
     border-radius: 10px;
     border: none;
     background-color: rgb(234,234,232)
-}
-
-.right{
-    background-color: white;
-    /* margin-left: 10px; */
-    width: 24%;
-    border-radius: 19px;
-    padding: 10px 25px;
-
-}
-
-.right-child{
-    background-color: transparent;
-}
-
-.text-gray{
-    color:grey;
-    font-weight: 400;
 }
 
 .text-bold{
@@ -435,17 +378,6 @@ p{
 
 .para{
     width: 100%;
-}
-
-
-/* Card container */
-
-
-.card-container{
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    /* background-color: aqua; */
 }
 
 /* Gradebook container styling */
@@ -642,35 +574,6 @@ p{
   margin-left: 5px;
 }}
 
-
-.subjects {
-    margin-bottom: 20px;
-}
-
-.subjects label {
-    display: block;
-    margin-bottom: 10px;
-}
-
-.subject-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px; /* Space between tags */
-}
-
-.tag {
-    background-color: #e0e0e0;
-    border-radius: 20px;
-    padding: 5px 15px;
-    display: flex;
-    align-items: center;
-}
-
-.close {
-    margin-left: 5px;
-    cursor: pointer;
-}
-
 .duration {
     margin-top: 20px;
 }
@@ -689,4 +592,220 @@ p{
     width: 50px;
     text-align: center;
     margin: 0 10px;
+}
+
+
+/* MiddleZone-3 with all elements in the block */
+.middleZone-3 {
+    background-color: white;
+    border-radius: 20px;
+    margin: 1rem 0;
+    padding: 20px 100px;
+}
+
+.text-gray {
+    color: grey;
+    font-weight: 400;
+}
+
+.text-gray-bold {
+    color: grey;
+    font-weight: 400;
+    font-weight: bold;
+}
+
+.profile-picture-container {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+}
+
+.woman1 {
+    width: 70px;
+    height: 70px;
+    border-radius: 100%;
+    object-fit: cover;
+}
+
+.input-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);  /* Two columns */
+    gap: 10px;                             /* Space between fields */
+    padding: 23px 0px 29px;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    justify-content: center;
+}
+
+input {
+    width: 100%;
+    padding: 16px;
+    border: 1px solid #ccc;
+    border-radius: 24px;
+    margin-top: 8px;
+    outline: none;
+}
+
+.btns-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Activity section */
+.right{
+    background-color: white;
+    /* margin-left: 10px; */
+    width: 24%;
+    border-radius: 19px;
+    padding: 10px 25px;
+}
+
+.right-child{
+    background-color: transparent;
+}
+
+.card-container{
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    /* background-color: aqua; */
+}
+
+.aligner{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.vertical-element{
+    height: 30px;
+    width: 1px;
+    background-color: rgb(207, 207, 207);
+    margin: 7px 0;
+}
+
+.space-bettween-element {
+    padding: 20px 0px 15px;
+}
+
+
+/* Seattings Section */
+
+.middleZone-4 {
+    background-color: white;
+    border-radius: 20px;
+    margin: 1rem 0;
+    padding: 25px 100px;
+}
+
+.label-settings {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.subjects {
+    margin-bottom: 20px;
+}
+
+.subjects label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    justify-content: center;
+}
+
+.input-container-tags {
+    border-radius: 20px;
+    padding: 7px;
+    background-color: rgb(234,234,232)
+}
+
+.subject-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Space between tags */
+}
+
+.tag {
+    background-color: #ffffff; /* White background for tags */
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    background-color: white; /* White background for input container */
+}
+
+.close {
+    margin-left: 5px;
+    cursor: pointer;
+    color: #ff0000; /* Red color for close button */
+}
+
+.duration-increase {
+    margin-top: 13px; /* Reduced margin */
+}
+
+.duration-increase label {
+    display: block;
+    margin-bottom: 5px; /* Adjusted margin */
+    font-size: 12px; /* Smaller font size */
+}
+
+.duration-control-increase {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 4px; /* Smaller border radius */
+    overflow: hidden;
+    height: 30px; /* Fixed height for the control */
+    width: 25%; /* Takes 25% of the parent container's width */
+}
+
+.duration-input-increase {
+    width: 40px; /* Adjusted width for the input */
+    text-align: center;
+    border: none; /* Remove default border */
+    outline: none; /* Remove outline on focus */
+    padding: 0; /* No padding for a compact look */
+    font-size: 14px; /* Smaller font size */
+    background-color: white; /* Ensure white background for input */
+}
+
+.button-increase {
+    background-color: #f0f0f0; /* Light background for buttons */
+    border: none; /* Remove default button border */
+    padding: 0 5px; /* Reduced padding */
+    cursor: pointer; /* Change cursor on hover */
+    font-size: 16px; /* Font size for buttons */
+    height: 100%; /* Make buttons fill the height */
+}
+
+.increment-increase {
+    background-color: #007bff; /* Blue background for increment button */
+    color: white; /* White text color for increment button */
+}
+
+.decrement-increase {
+    color: #333; /* Dark color for decrement button */
+}
+
+.duration-control-increase button:hover {
+    background-color: #e0e0e0; /* Lighten on hover for decrement */
+}
+
+.increment-increase:hover {
+    background-color: #0056b3; /* Darker blue on hover for increment */
 }
