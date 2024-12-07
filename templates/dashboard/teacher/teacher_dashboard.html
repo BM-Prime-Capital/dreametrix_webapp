@@ -10,7 +10,7 @@
                 <div class="middleZone">
                     <img src="{% static 'img/woman.jpg' %}" alt="Profile Picture" class="woman1">
                     <div>
-                        <h3 class="text-gray" >{{ firstname }} {{ lastname }}</h3>
+                        <h3 class="text-gray-bold" >{{ firstname }} {{ lastname }}</h3>
                         <div class="text-color">
                             <i class="bi bi-alarm"></i>
                             <i class="bi bi-person"></i>
@@ -21,7 +21,7 @@
 
                 <!-- Assistance Section -->
                 <div class="middleZone-2">
-                    <h3 class="text-gray">AI Teacher Assistance</h3>
+                    <h4 class="text-gray-bold">AI Teacher Assistance</h4>
                     <div class="check-container-new">
                         <div class="check-container redBG">
                             <i class="bi bi-exclamation-circle redColor"></i>
@@ -61,28 +61,26 @@
                     <h3 class="text-gray">Profile</h3>
                     <div class="profile-picture-container">
                         <img src="{% static 'img/woman.jpg' %}" alt="Profile Picture" class="woman1">
-                        <h4 class="text-gray">{{ role }}</h4>
+                        <h3 class="text-gray-bold">{{ firstname }} {{ lastname }}</h3>
                     </div>
                     <form>
                         {% csrf_token %}
-                        <div class="form-line">
+                        <div class="input-grid">
                             <div class="input-container">
-                                <label for="username">Username</label>
+                                <label for="username" class="text-gray-bold">Username</label>
                                 <input type="text" id="username" name="username" value="{{ username }}" readonly>
                             </div>
                             <div class="input-container">
-                                <label for="email">Email</label>
-                                <input type="text" id="email" name="email" value="{{ email }}" readonly>
+                                <label for="email" class="text-gray-bold">Email</label>
+                                <input type="text" id="email" name="email" value="{{ email }}" readonly class="text-gray">
                             </div>
-                        </div>
-                        <div class="form-line">
-                            <div class="input-container">
-                                <label for="school">School</label>
-                                <input type="text" id="school" name="school" value="{{ school }}" readonly>
+                            <div class="input-container" >
+                                <label for="school" class="text-gray-bold">School</label>
+                                <input type="text" id="school" name="school" value="{{ school }}" readonly class="text-gray">
                             </div>
                             <div class="input-container">
-                                <label for="role_user">Role</label>
-                                <input type="text" id="role_user" name="role_user" value="{{ role_user }}" readonly>
+                                <label for="role_user" class="text-gray-bold">Role</label>
+                                <input type="text" id="role_user" name="role_user" value="{{ role_user }}" readonly class="text-gray">
                             </div>
                         </div>
                         <div class="btns-container">
@@ -93,30 +91,32 @@
                 </div>
 
                 <!-- Seattings Section -->
-                <div class="middleZone-3">
-                    <h3 class="text-gray">Seattings</h3>
-                    <div class="profile-picture-container">
-                        <img src="{% static 'img/woman.jpg' %}" alt="Profile Picture" class="woman1">
-                        <h4 class="text-gray">{{ role }}</h4>
-                    </div>
+                <div class="middleZone-4">
+                    <h4 class="text-gray-bold">Seattings</h4>
+
                     <form>
                         {% csrf_token %}
-                        <div class="subjects">
-                            <label>Add Subjects</label>
-                            <div class="subject-tags">
-                                <span class="tag">Science <span class="close">&times;</span></span>
-                                <span class="tag">Mathematics <span class="close">&times;</span></span>
+                        <div class="subjects space-bettween-element">
+                            <label class="label-settings">Add Subjects</label>
+                            <div class="input-container-tags">
+                                <div class="subject-tags">
+                                    <span class="tag">Science <span class="close">&times;</span></span>
+                                    <span class="tag">Mathematics <span class="close">&times;</span></span>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="duration">
+                        <div class="duration-increase">
                             <label>Maximum duration for feedback audio (minutes)</label>
-                            <div class="duration-control">
-                                <button class="decrement">−</button>
+                            <div class="duration-control-increase">
+                                <button class="decrement-increase button-increase">−</button>
                                 <input type="number" value="02" min="0" class="duration-input">
-                                <button class="increment">+</button>
+                                <button class="increment-increase">+</button>
                             </div>
                         </div>
+
+                        <div class="space-bettween-element"></div>
+
                         <div class="btns-container">
                             <button class="update-button">UPDATE</button>
                             <button class="cancel-button">Cancel</button>
@@ -180,70 +180,75 @@
 
                         <div class="divider"></div>
 
-                        <h6 class="text-gray">YESTEDAY</h6>
+                        <div class="space-bettween-element">
+                             <h6 class="text-gray">YESTEDAY</h6>
+                        </div>
 
-                            <div class="card-container">
-                                <div class="aligner">
-                                    <div class="check-container blueBG">
-                                        <i class="bi bi-box-arrow-in-down"></i>
-                                    </div>
-                                    <div class="vertical-element"></div>
 
+
+                        <div class="card-container">
+                            <div class="aligner">
+                                <div class="check-container blueBG">
+                                    <i class="bi bi-box-arrow-in-down"></i>
                                 </div>
-
-                                <div>
-                                    <p class="text-gray"><span class="text-bold">Darika Samak</span> uploaded 4 files on <span class="text-bold">Tasks2 - Mathematics</span></p>
-
-                                    <p class="text-gray">6:02 PM</p>
-                                </div>
-
-                            </div>
-                            <div class="card-container">
-                                <div class="aligner">
-                                    <div class="check-container greenBG">
-                                        <i class="bi bi-check-circle"></i>
-                                    </div>
-                                    <div class="vertical-element"></div>
-
-                                </div>
-
-                                <div>
-                                    <p class="text-gray"><span class="text-bold">Darika Samak</span> Mark as done <span class="text-bold">Listing on Science</span></p>
-                                    <p class="text-gray">5:49 PM</p>
-                                </div>
-
-                            </div>
-                            <div class="card-container">
-                                <div class="aligner">
-                                    <div class="check-container purpleBG">
-                                        <i class="bi bi-pencil"></i>
-                                    </div>
-                                    <div class="vertical-element"></div>
-
-                                </div>
-
-                                <div>
-                                    <p class="text-gray"><span class="text-bold">Darika Samak</span> Edited <span class="text-bold">Listing on Science</span></p>
-                                    <p class="text-gray">5:40 PM</p>
-                                </div>
+                                <div class="vertical-element"></div>
 
                             </div>
 
-                            <div class="card-container">
-                                <div class="aligner">
-                                    <div class="check-container yellowBG">
-                                        <i class="bi bi-chat-left-dots"></i>
-                                    </div>
-                                    <!-- <div class="vertical-element"></div> -->
+                            <div>
+                                <p class="text-gray"><span class="text-bold">Darika Samak</span> uploaded 4 files on <span class="text-bold">Tasks2 - Mathematics</span></p>
 
-                                </div>
+                                <p class="text-gray">6:02 PM</p>
+                            </div>
 
-                                <div>
-                                    <p class="text-gray"><span class="text-bold">Emilee Sinchenko</span> Sent you a message</p>
-                                    <p class="text-gray">4:32 PM</p>
+                        </div>
+                        <div class="card-container">
+                            <div class="aligner">
+                                <div class="check-container greenBG">
+                                    <i class="bi bi-check-circle"></i>
                                 </div>
+                                <div class="vertical-element"></div>
 
                             </div>
+
+                            <div>
+                                <p class="text-gray"><span class="text-bold">Darika Samak</span> Mark as done <span class="text-bold">Listing on Science</span></p>
+                                <p class="text-gray">5:49 PM</p>
+                            </div>
+
+                        </div>
+                        <div class="card-container">
+                            <div class="aligner">
+                                <div class="check-container purpleBG">
+                                    <i class="bi bi-pencil"></i>
+                                </div>
+                                <div class="vertical-element"></div>
+
+                            </div>
+
+                            <div>
+                                <p class="text-gray"><span class="text-bold">Darika Samak</span> Edited <span class="text-bold">Listing on Science</span></p>
+                                <p class="text-gray">5:40 PM</p>
+                            </div>
+
+                        </div>
+
+                        <div class="card-container">
+                            <div class="aligner">
+                                <div class="check-container yellowBG">
+                                    <i class="bi bi-chat-left-dots"></i>
+                                </div>
+                                <!-- <div class="vertical-element"></div> -->
+
+                            </div>
+
+                            <div>
+                                <p class="text-gray"><span class="text-bold">Emilee Sinchenko</span> Sent you a message</p>
+                                <p class="text-gray">4:32 PM</p>
+                            </div>
+
+                        </div>
+
                 </div>
             </div>
         </div>
