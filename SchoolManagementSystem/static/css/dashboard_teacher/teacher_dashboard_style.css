@@ -753,3 +753,59 @@ input {
     cursor: pointer;
     color: #ff0000; /* Red color for close button */
 }
+
+.duration-increase {
+    margin-top: 13px; /* Reduced margin */
+}
+
+.duration-increase label {
+    display: block;
+    margin-bottom: 5px; /* Adjusted margin */
+    font-size: 12px; /* Smaller font size */
+}
+
+.duration-control-increase {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 4px; /* Smaller border radius */
+    overflow: hidden;
+    height: 30px; /* Fixed height for the control */
+    width: 25%; /* Takes 25% of the parent container's width */
+}
+
+.duration-input-increase {
+    width: 40px; /* Adjusted width for the input */
+    text-align: center;
+    border: none; /* Remove default border */
+    outline: none; /* Remove outline on focus */
+    padding: 0; /* No padding for a compact look */
+    font-size: 14px; /* Smaller font size */
+    background-color: white; /* Ensure white background for input */
+}
+
+.button-increase {
+    background-color: #f0f0f0; /* Light background for buttons */
+    border: none; /* Remove default button border */
+    padding: 0 5px; /* Reduced padding */
+    cursor: pointer; /* Change cursor on hover */
+    font-size: 16px; /* Font size for buttons */
+    height: 100%; /* Make buttons fill the height */
+}
+
+.increment-increase {
+    background-color: #007bff; /* Blue background for increment button */
+    color: white; /* White text color for increment button */
+}
+
+.decrement-increase {
+    color: #333; /* Dark color for decrement button */
+}
+
+.duration-control-increase button:hover {
+    background-color: #e0e0e0; /* Lighten on hover for decrement */
+}
+
+.increment-increase:hover {
+    background-color: #0056b3; /* Darker blue on hover for increment */
+}
