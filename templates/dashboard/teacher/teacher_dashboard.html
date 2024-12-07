@@ -67,7 +67,7 @@
                         {% csrf_token %}
                         <div class="input-grid">
                             <div class="input-container">
-                                <label for="username" class="text-gray-bold">Username</label>
+                                <label for="username" class="text-bold">Username</label>
                                 <input type="text" id="username" name="username" value="{{ username }}" readonly>
                             </div>
                             <div class="input-container">
@@ -110,7 +110,7 @@
                             <label>Maximum duration for feedback audio (minutes)</label>
                             <div class="duration-control-increase">
                                 <button class="decrement-increase button-increase">−</button>
-                                <input type="number" value="02" min="0" class="duration-input">
+                                <input type="number" value="02" min="0" class="duration-input-increase">
                                 <button class="increment-increase">+</button>
                             </div>
                         </div>
