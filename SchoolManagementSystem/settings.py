@@ -27,7 +27,7 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',  # développement local
     'http://localhost:8000',   # développement local
-    'https://dreametrix-2hra.onrender.com'  # production
+    'https://app-dreametrix.onrender.com'  # production
 ]
 
 # Temps d'expiration de la session (en secondes)
