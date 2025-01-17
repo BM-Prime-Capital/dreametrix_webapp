@@ -41,7 +41,7 @@ def register_user(request, user_type):
         username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
-
+        photo = request.FILES.get('profile_picture')
         # Check if the email is already taken
         if User.objects.filter(email=email).exists():
             messages.error(request, "An account with this email already exists.")
@@ -144,6 +144,23 @@ def register_user(request, user_type):
 
 
 # ================= Authentication (Login/Logout) =================
+def update_profile_photo(request):
+    if request.method == "POST":
+        user = request.user
+        profile_photo = request.FILES.get('profile_picture')  # Récupérer le fichier sélectionné
+
+        if profile_photo:
+            user.photo = profile_photo
+            user.save()  # Enregistrer la mise à jour
+            messages.success(request, "Profile picture updated successfully!")
+        else:
+            messages.error(request, "Please select a valid image.")
+
+        # Rediriger ou recharger la page en fonction du type d'utilisateur
+        return redirect('teacher_dashboard')
+
+    return render(request, 'dashboard/teacher/teacher_dashboard.html')
+
 
 @never_cache  # To clear cache on the browser when the user authenticates
 def login_user(request):
