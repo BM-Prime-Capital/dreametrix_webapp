@@ -8,7 +8,7 @@
             <div class="middle">
                 <!-- School Leader Section -->
                 <div class="middleZone">
-                    <img src="{% static 'img/woman.jpg' %}" alt="Profile Picture" class="woman1">
+                    <img src="{{ user.get_photo_url }}" alt="User Profile" class="woman1">
                     <div>
                         <h3 class="text-gray-bold" >{{ firstname }} {{ lastname }}</h3>
                         <div class="text-color">
@@ -57,13 +57,13 @@
                 </div>
 
                 <!-- Profile Section -->
-                <div class="middleZone-3">
-                    <h3 class="text-gray">Profile</h3>
-                    <div class="profile-picture-container">
-                        <img src="{% static 'img/woman.jpg' %}" alt="Profile Picture" class="woman1">
-                        <h3 class="text-gray-bold">{{ firstname }} {{ lastname }}</h3>
-                    </div>
-                    <form>
+                <form method="POST" enctype="multipart/form-data" >
+                    <div class="middleZone-3">
+                        <h3 class="text-gray">Profile</h3>
+                        <div class="profile-picture-container">
+                            <img src="{{ user.get_photo_url }}" alt="User Profile" class="woman1">
+                            <h3 class="text-gray-bold">{{ firstname }} {{ lastname }}</h3>
+                        </div>
                         {% csrf_token %}
                         <div class="input-grid">
                             <div class="input-container">
@@ -84,11 +84,11 @@
                             </div>
                         </div>
                         <div class="btns-container">
-                            <button class="update-button">UPDATE PROFILE</button>
+                            <button type="submit" class="update-button">Update Profile Picture</button>
                             <button class="cancel-button">Cancel</button>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
 
                 <!-- Seattings Section -->
                 <div class="middleZone-4">
@@ -253,4 +253,20 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('profile-picture-input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    // Mettre à jour la source de l'image
+                    document.getElementById('profile-picture-preview').src = e.target.result;
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
 {% endblock %}
