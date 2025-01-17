@@ -4,7 +4,7 @@ from .models import User, Student, Teacher, Parent
 
 class UserAdmin(admin.ModelAdmin):
     # Display different fields depending on the user type (e.g., for school admins)
-    list_display = ('username', 'email', 'user_type', 'is_staff', 'code', 'subdomain', 'address')
+    list_display = ('username', 'email', 'user_type', 'is_staff', 'code', 'photo', 'subdomain', 'address')
     search_fields = ('username', 'email', 'user_type', 'code', 'subdomain')
     list_per_page = 25
 

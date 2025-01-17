@@ -45,4 +45,8 @@ urlpatterns = [
     path('library_parent_dashboard/', views.library_parent_dashboard, name='library_parent_dashboard'),
     path('parent_dashboard/', views.parent_dashboard, name='parent_dashboard'),
 
+
+    # Generate digital library
+    path('digital_library/', views.digital_library, name='digital_library'),
+    path('generate_pdf/', views.generate_pdf, name='generate_pdf'),  # New URL for PDF generation
 ]

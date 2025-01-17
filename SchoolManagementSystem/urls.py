@@ -25,9 +25,14 @@ urlpatterns = [
     path('', include('Authentication.urls')),  # Application d'authentification
     path('', include('School.urls')),
     #path('select-school/', views.select_school, name='select_school'),  # Ajout d'une page pour la sélection de l'école
-]
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+#if settings.DEBUG:
+ #   urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+#if settings.DEBUG:
+#   urlpatterns += static(settings.STATIC_URL, document_root=settings.MEDIA_ROOT)
+
+
 # Error handling
 handler404 = "helpers.views.handle_not_found"
 handler500 = "helpers.views.handle_server_error"
