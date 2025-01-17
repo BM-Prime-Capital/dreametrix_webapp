@@ -474,11 +474,13 @@ p{
 
 .button-print {
     background-color: rgb(62, 179, 227);
-    width: 70px; /* Or use auto/min-width based on preference */
+    width: 170px; /* Or use auto/min-width based on preference */
     height: 60px; /* Or use auto/min-width based on preference */
     color: white;
-    align-item: center;
-    justify-content: center;
+    text-align: center;
+    padding: 9px 13px; /* Adjust padding to fit content */
+    font-size: 16px;
+    font-weight: 500;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease;

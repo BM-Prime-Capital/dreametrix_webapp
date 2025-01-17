@@ -22,3 +22,9 @@ virtualenv
 virtualenv-clone
 whitenoise
 python-decouple
+pandas openpyxl
+reportlab
+requests
+tesseract
+PyMuPDF
+Pillow
