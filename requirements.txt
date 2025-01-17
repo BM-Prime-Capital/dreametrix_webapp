@@ -22,7 +22,7 @@ virtualenv
 virtualenv-clone
 whitenoise
 python-decouple
-pandas openpyxl
+pandas
 reportlab
 requests
 tesseract
