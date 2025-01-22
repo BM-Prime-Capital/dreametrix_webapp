@@ -1,325 +1,138 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Générateur d'Exercices</title>
-
-    <!-- Base styles -->
+    <title>Generate Test PDF</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             margin: 0;
-            padding: 0;
-            background: linear-gradient(to right, #6a11cb, #2575fc);
-            color: #333;
-        }
-
-        /* Modal styles */
-        .modal {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.6);
             padding: 20px;
         }
-
-        .modal-content {
-            background-color: #fff;
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            padding: 30px;
-            width: 90%;
-            max-width: 1200px;
-            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-
-        @keyframes slideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        h2 {
-            margin-bottom: 20px;
-            color: #2575fc;
+        h1 {
             text-align: center;
+            color: #333;
         }
-
-        .form-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            flex: 1 1 calc(20% - 20px);
-            min-width: 150px;
-        }
-
         label {
-            margin-bottom: 5px;
-            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
         }
-
-        select {
+        select, input[type="number"] {
             width: 100%;
             padding: 10px;
+            margin-bottom: 20px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            background-color: #f9f9f9;
-            font-size: 14px;
-            color: #333;
-            outline: none;
-            transition: border-color 0.3s ease;
         }
-
-        select:focus {
-            border-color: #2575fc;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 20px;
-            background-color: #2575fc;
-            color: #fff;
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #5cb85c;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
+            color: white;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            margin: 20px auto 0;
-            text-align: center;
         }
-
-        .btn:hover {
-            background-color: #1a5cbc;
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-container {
-            text-align: center;
-            width: 100%;
-        }
-
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .form-group {
-                flex: 1 1 calc(50% - 20px); /* Reduces to two columns on mobile */
-            }
-        }
-
-        @media (max-width: 480px) {
-            .form-group {
-                flex: 1 1 100%; /* One column on small screens */
-            }
+        button:hover {
+            background-color: #4cae4c;
         }
     </style>
 </head>
 <body>
 
-<div id="myModal" class="modal">
-    <div class="modal-content">
-        <h2>Générateur d'Exercices</h2>
-        <form action="{% url 'generate_pdf' %}" method="post">
-            {% csrf_token %}
+<div class="container">
+    <h1>Generate Test PDF</h1>
+    <form action="{% url 'generate_pdf' %}" method="post" id="pdfForm">
+        {% csrf_token %}
+        <label for="subject">Subject:</label>
+        <select id="subject" name="subject" required onchange="updateOptions('subject')">
+            <!-- Options will be populated dynamically -->
+        </select>
 
-            <div class="form-container">
-                <!-- Dropdown for Subject -->
-                <div class="form-group">
-                    <label for="subject">Subject:</label>
-                    <select id="subject" name="subject">
-                        <!-- Options for subject populated by JavaScript -->
-                    </select>
-                </div>
-                <!-- Dropdown for Year -->
-                <div class="form-group">
-                    <label for="year">Year:</label>
-                    <select id="year" name="year">
-                        <!-- Options for year populated by JavaScript -->
-                    </select>
-                </div>
+        <label for="year">Year:</label>
+        <select id="year" name="year" required onchange="updateOptions('year')">
+            <option value="">Select Year</option>
+        </select>
 
-                <!-- Dropdown for Grade -->
-                <div class="form-group">
-                    <label for="grade">Grade:</label>
-                    <select id="grade" name="grade">
-                        <!-- Options for grade populated by JavaScript -->
-                    </select>
-                </div>
+        <label for="grade">Grade:</label>
+        <select id="grade" name="grade" required onchange="updateOptions('grade')">
+            <option value="">Select Grade</option>
+        </select>
 
-                <!-- Dropdown for Question Number -->
-                <div class="form-group">
-                    <label for="questionNumber">Question Number:</label>
-                    <select id="questionNumber" name="question_number">
-                        <!-- Options for question number populated by JavaScript -->
-                    </select>
-                </div>
+        <label for="kind">Question Type:</label>
+        <select id="kind" name="kind" required>
+            <option value="MC">Multiple Choice (MC)</option>
+            <option value="OR">Open Response (OR)</option>
+        </select>
 
-                <!-- Dropdown for MC/OR -->
-                <div class="form-group">
-                    <label for="mcor">MC/OR:</label>
-                    <select id="mcor" name="mc_or">
-                        <!-- Options for MC/OR populated by JavaScript -->
-                    </select>
-                </div>
+        <label for="number">Number of Questions:</label>
+        <input type="number" id="number" name="number" min="1" required>
 
-                <!-- Dropdown for Standard -->
-                <div class="form-group">
-                    <label for="standarD">Standard:</label>
-                    <select id="standarD" name="standardd">
-                        <!-- Options for MC/OR populated by JavaScript -->
-                    </select>
-                </div>
-
-                <!-- Dropdown for Point value -->
-                <div class="form-group">
-                    <label for="point_valuE">Point value:</label>
-                    <select id="point_valuE" name="point_value">
-                        <!-- Options for point_value populated by JavaScript -->
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="k_ey">Key:</label>
-                    <select id="k_ey" name="ke_y">
-                        <!-- Options for key populated by JavaScript -->
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="link_to_iteM">Link to item:</label>
-                    <select id="link_to_iteM" name="link_to_item">
-                        <!-- Options for key populated by JavaScript -->
-                    </select>
-                </div>
-            </div>
-
-            <!-- Submit button -->
-            <div class="btn-container">
-                <button type="submit" class="btn">Generate Test</button>
-            </div>
-        </form>
-    </div>
+        <button type="submit">Generate Test</button>
+    </form>
 </div>
 
 <script>
-    // Data passed from Django to JavaScript
-    const years = {{ years|safe }};
-    const subjects = {{ subjects|safe }};
-    const grades = {{ grades|safe }};
-    const questionNumbers = {{ question_numbers|safe }};
-    const mcOrs = {{ mc_ors|safe }};
-    const standarDs = {{ standards|safe }};
-    const point_valuEs = {{ point_values|safe }};
-    const k_Eys = {{ key_s|safe }};
-    const link_to_Etems = {{ link_to_items|safe }};
+    document.addEventListener("DOMContentLoaded", function() {
+        // Fetch initial subjects
+        fetch('/api/subjects/')
+            .then(response => response.json())
+            .then(data => {
+                const subjectSelect = document.getElementById('subject');
+                data.subjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject;
+                    option.textContent = subject;
+                    subjectSelect.appendChild(option);
+                });
+            });
+    });
 
-    // Function to populate dropdowns
-    function populateDropdowns() {
-        const yearSelect = document.getElementById('year');
-        const subjectSelect = document.getElementById('subject');
-        const gradeSelect = document.getElementById('grade');
-        const questionNumberSelect = document.getElementById('questionNumber');
-        const mcOrSelect = document.getElementById('mcor');
-        const standardSelect = document.getElementById('standarD');
-        const point_valueSelect = document.getElementById('point_valuE');
-        const  k_eySelect = document.getElementById('k_ey');
-        const  link_to_EtemsSelect = document.getElementById('link_to_iteM');
-
-        // Populate Year dropdown
-        years.forEach(year => {
-            const option = document.createElement('option');
-            option.value = year;
-            option.textContent = year;
-            yearSelect.appendChild(option);
-        });
-
-        // Populate Subject dropdown
-        subjects.forEach(subject => {
-            const option = document.createElement('option');
-            option.value = subject;
-            option.textContent = subject;
-            subjectSelect.appendChild(option);
-        });
-
-        // Populate Grade dropdown
-        grades.forEach(grade => {
-            const option = document.createElement('option');
-            option.value = grade;
-            option.textContent = grade;
-            gradeSelect.appendChild(option);
-        });
-
-        // Populate Question Number dropdown
-        questionNumbers.forEach(questionNumber => {
-            const option = document.createElement('option');
-            option.value = questionNumber;
-            option.textContent = questionNumber;
-            questionNumberSelect.appendChild(option);
-        });
-
-        // Populate MC/OR dropdown
-        mcOrs.forEach(mcor => {
-            const option = document.createElement('option');
-            option.value = mcor;
-            option.textContent = mcor;
-            mcOrSelect.appendChild(option);
-        });
-
-        // Populate Standard dropdown
-        standarDs.forEach(standarD => {
-            const option = document.createElement('option');
-            option.value = standarD;
-            option.textContent = standarD;
-            standardSelect.appendChild(option);
-        });
-
-        // Populate Point Value dropdown
-        point_valuEs.forEach(point_valuE => {
-            const option = document.createElement('option');
-            option.value = point_valuE;
-            option.textContent = point_valuE;
-            point_valueSelect.appendChild(option);
-        });
-
-        // Populate Key Value dropdown
-        k_Eys.forEach(k_ey => {
-            const option = document.createElement('option');
-            option.value = k_ey;
-            option.textContent = k_ey;
-            k_eySelect.appendChild(option);
-        });
-
-        // Populate Key Value dropdown
-        link_to_Etems.forEach(link_to_iteM => {
-            const option = document.createElement('option');
-            option.value = link_to_iteM;
-            option.textContent = link_to_iteM;
-            link_to_EtemsSelect.appendChild(option);
-        });
+    function updateOptions(type) {
+        let selectedValue;
+        if (type === 'subject') {
+            selectedValue = document.getElementById('subject').value;
+            fetch(`/api/years/${selectedValue}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const yearSelect = document.getElementById('year');
+                    yearSelect.innerHTML = '<option value="">Select Year</option>';
+                    data.years.forEach(year => {
+                        const option = document.createElement('option');
+                        option.value = year;
+                        option.textContent = year;
+                        yearSelect.appendChild(option);
+                    });
+                });
+        } else if (type === 'year') {
+            selectedValue = document.getElementById('year').value;
+            const subjectValue = document.getElementById('subject').value;
+            fetch(`/api/grades/${subjectValue}/${selectedValue}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const gradeSelect = document.getElementById('grade');
+                    gradeSelect.innerHTML = '<option value="">Select Grade</option>';
+                    data.grades.forEach(grade => {
+                        const option = document.createElement('option');
+                        option.value = grade;
+                        option.textContent = grade;
+                        gradeSelect.appendChild(option);
+                    });
+                });
+        }
     }
-
-    // Initialize dropdowns when DOM is fully loaded
-    document.addEventListener('DOMContentLoaded', populateDropdowns);
 </script>
 
 </body>
