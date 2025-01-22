@@ -28,3 +28,4 @@ requests
 tesseract
 PyMuPDF
 Pillow
+openpyxl
