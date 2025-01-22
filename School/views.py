@@ -295,19 +295,28 @@ def get_subjects(request):
     return JsonResponse({'subjects': subjects})
 
 
-# API pour obtenir les années en fonction du sujet
 def get_years(request, subject):
     df = pd.read_excel("Digital library.xlsx")
-    years = df[df['Subject'] == subject]['Year'].unique().tolist()
-    #years = df[df['Subject'] == subject]['Year'].tolist()
-    return JsonResponse({'years': years})
 
+    print("DataFrame Loaded:")
+    print(df.head())  # Affiche les premières lignes
+    print("Subjects:", df['Subject'].unique())  # Affiche tous les sujets uniques
+
+    df['Year'] = df['Year'].astype(str).str.strip()  # Nettoyer les années
+
+    if subject in df['Subject'].values:
+        years = df[df['Subject'] == subject]['Year'].unique().tolist()
+        print("Years found for subject:", years)
+    else:
+        years = []
+        print("Subject not found.")
+
+    return JsonResponse({'years': years})
 
 # API pour obtenir les niveaux en fonction du sujet et de l'année
 def get_grades(request, subject, year):
     df = pd.read_excel("Digital library.xlsx")
-    #grades = df[(df['Subject'] == subject) & (df['Year'] == year)]['Grade'].unique().tolist()
-    grades = df[(df['Subject'] == subject) & (df['Year'] == year)]['Grade'].tolist()
+    grades = df[(df['Subject'] == subject) & (df['Year'] == year)]['Grade'].unique().tolist()
     return JsonResponse({'grades': grades})
 
 
