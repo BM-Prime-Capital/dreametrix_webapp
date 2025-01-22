@@ -57,7 +57,9 @@
     <form action="{% url 'generate_pdf' %}" method="post" id="pdfForm">
         {% csrf_token %}
         <label for="subject">Subject:</label>
+
         <select id="subject" name="subject" required onchange="updateOptions('subject')">
+            <option value="">Select Subject</option> <!-- Option par défaut -->
             <!-- Options will be populated dynamically -->
         </select>
 
