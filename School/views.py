@@ -290,33 +290,37 @@ def generate_pdf_view(request):
 # API pour obtenir les sujets
 def get_subjects(request):
     df = pd.read_excel("Digital library.xlsx")
-    subjects = df['Subject'].unique().tolist()
-    #subjects = df['Subject'].tolist()
+    # Nettoyer les espaces dans les sujets
+    subjects = df['Subject'].str.strip().unique().tolist()
     return JsonResponse({'subjects': subjects})
 
 
 def get_years(request, subject):
     df = pd.read_excel("Digital library.xlsx")
 
-    print("DataFrame Loaded:")
-    print(df.head())  # Affiche les premières lignes
-    print("Subjects:", df['Subject'].unique())  # Affiche tous les sujets uniques
+    # Nettoyer le sujet pour enlever les espaces
+    subject = subject.strip()
 
-    df['Year'] = df['Year'].astype(str).str.strip()  # Nettoyer les années
-
+    # Vérifiez si le sujet existe dans le DataFrame
     if subject in df['Subject'].values:
-        years = df[df['Subject'] == subject]['Year'].unique().tolist()
-        print("Years found for subject:", years)
+        years = df[df['Subject'].str.strip() == subject]['Year'].unique().tolist()
     else:
         years = []
-        print("Subject not found.")
 
     return JsonResponse({'years': years})
 
 # API pour obtenir les niveaux en fonction du sujet et de l'année
 def get_grades(request, subject, year):
     df = pd.read_excel("Digital library.xlsx")
-    grades = df[(df['Subject'] == subject) & (df['Year'] == year)]['Grade'].unique().tolist()
+
+    # Nettoyer le sujet et l'année pour enlever les espaces
+    subject = subject.strip()
+    year = str(year).strip()
+
+    print("All unique years:", df['Year'].unique())
+    print("All unique grades:", df['Grade'].unique())
+
+    grades = df[(df['Subject'].str.strip() == subject) & (df['Year'].astype(str) == year)]['Grade'].unique().tolist()
     return JsonResponse({'grades': grades})
 
 
