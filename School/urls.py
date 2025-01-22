@@ -47,6 +47,8 @@ urlpatterns = [
 
 
     # Generate digital library
-    path('digital_library/', views.digital_library, name='digital_library'),
-    path('generate_pdf/', views.generate_pdf, name='generate_pdf'),  # New URL for PDF generation
+    path('generate_pdf/', views.generate_pdf_view, name='generate_pdf'),
+    path('api/subjects/', views.get_subjects, name='get_subjects'),
+    path('api/years/<str:subject>/', views.get_years, name='get_years'),
+    path('api/grades/<str:subject>/<int:year>/', views.get_grades, name='get_grades'),
 ]

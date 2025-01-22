@@ -187,106 +187,128 @@ def seating_teacher_dashboard(request):
 def teach_teacher_dashboard(request):
     return render(request, 'dashboard/teacher/teach.html')
 
-import fitz  # PyMuPDF
-import requests
-from io import BytesIO
-from PIL import Image
+
 from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse
 import pandas as pd
-from django.http import HttpResponse
+import random
+import requests
+import fitz
+from io import BytesIO
+from openpyxl import load_workbook
 
 
-def digital_library(request):
-    # Charger le fichier Excel
-    url = "https://www.dropbox.com/scl/fi/d5bqz20hsdsmuya85dl3b/Digital-library.xlsx?rlkey=hb1d0kqbnqesbhbleqb5r3r2c&e=1&dl=1"
-    data = pd.read_excel(url)
-
-    # Extraire les valeurs uniques pour les dropdowns
-    context = {
-        'years': data['Year'].unique().tolist(),
-        'subjects': data['Subject'].unique().tolist(),
-        'grades': data['Grade'].unique().tolist(),
-        'question_numbers': data['Question Number'].unique().tolist(),
-        'mc_ors': data['MC/OR'].unique().tolist(),
-        'standards': data['Standard'].unique().tolist(),
-        'point_values': data['Point Value'].unique().tolist(),
-        'key_s': data['Key'].unique().tolist(),
-        'link_to_items': data['Link to item'].unique().tolist(),
-    }
-    return render(request, 'dashboard/teacher/digital_library.html', context)
+# Fonction pour filtrer les questions
+import os
+from django.conf import settings
+import pandas as pd
+import random
+from openpyxl import load_workbook
 
 
-def resolve_redirect_url(url):
-    """
-    Résout les redirections d'une URL pour obtenir l'URL finale.
-    """
+def filter_question(subject, year, number, grade, kind):
+    # Construct the absolute path to the Excel file
+    excel_file_path = os.path.join(settings.BASE_DIR, "Digital library.xlsx")
+
+    # Load the Excel file into a DataFrame
+    df = pd.read_excel(excel_file_path)
+
+    # Filter the DataFrame based on the provided parameters
+    filtered_df = df.loc[
+        (df["Year"] == year) &
+        (df["Subject"] == subject) &
+        (df["Grade"] == grade) &
+        (df["MC/OR"] == kind)
+        ]
+
+    # Load the workbook for hyperlink extraction
+    workbook = load_workbook(excel_file_path)
+    sheet = workbook.active
+
+    links = []
+    column = df.columns.get_loc("Link to item")
+
     try:
-        response = requests.head(url, allow_redirects=True)
-        if response.status_code == 200:
-            return response.url
-    except requests.exceptions.RequestException as e:
-        print(f"Erreur lors de la résolution de l'URL: {e}")
-    return None
+        q = random.sample(list(filtered_df.index), number)
+    except ValueError:
+        raise ValueError("Not enough questions to generate test")
+
+    for ele in q:
+        cell = sheet.cell(ele + 2, column + 1)
+        link = cell.hyperlink.target
+        links.append(link)
+
+    return links
 
 
-def generate_pdf(request):
-    if request.method == 'POST':
-        # Récupérer les données du formulaire
-        year = request.POST['year']
-        subject = request.POST['subject']
-        grade = request.POST['grade']
-        question_number = request.POST['question_number']
-        mc_or = request.POST['mc_or']
-        standardd = request.POST['standardd']
-        point_value = request.POST['point_value']
-        ke_y = request.POST['ke_y']
-        link_to_item = request.POST['link_to_item']
+# Fonction pour générer le PDF
+def generate_pdf(links):
+    doc = fitz.open()
+    pdf = doc.new_page(width=595, height=842)  # taille A4
+    x, y = 24, 24  # coordonnées initiales
+    margin = 5  # marge
 
-        # Vérifier et résoudre l'URL
-        resolved_link = resolve_redirect_url(link_to_item)
-        if not resolved_link:
-            return HttpResponse("Erreur : L'URL de l'image n'est pas valide.", status=400)
-
-        # Créer un document PDF
-        doc = fitz.open()
-
-        # Ajouter une page au PDF
-        page = doc.new_page()
-
-        # Ajouter les détails de l'examen
-        text_x, text_y = 72, 750
-        page.insert_text((text_x, text_y), f"Titre de l'examen : Examen Final", fontsize=14)
-        page.insert_text((text_x, text_y - 20), f"Année : {year}", fontsize=12)
-        page.insert_text((text_x, text_y - 40), f"Matière : {subject}", fontsize=12)
-        page.insert_text((text_x, text_y - 60), f"Niveau : {grade}", fontsize=12)
+    for link in links:
+        link = link.replace("dl=0", "raw=1")
 
         try:
-            # Télécharger l'image
-            response = requests.get(resolved_link)
-            response.raise_for_status()
+            response = requests.get(link)
+            image = BytesIO(response.content)
 
-            # Ajouter l'image au PDF sans extraire le texte
-            img_rect = fitz.Rect(72, 300, 300, 500)
-            pixmap = fitz.Pixmap(BytesIO(response.content))  # Utilisation correcte de Pixmap
-            page.insert_image(img_rect, pixmap=pixmap)
+            if y + 228 > 842 - 24:
+                pdf = doc.new_page(width=595, height=842)
+                x, y = 24, 24
+
+            pdf.insert_image(fitz.Rect(x, y, x + 228, y + 228), stream=image)
+            y += 228 + margin
 
         except Exception as e:
-            print(f"Erreur lors de l'insertion de l'image : {e}")
-            page.insert_text((text_x, 300), "Erreur lors du chargement de l'image.", fontsize=12)
-
-        # Sauvegarder le PDF dans un flux
-        pdf_data = BytesIO()
-        doc.save(pdf_data)
-        doc.close()
-        pdf_data.seek(0)
-
-        # Retourner le PDF comme réponse
-        response = HttpResponse(pdf_data, content_type="application/pdf")
-        response['Content-Disposition'] = f'attachment; filename="exercise_{year}_{subject}.pdf"'
-        return response
+            raise ValueError(e)
+    doc.save("test_generated_today.pdf")
 
 
+# Vue pour générer le PDF
+def generate_pdf_view(request):
+    if request.method == "POST":
+        subject = request.POST['subject']
+        year = int(request.POST['year'])
+        number = int(request.POST['number'])
+        grade = int(request.POST['grade'])
+        kind = request.POST['kind']
 
+        links = filter_question(subject, year, number, grade, kind)
+        generate_pdf(links)
+
+        with open("test_generated_today.pdf", "rb") as pdf:
+            response = HttpResponse(pdf.read(), content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="test_generated.pdf"'
+            return response
+
+    return render(request, 'dashboard/teacher/digital_library.html')
+
+
+# API pour obtenir les sujets
+def get_subjects(request):
+    df = pd.read_excel("Digital library.xlsx")
+    subjects = df['Subject'].unique().tolist()
+    #subjects = df['Subject'].tolist()
+    return JsonResponse({'subjects': subjects})
+
+
+# API pour obtenir les années en fonction du sujet
+def get_years(request, subject):
+    df = pd.read_excel("Digital library.xlsx")
+    years = df[df['Subject'] == subject]['Year'].unique().tolist()
+    #years = df[df['Subject'] == subject]['Year'].tolist()
+    return JsonResponse({'years': years})
+
+
+# API pour obtenir les niveaux en fonction du sujet et de l'année
+def get_grades(request, subject, year):
+    df = pd.read_excel("Digital library.xlsx")
+    #grades = df[(df['Subject'] == subject) & (df['Year'] == year)]['Grade'].unique().tolist()
+    grades = df[(df['Subject'] == subject) & (df['Year'] == year)]['Grade'].tolist()
+    return JsonResponse({'grades': grades})
 
 
 
