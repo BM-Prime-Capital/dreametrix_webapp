@@ -206,7 +206,7 @@ import random
 from openpyxl import load_workbook
 
 
-def filter_question(subject, year, number, grade, kind):
+def filter_question(subject, year, number, grade, kind, standard):
     # Construct the absolute path to the Excel file
     excel_file_path = os.path.join(settings.BASE_DIR, "Digital library.xlsx")
 
@@ -218,8 +218,9 @@ def filter_question(subject, year, number, grade, kind):
         (df["Year"] == year) &
         (df["Subject"] == subject) &
         (df["Grade"] == grade) &
-        (df["MC/OR"] == kind)
-        ]
+        (df["MC/OR"] == kind) &
+        (df["Standard"] == standard)  # Added Standard filter
+    ]
 
     # Load the workbook for hyperlink extraction
     workbook = load_workbook(excel_file_path)
@@ -268,6 +269,8 @@ def generate_pdf(links):
 
 
 # Vue pour générer le PDF
+from django.contrib import messages
+
 def generate_pdf_view(request):
     if request.method == "POST":
         subject = request.POST['subject']
@@ -275,16 +278,23 @@ def generate_pdf_view(request):
         number = int(request.POST['number'])
         grade = int(request.POST['grade'])
         kind = request.POST['kind']
+        standard = request.POST['standard']  # Nouveau champ ajouté pour Standard
 
-        links = filter_question(subject, year, number, grade, kind)
-        generate_pdf(links)
+        try:
+            links = filter_question(subject, year, number, grade, kind, standard)
+            generate_pdf(links)
 
-        with open("test_generated_today.pdf", "rb") as pdf:
-            response = HttpResponse(pdf.read(), content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="test_generated.pdf"'
-            return response
+            with open("test_generated_today.pdf", "rb") as pdf:
+                response = HttpResponse(pdf.read(), content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename="test_generated.pdf"'
+                return response
+        except ValueError as e:
+            # Ajout d'un message en cas d'erreur
+            messages.error(request, str(e))
+            return render(request, 'dashboard/teacher/digital_library.html')
 
     return render(request, 'dashboard/teacher/digital_library.html')
+
 
 
 # API pour obtenir les sujets
@@ -323,6 +333,21 @@ def get_grades(request, subject, year):
     grades = df[(df['Subject'].str.strip() == subject) & (df['Year'].astype(str) == year)]['Grade'].unique().tolist()
     return JsonResponse({'grades': grades})
 
+# API to get standards based on subject, year, and grade
+def get_standards(request, subject, year, grade):
+    df = pd.read_excel("Digital library.xlsx")
 
+    # Clean the input parameters to remove spaces
+    subject = subject.strip()
+    year = str(year).strip()
+    grade = str(grade).strip()
+
+    standards = df[
+        (df['Subject'].str.strip() == subject) &
+        (df['Year'].astype(str) == year) &
+        (df['Grade'].astype(str) == grade)
+    ]['Standard'].unique().tolist()
+
+    return JsonResponse({'standards': standards})
 
 
