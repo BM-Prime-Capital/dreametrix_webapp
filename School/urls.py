@@ -45,10 +45,9 @@ urlpatterns = [
     path('library_parent_dashboard/', views.library_parent_dashboard, name='library_parent_dashboard'),
     path('parent_dashboard/', views.parent_dashboard, name='parent_dashboard'),
 
-
-    # Generate digital library
-    path('generate_pdf/', views.generate_pdf_view, name='generate_pdf'),
-    path('api/subjects/', views.get_subjects, name='get_subjects'),
-    path('api/years/<str:subject>/', views.get_years, name='get_years'),
-    path('api/grades/<str:subject>/<int:year>/', views.get_grades, name='get_grades'),
+    path('generate-pdf/', views.generate_pdf_view, name='generate_pdf'),
+    path('get-subjects/', views.get_subjects, name='get_subjects'),
+    path('get-years/<str:subject>/', views.get_years, name='get_years'),
+    path('get-grades/<str:subject>/<int:year>/', views.get_grades, name='get_grades'),
+    path('get-standards/<str:subject>/<int:year>/<int:grade>/', views.get_standards, name='get_standards'),
 ]
