@@ -90,6 +90,10 @@
     #message-container .ui.error.message {
         background-color: #F44336; /* Rouge */
     }
+    .back-to-gradebook {
+        margin-top: 20px;
+        font-size: 14px;
+    }
 
     </style>
 </head>
@@ -133,6 +137,9 @@
         <button type="submit">Generate Test</button>
     </form>
 
+    <div class="back-to-gradebook">
+        <a href="{% url 'gradebook_teacher_dashboard' %}" style="color: #0073b1;">Go back to Gradebook</a>
+    </div>
 </div>
 
 <script>
