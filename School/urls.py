@@ -50,4 +50,29 @@ urlpatterns = [
     path('get-years/<str:subject>/', views.get_years, name='get_years'),
     path('get-grades/<str:subject>/<int:year>/', views.get_grades, name='get_grades'),
     path('get-standards/<str:subject>/<int:year>/<int:grade>/', views.get_standards, name='get_standards'),
+
+    #GRADEBOOK FUNCTIONALITIES
+    path('gradebook_list_view/', views.gradebook_list_view, name='get_gradebooks'),  # Render template to list gradebook entries
+    path('create_gradebook/', views.create_gradebook_view, name='create_gradebook'),
+    # Render template to create a gradebook entry
+    path('gradebooks/<int:pk>/update/', views.update_gradebook_view, name='update_gradebook'),
+    # Render template to update a gradebook entry
+    path('gradebooks/<int:pk>/delete/', views.delete_gradebook_view, name='delete_gradebook'),
+    # Render template to delete a gradebook entry
+    path('gradebook_calculation/', views.gradebook_calculation, name='gradebook_calculation'),
+
+    #CLASSES FUNCTIONALITIES
+    path('classes/', views.class_list_view, name='get_classes'),  # Render template to list classes
+    path('classes/create/', views.create_class_view, name='create_class'),  # Render template to create a class
+    path('classes/<int:pk>/update/', views.update_class_view, name='update_class'),  # Render template to update a class
+    path('classes/<int:pk>/delete/', views.delete_class_view, name='delete_class'),  # Render template to delete a class
+
+    #ASSIGMENTS FONCTIONNALITIES
+    path('assignments/', views.assignment_list_view, name='get_assignments'),  # Render template to list assignments
+    path('assignments/create/', views.create_assignment_view, name='create_assignment'),
+    # Render template to create an assignment
+    path('assignments/<int:pk>/update/', views.update_assignment_view, name='update_assignment'),
+    # Render template to update an assignment
+    path('assignments/<int:pk>/delete/', views.delete_assignment_view, name='delete_assignment'),
+    # Render template to delete an assignment
 ]

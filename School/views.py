@@ -1,5 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.contrib import messages
+
+
+
 
 #SCHOOL_DASHBOARD
 def home_school_dashboard(request):
@@ -350,4 +353,171 @@ def get_standards(request, subject, year, grade):
 
     return JsonResponse({'standards': standards})
 
+def gradebook_calculation(request):
+    return render(request, 'dashboard/teacher/calculations.html')
 
+
+
+#CLASSES FUNCTIONNALITIES
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Class
+from .serializers import ClassSerializer
+
+def class_list_view(request):
+    """Render the template to list all classes."""
+    classes = Class.objects.all()
+    return render(request, 'classes/class_list.html', {'classes': classes})
+
+def create_class_view(request):
+    """Handle the creation of a new class."""
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        subject = request.POST.get('subject')
+        grade = request.POST.get('grade')
+        new_class = Class.objects.create(name=name, subject=subject, grade=grade)
+        return redirect('get_classes')  # Redirect to the class list after creation
+
+    return render(request, 'classes/create_class.html')
+
+def update_class_view(request, pk):
+    """Handle the update of an existing class."""
+    class_instance = get_object_or_404(Class, pk=pk)
+    if request.method == 'POST':
+        class_instance.name = request.POST.get('name')
+        class_instance.subject = request.POST.get('subject')
+        class_instance.grade = request.POST.get('grade')
+        class_instance.save()
+        return redirect('get_classes')  # Redirect to the class list after updating
+
+    return render(request, 'classes/update_class.html', {'class_instance': class_instance})
+
+def delete_class_view(request, pk):
+    """Handle the deletion of a class."""
+    class_instance = get_object_or_404(Class, pk=pk)
+    if request.method == 'POST':
+        class_instance.delete()
+        return redirect('get_classes')  # Redirect to the class list after deletion
+
+    return render(request, 'classes/delete_class.html', {'class_instance': class_instance})
+
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Assignment
+from .serializers import AssignmentSerializer
+
+def assignment_list_view(request):
+    """Render the template to list all assignments."""
+    assignments = Assignment.objects.all()
+    return render(request, 'assignments/assignment_list.html', {'assignments': assignments})
+
+def create_assignment_view(request):
+    """Handle the creation of a new assignment."""
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        assignment_type = request.POST.get('assignment_type')
+        average_score = request.POST.get('average_score')
+        general_feedback = request.POST.get('general_feedback') == 'on'
+        new_assignment = Assignment.objects.create(
+            title=title,
+            assignment_type=assignment_type,
+            average_score=average_score,
+            general_feedback=general_feedback
+        )
+        return redirect('get_assignments')  # Redirect to the assignment list after creation
+
+    return render(request, 'assignments/create_assignment.html')
+
+def update_assignment_view(request, pk):
+    """Handle the update of an existing assignment."""
+    assignment_instance = get_object_or_404(Assignment, pk=pk)
+    if request.method == 'POST':
+        assignment_instance.title = request.POST.get('title')
+        assignment_instance.assignment_type = request.POST.get('assignment_type')
+        assignment_instance.average_score = request.POST.get('average_score')
+        assignment_instance.general_feedback = request.POST.get('general_feedback') == 'on'
+        assignment_instance.save()
+        return redirect('get_assignments')  # Redirect to the assignment list after updating
+
+    return render(request, 'assignments/update_assignment.html', {'assignment_instance': assignment_instance})
+
+def delete_assignment_view(request, pk):
+    """Handle the deletion of an assignment."""
+    assignment_instance = get_object_or_404(Assignment, pk=pk)
+    if request.method == 'POST':
+        assignment_instance.delete()
+        return redirect('get_assignments')  # Redirect to the assignment list after deletion
+
+    return render(request, 'assignments/delete_assignment.html', {'assignment_instance': assignment_instance})
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Gradebook
+from .models import Student
+from .serializers import GradebookSerializer
+
+def gradebook_list_view(request):
+    """Render the template to list all gradebook entries."""
+    gradebooks = Gradebook.objects.all()
+    classes = Class.objects.all()  # Récupérer toutes les classes
+    return render(request, 'dashboard/teacher/gradebook.html', {'gradebooks': gradebooks, 'classes': classes})
+
+def create_gradebook_view(request):
+    """Handle the creation of a new gradebook entry."""
+    if request.method == 'POST':
+        class_instance_id = request.POST.get('class_instance')  # ID de la classe
+        student_id = request.POST.get('student')  # ID de l'élève
+        average = request.POST.get('average')  # Note moyenne
+        exam_feedback = request.FILES.get('exam_feedback')  # Fichier de feedback d'examen
+        test_feedback = request.FILES.get('test_feedback')  # Fichier de feedback de test
+        homework_feedback = request.FILES.get('homework_feedback')  # Fichier de feedback de devoir
+
+        class_instance = Class.objects.get(id=class_instance_id)
+        student = Student.objects.get(id=student_id)
+
+        new_gradebook = Gradebook.objects.create(
+            class_instance=class_instance,
+            student=student,
+            average=average,
+            exam_feedback=exam_feedback,
+            test_feedback=test_feedback,
+            homework_feedback=homework_feedback
+        )
+
+        return redirect('get_gradebooks')  # Redirection vers la liste des gradebooks après la création
+
+    # Récupérer tous les étudiants et classes
+    studentss = Student.objects.all()
+    classes = Class.objects.all()
+
+    if not studentss:
+        print("Aucun étudiant trouvé.")
+    else:
+        print(f"Étudiants trouvés : {[student.user.username for student in studentss]}")  #
+
+    return render(request, 'dashboard/teacher/add_new_item.html', {
+        'students': studentss,
+        'classes': classes,  # Si vous avez besoin de sélectionner une classe
+    })
+
+def update_gradebook_view(request, pk):
+    """Handle the update of an existing gradebook entry."""
+    gradebook_instance = get_object_or_404(Gradebook, pk=pk)
+    if request.method == 'POST':
+        gradebook_instance.student_name = request.POST.get('student_name')
+        gradebook_instance.assignment_title = request.POST.get('assignment_title')
+        gradebook_instance.score = request.POST.get('score')
+        gradebook_instance.feedback = request.POST.get('feedback')
+        gradebook_instance.save()
+        return redirect('get_gradebooks')  # Redirect to the gradebook list after updating
+
+    return render(request, 'dashboard/teacher/gradebook.html', {'gradebook_instance': gradebook_instance})
+
+def delete_gradebook_view(request, pk):
+    """Handle the deletion of a gradebook entry."""
+    gradebook_instance = get_object_or_404(Gradebook, pk=pk)
+    if request.method == 'POST':
+        gradebook_instance.delete()
+        return redirect('get_gradebooks')  # Redirect to the gradebook list after deletion
+
+    return render(request, 'dashboard/teacher/gradebook.html', {'gradebook_instance': gradebook_instance})

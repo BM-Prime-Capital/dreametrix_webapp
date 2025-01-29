@@ -827,3 +827,39 @@ input {
     background-color: rgb(62, 179, 227); /* Darker blue on hover for increment */
     color: white;
 }
+
+/* Add new item form */
+#add-item-form {
+    display: flex;
+    flex-direction: column; /* Change to vertical layout */
+    margin-top: 20px;
+    gap: 25px; /* Increased space between fields */
+}
+
+#add-item-form label {
+    font-weight: bold; /* Bold labels */
+    margin-bottom: 5px; /* Space below labels */
+}
+
+#add-item-form select,
+#add-item-form input[type="number"],
+#add-item-form input[type="file"] {
+    padding: 20px; /* Padding for input fields */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 4px; /* Rounded corners */
+    width: 100%; /* Full width */
+}
+
+#add-item-form button {
+    padding: 15px 20px; /* Padding for button */
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text */
+    border: none; /* No border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor */
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+#add-item-form button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
