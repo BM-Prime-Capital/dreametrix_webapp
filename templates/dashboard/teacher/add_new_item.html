@@ -1,0 +1,43 @@
+{% extends "_partials/dashboard_teacher/layaout.html" %}
+{% load static %}
+
+{% block content %}
+    <div class="gradebook-container">
+        <div class="content">
+            <div id="add-item-form">
+                <form method="POST" action="{% url 'create_gradebook' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <label for="class_instance">Class:</label>
+                    <select id="class_instance" name="class_instance" required>
+                        {% for class in classes %}
+                            <option value="{{ class.id }}">{{ class.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label for="student">Student:</label>
+                    <select id="student" name="student" required>
+                        <option value="">Select a student</option>
+                        {% for student in students %}
+                            <option value="{{ student.id }}">{{ student.user.username }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label for="average">Average:</label>
+                    <input type="number" id="average" name="average" placeholder="Average" required>
+
+                    <label for="exam_feedback">Exam Feedback:</label>
+                    <input type="file" id="exam_feedback" name="exam_feedback" required>
+
+                    <label for="test_feedback">Test Feedback:</label>
+                    <input type="file" id="test_feedback" name="test_feedback" required>
+
+                    <label for="homework_feedback">Homework Feedback:</label>
+                    <input type="file" id="homework_feedback" name="homework_feedback" required>
+
+                    <button type="submit" class="button button-apply">APPLY</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

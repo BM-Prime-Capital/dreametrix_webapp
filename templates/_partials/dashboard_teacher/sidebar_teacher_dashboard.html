@@ -14,7 +14,7 @@
             </button>
         </a>
 
-        <a href="{% url 'gradebook_teacher_dashboard' %}">
+        <a href="{% url 'get_gradebooks' %}">
             <button class="btn {% if request.resolver_match.url_name == 'gradebook_teacher_dashboard' %}active{% endif %}">
                 <i class="bi bi-clipboard-data orange"></i> GRADEBOOK
             </button>

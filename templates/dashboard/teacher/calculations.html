@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradebook Calculations</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard_teacher/gradebook_calculations.css' %}">
+</head>
+<body>
+    <div class="content">
+        <h2>Calculations</h2>
+
+        <div class="header-row">
+            <div class="percent">%</div>
+            <div class="gauge">◐</div>
+        </div>
+
+        <div class="calculation-row">
+            <div class="range">100 - 90</div>
+            <div class="grade-container">
+                <span class="grade grade-a">A</span>
+                <span class="delete">🗑️</span>
+            </div>
+        </div>
+
+        <div class="calculation-row">
+            <div class="range">89 - 80</div>
+            <div class="grade-container">
+                <span class="grade grade-b">B</span>
+                <span class="delete">🗑️</span>
+            </div>
+        </div>
+
+        <div class="calculation-row">
+            <div class="range">79 - 70</div>
+            <div class="grade-container">
+                <span class="grade grade-c">C</span>
+                <span class="delete">🗑️</span>
+            </div>
+        </div>
+
+        <div class="calculation-row">
+            <div class="range">69 - 55</div>
+            <div class="grade-container">
+                <span class="grade grade-d">D</span>
+                <span class="delete">🗑️</span>
+            </div>
+        </div>
+
+        <div class="calculation-row">
+            <div class="range">54 - 0</div>
+            <div class="grade-container">
+                <span class="grade grade-f">F</span>
+                <span class="delete">🗑️</span>
+            </div>
+        </div>
+
+        <div class="calculation-row">
+            <div class="range">-- - --</div>
+            <div class="grade-container">
+                <span class="grade grade-unknown">?</span>
+                <span class="delete">🗑️</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <button class="cancel-btn">Cancel</button>
+            <button class="apply-btn">APPLY</button>
+        </div>
+    </div>
+</body>
+</html>
