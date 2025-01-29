@@ -7,13 +7,22 @@
     <div class="gradebook-container">
         <div class="content">
             <div class="content-header">
+<<<<<<< HEAD
                 <div class="button-group" id="button-group">
                     <a href="{% url 'create_gradebook' %}">
+=======
+                <div class="button-group">
+                    <a href="">
+>>>>>>> cc7ae6b (henock branch initialized)
                         <button class="button button-add-new-item">
                             <i class="bi bi-clipboard-data white"></i> <span>Add New Item</span>
                         </button>
                     </a>
+<<<<<<< HEAD
                     <a href="{% url 'gradebook_calculation' %}">
+=======
+                    <a href="">
+>>>>>>> cc7ae6b (henock branch initialized)
                         <button class="button button-calculations">
                             <i class="bi bi-gear white"></i> <span>Calculations</span>
                         </button>
@@ -24,6 +33,7 @@
                             <span>Layout</span>
                         </button>
                     </a>
+<<<<<<< HEAD
                 </div>
                 <p>Filter by Class here</p>
                 <select class="dropdown">
@@ -79,6 +89,92 @@
                     </tbody>
                 </table>
             </div>
+=======
+                    <!--
+                    <a href="">
+                        <button class="button button-layout">
+                            <i class="bi bi-layout-text-sidebar white"></i>
+                            <span>Digital library</span>
+                        </button>
+                    </a>
+                    -->
+                    <a href="{% url 'generate_pdf' %}">
+                        <button class="button button-print">
+                            <i class="bi bi-printer white"></i>
+                            <span>Digital library</span>
+                        </button>
+                    </a>
+                </div>
+                <select class="dropdown">
+                    <option>Class 5N</option>
+                    <option>Class 5</option>
+                    <option>Class 6</option>
+                </select>
+                <a href="">
+                        <button class="button button-fa-sliders">
+                            <i class="bi bi-sliders noir"></i>
+                        </button>
+                    </a>
+            </div>
+
+            <div class="table-container">
+  <table class="gradebook-table">
+    <thead>
+      <tr class="header-row">
+        <th>STUDENT</th>
+        <th>AVERAGE</th>
+        <th>EXAM (3)</th>
+        <th>TESTS (2)</th>
+        <th>ASSIGNMENTS (14)</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr class="colored-row">
+        <td>John, Smith</td>
+        <td>100% (A)</td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+      </tr>
+      <tr class="white-row">
+        <td>Rae, Martha</td>
+        <td>65% (C)</td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+      </tr>
+      <tr class="colored-row">
+        <td>Rae, Martha</td>
+        <td>65% (C)</td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+      </tr>
+    <tr class="white-row">
+        <td>Rae, Martha</td>
+        <td>65% (C)</td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+      </tr>
+      <tr class="colored-row">
+        <td>Rae, Martha</td>
+        <td>65% (C)</td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+      </tr>
+    <tr class="white-row">
+        <td>Rae, Martha</td>
+        <td>65% (C)</td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+>>>>>>> cc7ae6b (henock branch initialized)
         </div>
     </div>
 {% endblock %}
