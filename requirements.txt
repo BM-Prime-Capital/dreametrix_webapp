@@ -29,4 +29,4 @@ tesseract
 PyMuPDF
 Pillow
 openpyxl
-rest_framework
+djangorestframework
