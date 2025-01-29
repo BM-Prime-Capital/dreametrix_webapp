@@ -1,40 +1,101 @@
-{% extends "_partials/base.html" %}
+{% extends "_partials/dashboard_teacher/layaout.html" %}
 {% load static %}
 
 {% block content %}
-    <div class="form-container">
-        <img src="{% static 'img/logo.png' %}" alt="logo" style="width: 145px; margin-bottom: 15px;">
-
-        {% include '_partials/messages.html' %}
-        <p>Login as a {{ user_type|title }}</p> <!-- Display the selected user type -->
-        <form method="post" action="{% url 'login' %}?user_type={{ user_type }}">
-            {% csrf_token %}
-            <div class="ui left icon input" style="border-color: #0073b1;">
-                <input type="text" name="identifier" placeholder="Email or Username" required>
-                <i class="envelope icon" style="color: #0073b1;"></i>
-            </div>
-            <div class="ui left icon input" style="border-color: #0073b1;">
-                <input type="password" name="password" placeholder="Password" required>
-                <i class="lock icon" style="color: #0073b1;"></i>
-            </div>
-
-            <div style="margin-bottom: 10px; text-align: right;">
-                <a href="{% url 'password_reset' %}"
-                   style="color: #007351; text-decoration: none;"
-                   onmouseover="this.style.color='#005582';"
-                   onmouseout="this.style.color='#0073b1';">
-                   Forgot password?
+    <!-- Assistance Section -->
+    <h4 class="text-color-pink">GRADEBOOK</h4>
+    <div class="gradebook-container">
+        <div class="content">
+            <div class="content-header">
+                <div class="button-group" id="button-group">
+                    <button class="button button-add-new-item" onclick="toggleForm()">
+                        <i class="bi bi-clipboard-data white"></i> <span>Add New Item</span>
+                    </button>
+                    <a href="{% url 'gradebook_calculation' %}">
+                        <button class="button button-calculations">
+                            <i class="bi bi-gear white"></i> <span>Calculations</span>
+                        </button>
+                    </a>
+                    <a href="">
+                        <button class="button button-layout">
+                            <i class="bi bi-layout-text-sidebar white"></i>
+                            <span>Layout</span>
+                        </button>
+                    </a>
+                    <a href="{% url 'generate_pdf' %}">
+                        <button class="button button-print">
+                            <i class="bi bi-printer white"></i>
+                            <span>Digital library</span>
+                        </button>
+                    </a>
+                </div>
+                <select class="dropdown">
+                    {% for class in classes %}
+                        <option value="{{ class.id }}">{{ class.name }}</option>
+                    {% endfor %}
+                </select>
+                <a href="">
+                    <button class="button button-fa-sliders">
+                        <i class="bi bi-sliders noir"></i>
+                    </button>
                 </a>
             </div>
 
-            <button type="submit" class="ui button" style="background-color: #0073b1; color: white;">Login</button>
-        </form>
+            <!-- Formulaire d'ajout -->
+            <div id="add-item-form" style="display: flex; margin-top: 20px;">
+                <form method="POST" action="{% url 'create_gradebook' %}" style="display: flex; align-items: center; gap: 10px;">
+                    {% csrf_token %}
+                    <input type="text" id="student_name" name="student_name" placeholder="Student Name" required style="flex: 1;">
+                    <input type="text" id="assignment_title" name="assignment_title" placeholder="Assignment Title" required style="flex: 1;">
+                    <input type="number" id="score" name="score" placeholder="Score" required style="flex: 1;">
+                    <textarea id="feedback" name="feedback" placeholder="Feedback" style="flex: 1; resize: none; height: 40px;"></textarea>
+                    <button type="submit" class="button button-apply">APPLY</button>
+                </form>
+            </div>
 
-    <!-- Show register link only if the user type is not school_admin -->
-    {% if user_type != 'school_admin' %}
-        <div class="register-link">
-            Not registered yet? <a href="{% url 'register_user' user_type %}" style="color: #0073b1;">Sign up as a {{ user_type|title }} here</a>.
+            <div class="table-container">
+                <table class="gradebook-table">
+                    <thead>
+                        <tr class="header-row">
+                            <th>STUDENT</th>
+                            <th>AVERAGE</th>
+                            <th>EXAM (3)</th>
+                            <th>TESTS (2)</th>
+                            <th>ASSIGNMENTS (14)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for gradebook in gradebooks %}
+                            <tr class="{% if forloop.counter|divisibleby:2 %}white-row{% else %}colored-row{% endif %}">
+                                <td>{{ gradebook.student.user.username }}</td>
+                                <td>{{ gradebook.average }}%</td>
+                                <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+                                <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+                                <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5">Aucune entrée de gradebook trouvée.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    {% endif %}
     </div>
+
+    <script>
+        function toggleForm() {
+            var buttonGroup = document.getElementById('button-group');
+            var form = document.getElementById('add-item-form');
+
+            if (form.style.display === 'none') {
+                buttonGroup.style.display = 'none'; // Masquer les boutons
+                form.style.display = 'flex'; // Afficher le formulaire
+            } else {
+                buttonGroup.style.display = 'flex'; // Afficher les boutons
+                form.style.display = 'none'; // Masquer le formulaire
+            }
+        }
+    </script>
 {% endblock %}
