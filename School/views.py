@@ -106,8 +106,6 @@ def library_parent_dashboard(request):
 
 
 #TEACHER_DASHBOARD
-def home_teacher_dashboard(request):
-   return render(request, 'dashboard/teacher/home.html')
 
 def update_profile_photo(request):
     if request.method == "POST":
@@ -357,27 +355,57 @@ def gradebook_calculation(request):
     return render(request, 'dashboard/teacher/calculations.html')
 
 
-
-#CLASSES FUNCTIONNALITIES
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Class
-from .serializers import ClassSerializer
+from django.shortcuts import render, redirect
+from django.http import HttpResponseBadRequest
+from .models import Class, Student
 
 def class_list_view(request):
     """Render the template to list all classes."""
     classes = Class.objects.all()
-    return render(request, 'classes/class_list.html', {'classes': classes})
+    code_teacher = {
+        'username': request.user.code,
+    }
+
+    return render(request, 'dashboard/teacher/home.html', {'classes': classes, 'code_teacher': code_teacher})
+
 
 def create_class_view(request):
     """Handle the creation of a new class."""
     if request.method == 'POST':
+        student_id = request.POST.get('student')  # ID of the student
         name = request.POST.get('name')
         subject = request.POST.get('subject')
         grade = request.POST.get('grade')
-        new_class = Class.objects.create(name=name, subject=subject, grade=grade)
-        return redirect('get_classes')  # Redirect to the class list after creation
 
-    return render(request, 'classes/create_class.html')
+        # Validate inputs
+        if not name or not subject or not grade or not student_id:
+            return HttpResponseBadRequest("All fields are required.")
+
+        try:
+            # Create the new class
+            new_class = Class.objects.create(name=name, subject=subject, grade=grade)
+
+            # Fetch and associate the student with the new class
+            student = Student.objects.get(id=student_id)
+            new_class.students.add(student)  # Associate the student with the new class
+
+            return redirect('get_classes')  # Redirect to the class list after creation
+        except Student.DoesNotExist:
+            return HttpResponseBadRequest("Student not found.")
+        except Exception as e:
+            return HttpResponseBadRequest(f"An error occurred: {e}")
+
+    # Fetching all students for the dropdown
+    students = Student.objects.all()
+
+    if not students:
+        print("No students found.")
+    else:
+        print(f"Students found: {[student.user.username for student in students]}")
+
+    return render(request, 'dashboard/teacher/add_new_item_classes.html', {
+        'students': students,  # Pass the list of students to the template
+    })
 
 def update_class_view(request, pk):
     """Handle the update of an existing class."""
