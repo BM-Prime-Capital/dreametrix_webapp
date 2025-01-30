@@ -11,7 +11,6 @@ urlpatterns = [
     path('school_dashboard/', views.school_dashboard, name='school_dashboard'),
 
     #TEACHER DASHBOARD
-    path('home_teacher_dashboard/', views.home_teacher_dashboard, name='home_teacher_dashboard'),
     path('assignments_teacher_dashboard/', views.assignments_teacher_dashboard, name='assignments_teacher_dashboard'),
     path('attendance_teacher_dashboard/', views.attendance_teacher_dashboard, name='attendance_teacher_dashboard'),
     path('character_teacher_dashboard/', views.character_teacher_dashboard, name='character_teacher_dashboard'),
