@@ -8,13 +8,6 @@
                 <form method="POST" action="{% url 'create_gradebook' %}" enctype="multipart/form-data">
                     {% csrf_token %}
 
-                    <label for="class_instance">Class:</label>
-                    <select id="class_instance" name="class_instance" required>
-                        {% for class in classes %}
-                            <option value="{{ class.id }}">{{ class.name }}</option>
-                        {% endfor %}
-                    </select>
-
                     <label for="student">Student:</label>
                     <select id="student" name="student" required>
                         <option value="">Select a student</option>
