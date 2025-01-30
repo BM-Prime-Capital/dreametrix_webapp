@@ -58,7 +58,20 @@
                         {% for gradebook in gradebooks %}
                             <tr class="{% if forloop.counter|divisibleby:2 %}white-row{% else %}colored-row{% endif %}">
                                 <td>{{ gradebook.student.user.username }}</td>
-                                <td>{{ gradebook.average }}%</td>
+                                <td>
+                                    {{ gradebook.average }}%
+                                    {% if gradebook.average >= 90 %}
+                                        (A)
+                                    {% elif gradebook.average >= 80 %}
+                                        (B)
+                                    {% elif gradebook.average >= 70 %}
+                                        (C)
+                                    {% elif gradebook.average >= 55 %}
+                                        (D)
+                                    {% else %}
+                                        (F)
+                                    {% endif %}
+                                </td>
                                 <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
                                 <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
                                 <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
