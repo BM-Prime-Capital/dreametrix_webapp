@@ -2,69 +2,54 @@
 {% load static %}
 
 {% block content %}
-    <h4 class="text-color-pink">HOME</h4>
-    <div class="gradebook-container">
-        <div class="content">
-
-            <div class="table-container">
-  <table class="gradebook-table">
-    <thead>
-      <tr class="header-row">
-        <th>CLASS</th>
-        <th>SUBJECT</th>
-        <th>GRADE</th>
-        <th>VIEW</th>
-        <th>EDIT</th>
-        <th>SEARCH</th>
-        <th>DELETE</th>
-      </tr>
-    </thead>
-    <tbody>
-    <tr class="colored-row">
-        <td>John, Smith</td>
-        <td>100% (A)</td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-      </tr>
-      <tr class="white-row">
-        <td>Rae, Martha</td>
-        <td>65% (C)</td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-      </tr>
-      <tr class="colored-row">
-        <td>Rae, Martha</td>
-        <td>65% (C)</td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-      </tr>
-    <tr class="white-row">
-        <td>Rae, Martha</td>
-        <td>65% (C)</td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-      </tr>
-      <tr class="colored-row">
-        <td>Rae, Martha</td>
-        <td>65% (C)</td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-      </tr>
-    <tr class="white-row">
-        <td>Rae, Martha</td>
-        <td>65% (C)</td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-        <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-      </tr>
-    </tbody>
-  </table>
+<h4 class="text-color-pink">TEACHER'S CODE:
+    <span>
+        {% for key, value in code_teacher.items %}
+            {{ value }}  <!-- This will only display the value -->
+        {% endfor %}
+    </span>
+</h4>
+<div class="content-header">
+    <div class="button-group" id="button-group">
+        <a href="{% url 'create_class' %}">
+            <button class="button button-add-new-item">
+                <i class="bi bi-clipboard-data white"></i> <span>Add New Item</span>
+            </button>
+        </a>
+    </div>
 </div>
+<div class="gradebook-container">
+    <div class="content">
+        <div class="table-container">
+            <table class="gradebook-table">
+                <thead>
+                    <tr class="header-row">
+                        <th>CLASS</th>
+                        <th>SUBJECT</th>
+                        <th>GRADE</th>
+                        <th>STUDENT</th>
+                        <th>EDIT</th>
+                        <th>DELETE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for class in classes %}
+                    <tr class="colored-row">
+                        <td>{{ class.name }}</td>
+                        <td>{{ class.subject }}</td>
+                        <td>{{ class.grade }}%</td>
+                        <td>
+                            {% for student in class.students.all %}
+                                <span class="view-link">{{ student.name }}</span><i class="bi bi-mic-fill red"></i>
+                            {% endfor %}
+                        </td>
+                        <td><span class="view-link">Edit</span><i class="bi bi-pencil-fill"></i></td>
+                        <td><span class="view-link">Delete</span><i class="bi bi-trash-fill"></i></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 {% endblock %}
