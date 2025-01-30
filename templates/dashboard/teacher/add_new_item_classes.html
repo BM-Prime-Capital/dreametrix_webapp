@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Class</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
+    <style>
+        .classes-container {
+            padding: 20px;
+            background-color: #f0f4f8; /* Light background for contrast */
+        }
+
+        .button-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-field {
+            margin-right: 10px;
+        }
+
+        .input-field input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .button {
+            background-color: #e0e0e0; /* Default button color */
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+
+        .button i {
+            margin-right: 5px; /* Space between icon and text */
+        }
+
+        .button.active {
+            background-color: #007bff; /* Active button color */
+            color: white;
+        }
+
+        .button.cancel {
+            background-color: #f44336; /* Red for cancel */
+            color: white;
+        }
+
+        .button.apply {
+            background-color: #28a745; /* Green for apply */
+            color: white;
+        }
+
+        .select-student {
+            margin-right: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="classes-container">
+    <form method="POST" action="{% url 'create_class' %}">
+        {% csrf_token %}
+        <div class="button-group">
+            <button class="button active">
+                <i class="bi bi-plus-circle"></i> Class
+            </button>
+            <div class="input-field">
+                <input type="text" name="name" placeholder="Class Name" required />
+            </div>
+            <div class="input-field">
+                <input type="text" name="subject" placeholder="Subject" required />
+            </div>
+            <div class="input-field">
+                <input type="number" name="grade" placeholder="Grade" required />
+            </div>
+            <select class="select-student" name="student" required>
+                <option value="" disabled selected>Select Student</option>
+                {% for student in students %}
+                    <option value="{{ student.id }}">{{ student.user.username }}</option>
+                {% endfor %}
+            </select>
+            <button type="button" class="button cancel" onclick="window.history.back();">
+                Cancel
+            </button>
+            <button type="submit" class="button apply">
+                Apply
+            </button>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
