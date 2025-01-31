@@ -104,5 +104,11 @@
 >>>>>>> cc7ae6b (henock branch initialized)
             </button>
         </a>
+
+        <a href="{% url 'ai_chat_teacher_dashboard' %}">
+            <button class="btn {% if request.resolver_match.url_name == 'ai_chat_teacher_dashboard' %}active{% endif %}">
+                <i class="bi bi-book blue"></i> AI Chat
+            </button>
+        </a>
     </div>
 </div>

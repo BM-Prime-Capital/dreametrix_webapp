@@ -194,6 +194,9 @@ def gradebook_teacher_dashboard(request):
 def polis_teacher_dashboard(request):
     return render(request, 'dashboard/teacher/polis.html')
 
+def ai_chat_teacher_dashboard(request):
+    return render(request, 'dashboard/teacher/ai_chat.html')
+
 def reports_teacher_dashboard(request):
     return render(request, 'dashboard/teacher/reports.html')
 
