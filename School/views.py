@@ -429,7 +429,7 @@ def delete_class_view(request, pk):
         class_instance.delete()
         return redirect('get_classes')  # Redirect to the class list after deletion
 
-    return render(request, 'classes/delete_class.html', {'class_instance': class_instance})
+    return render(request, 'dashboard/teacher/add_new_item_classes.html', {'class_instance': class_instance})
 
 
 
