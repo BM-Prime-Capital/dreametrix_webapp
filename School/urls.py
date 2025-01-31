@@ -17,6 +17,7 @@ urlpatterns = [
     path('communicate_teacher_dashboard/', views.communicate_teacher_dashboard, name='communicate_teacher_dashboard'),
     path('gradebook_teacher_dashboard/', views.gradebook_teacher_dashboard, name='gradebook_teacher_dashboard'),
     path('polis_teacher_dashboard/', views.polis_teacher_dashboard, name='polis_teacher_dashboard'),
+    path('ai_chat_teacher_dashboard/', views.ai_chat_teacher_dashboard, name='ai_chat_teacher_dashboard'),
     path('reports_teacher_dashboard/', views.reports_teacher_dashboard, name='reports_teacher_dashboard'),
     path('seating_teacher_dashboard/', views.seating_teacher_dashboard, name='seating_teacher_dashboard'),
     path('teach_teacher_dashboard/', views.teach_teacher_dashboard, name='teach_teacher_dashboard'),
