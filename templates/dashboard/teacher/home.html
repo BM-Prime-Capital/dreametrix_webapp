@@ -71,8 +71,31 @@
                         <td>{{ class.name }}</td>
                         <td>{{ class.subject }}</td>
                         <td>{{ class.grade }}</td>
-                        <td><span class="view-link">Edit</span><i class="bi bi-pencil-fill"></i></td>
-                        <td><span class="view-link">Delete</span><i class="bi bi-trash-fill"></i></td>
+                        <td>
+                            <button type="button" onclick='openEditPopup({
+                                name: "{{ class.name|escapejs }}",
+                                subject: "{{ class.subject|escapejs }}",
+                                grade: "{{ class.grade|escapejs }}",
+                                updateUrl: "{% url 'update_class' class.pk %}"
+                            })' class="view-link" style="background:none; border:none; cursor:pointer; padding:0;">
+                                Edit
+                            </button>
+                            <i class="bi bi-pencil-fill" onclick='openEditPopup({
+                                name: "{{ class.name|escapejs }}",
+                                subject: "{{ class.subject|escapejs }}",
+                                grade: "{{ class.grade|escapejs }}",
+                                updateUrl: "{% url 'update_class' class.pk %}"
+                            })' style="cursor:pointer;"></i>
+                        </td>
+                        <td>
+                            <form action="{% url 'delete_class' class.pk %}" method="POST" style="display:inline;" onsubmit="return confirmDelete();">
+                                {% csrf_token %}
+                                <button type="submit" style="background:none; border:none; color:red; cursor:pointer; padding:0;">
+                                    <span class="view-link">Delete</span>
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -81,35 +104,79 @@
     </div>
 </div>
 
+<div id="edit-popup" class="popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000;">
+    <div class="popup-content" style="background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+        <h5>Edit Class</h5>
+        <form id="edit-form" method="POST">
+            {% csrf_token %}
+            <div>
+                <label for="edit-name">Class Name:</label>
+                <input type="text" id="edit-name" name="name" required>
+            </div>
+            <div>
+                <label for="edit-subject">Subject:</label>
+                <input type="text" id="edit-subject" name="subject" required>
+            </div>
+            <div>
+                <label for="edit-grade">Grade:</label>
+                <input type="text" id="edit-grade" name="grade" required>
+            </div>
+            <div>
+                <button type="button" id="save-changes" class="button">Save Changes</button>
+                <button type="button" id="cancel-edit" class="button">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-function toggleFilters(event) {
-    event.preventDefault(); // Empêche le comportement par défaut du lien
-    event.stopPropagation(); // Empêche la fermeture immédiate
-    const filterContainer = document.getElementById('filter-container');
-    filterContainer.style.display = filterContainer.style.display === 'none' ? 'block' : 'none';
-}
-
-function applyFilters() {
-    const classFilter = document.getElementById('class-filter').value;
-    const subjectFilter = document.getElementById('subject-filter').value;
-    const gradeFilter = document.getElementById('grade-filter').value;
-
-    // Construire l'URL avec les paramètres de filtre
-    let url = '/classes/?'; // Assurez-vous que cela correspond à votre URL
-    if (classFilter) url += `class=${classFilter}&`;
-    if (subjectFilter) url += `subject=${subjectFilter}&`;
-    if (gradeFilter) url += `grade=${gradeFilter}&`;
-
-    window.location.href = url; // Redirige vers l'URL avec les filtres
-}
-
-// Ferme le popup si l'utilisateur clique en dehors
-window.onclick = function(event) {
-    const filterContainer = document.getElementById('filter-container');
-    if (event.target !== filterContainer && !filterContainer.contains(event.target)) {
-        filterContainer.style.display = 'none';
+    function confirmDelete() {
+        return confirm('Are you sure you want to delete this class?');
     }
-}
+
+    function toggleFilters(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const filterContainer = document.getElementById('filter-container');
+        filterContainer.style.display = filterContainer.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function applyFilters() {
+        const classFilter = document.getElementById('class-filter').value;
+        const subjectFilter = document.getElementById('subject-filter').value;
+        const gradeFilter = document.getElementById('grade-filter').value;
+
+        let url = '/classes/?';
+        if (classFilter) url += `class=${classFilter}&`;
+        if (subjectFilter) url += `subject=${subjectFilter}&`;
+        if (gradeFilter) url += `grade=${gradeFilter}&`;
+
+        window.location.href = url;
+    }
+
+    window.onclick = function(event) {
+        const filterContainer = document.getElementById('filter-container');
+        if (event.target !== filterContainer && !filterContainer.contains(event.target)) {
+            filterContainer.style.display = 'none';
+        }
+    }
+
+    function openEditPopup(classData) {
+        document.getElementById('edit-name').value = classData.name;
+        document.getElementById('edit-subject').value = classData.subject;
+        document.getElementById('edit-grade').value = classData.grade;
+
+        document.getElementById('edit-popup').style.display = 'flex';
+
+        document.getElementById('save-changes').onclick = function() {
+            document.getElementById('edit-form').action = classData.updateUrl;
+            document.getElementById('edit-form').submit();
+        };
+
+        document.getElementById('cancel-edit').onclick = function() {
+            document.getElementById('edit-popup').style.display = 'none';
+        };
+    }
 </script>
 
 {% endblock %}
