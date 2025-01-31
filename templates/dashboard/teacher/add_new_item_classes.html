@@ -85,17 +85,11 @@
             <div class="input-field">
                 <input type="number" name="grade" placeholder="Grade" required />
             </div>
-            <select class="select-student" name="student" required>
-                <option value="" disabled selected>Select Student</option>
-                {% for student in students %}
-                    <option value="{{ student.id }}">{{ student.user.username }}</option>
-                {% endfor %}
-            </select>
             <button type="button" class="button cancel" onclick="window.history.back();">
                 Cancel
             </button>
             <button type="submit" class="button apply">
-                Apply
+                Create Class
             </button>
         </div>
     </form>

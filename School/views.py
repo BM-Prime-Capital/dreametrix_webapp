@@ -360,34 +360,47 @@ from django.http import HttpResponseBadRequest
 from .models import Class, Student
 
 def class_list_view(request):
-    """Render the template to list all classes."""
-    classes = Class.objects.all()
-    code_teacher = {
-        'username': request.user.code,
-    }
+    """Affiche la liste des classes, avec option de filtrage."""
+    classes = Class.objects.all()  # Récupérer toutes les classes
 
-    return render(request, 'dashboard/teacher/home.html', {'classes': classes, 'code_teacher': code_teacher})
+    # Récupérer les filtres de la requête
+    class_filter = request.GET.get('class')
+    subject_filter = request.GET.get('subject')
+    grade_filter = request.GET.get('grade')
 
+    if class_filter:
+        classes = classes.filter(name=class_filter)
+    if subject_filter:
+        classes = classes.filter(subject=subject_filter)
+    if grade_filter:
+        classes = classes.filter(grade=grade_filter)
+
+    # Récupérer les listes uniques pour les filtres
+    unique_classes = Class.objects.values_list('name', flat=True).distinct()
+    unique_subjects = Class.objects.values_list('subject', flat=True).distinct()
+    unique_grades = Class.objects.values_list('grade', flat=True).distinct()
+
+    return render(request, 'dashboard/teacher/home.html', {
+        'classes': classes,
+        'unique_classes': unique_classes,
+        'unique_subjects': unique_subjects,
+        'unique_grades': unique_grades,
+    })
 
 def create_class_view(request):
     """Handle the creation of a new class."""
     if request.method == 'POST':
-        student_id = request.POST.get('student')  # ID of the student
         name = request.POST.get('name')
         subject = request.POST.get('subject')
         grade = request.POST.get('grade')
 
         # Validate inputs
-        if not name or not subject or not grade or not student_id:
+        if not name or not subject or not grade:
             return HttpResponseBadRequest("All fields are required.")
 
         try:
             # Create the new class
             new_class = Class.objects.create(name=name, subject=subject, grade=grade)
-
-            # Fetch and associate the student with the new class
-            student = Student.objects.get(id=student_id)
-            new_class.students.add(student)  # Associate the student with the new class
 
             return redirect('get_classes')  # Redirect to the class list after creation
         except Student.DoesNotExist:
@@ -395,17 +408,7 @@ def create_class_view(request):
         except Exception as e:
             return HttpResponseBadRequest(f"An error occurred: {e}")
 
-    # Fetching all students for the dropdown
-    students = Student.objects.all()
-
-    if not students:
-        print("No students found.")
-    else:
-        print(f"Students found: {[student.user.username for student in students]}")
-
-    return render(request, 'dashboard/teacher/add_new_item_classes.html', {
-        'students': students,  # Pass the list of students to the template
-    })
+    return render(request, 'dashboard/teacher/add_new_item_classes.html')
 
 def update_class_view(request, pk):
     """Handle the update of an existing class."""

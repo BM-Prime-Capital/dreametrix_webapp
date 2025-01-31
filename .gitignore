@@ -67,4 +67,3 @@ db.sqlite3
 *.orig
 *.rej
 test_generated_today.pdf
-feedback/

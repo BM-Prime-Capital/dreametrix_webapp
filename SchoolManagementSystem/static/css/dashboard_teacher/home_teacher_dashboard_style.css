@@ -33,12 +33,12 @@ button {
     border: 0 solid transparent;
     height: 50px;
     width: 200px;
-    text-align: left;
+    text-align: right;
     display: flex;
     flex-direction: row;
     gap: 10px;
     align-items: center;
-    background-color: white;
+    background-color: rgb(245,245,245);
     cursor: pointer;
 }
 

@@ -16,33 +16,61 @@
                 <i class="bi bi-clipboard-data white"></i> <span>Add New Item</span>
             </button>
         </a>
+
+        All classes
+        <a href="#" onclick="toggleFilters(event)">
+            <button class="button button-fa-sliders">
+                <i class="bi bi-sliders noir"></i>
+            </button>
+        </a>
     </div>
 </div>
+
+<div id="filter-container" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9; z-index: 1000;">
+    <h5>Filter by</h5>
+    <select id="class-filter">
+        <option value="" disabled selected>Class</option>
+        {% for class in unique_classes %}
+            <option value="{{ class }}">{{ class }}</option>
+        {% endfor %}
+    </select>
+    <select id="subject-filter">
+        <option value="" disabled selected>Subject</option>
+        {% for subject in unique_subjects %}
+            <option value="{{ subject }}">{{ subject }}</option>
+        {% endfor %}
+    </select>
+    <select id="grade-filter">
+        <option value="" disabled selected>Grade</option>
+        {% for grade in unique_grades %}
+            <option value="{{ grade }}">{{ grade }}</option>
+        {% endfor %}
+    </select>
+    <div style="margin-top: 15px; display: flex; flex-direction: column;">
+        <button onclick="applyFilters()" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">APPLY</button>
+        <button onclick="toggleFilters(event)" style="margin-top: 10px; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+    </div>
+</div>
+
 <div class="gradebook-container">
     <div class="content">
         <div class="table-container">
             <table class="gradebook-table">
                 <thead>
                     <tr class="header-row">
-                        <th>CLASS</th>
-                        <th>SUBJECT</th>
-                        <th>GRADE</th>
-                        <th>STUDENT</th>
+                        <th>CLASSES</th>
+                        <th>SUBJECTS</th>
+                        <th>GRADES</th>
                         <th>EDIT</th>
                         <th>DELETE</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for class in classes %}
-                    <tr class="colored-row">
+                    <tr class="{% if forloop.counter|divisibleby:2 %}white-row{% else %}colored-row{% endif %}">
                         <td>{{ class.name }}</td>
                         <td>{{ class.subject }}</td>
-                        <td>{{ class.grade }}%</td>
-                        <td>
-                            {% for student in class.students.all %}
-                                <span class="view-link">{{ student.name }}</span><i class="bi bi-mic-fill red"></i>
-                            {% endfor %}
-                        </td>
+                        <td>{{ class.grade }}</td>
                         <td><span class="view-link">Edit</span><i class="bi bi-pencil-fill"></i></td>
                         <td><span class="view-link">Delete</span><i class="bi bi-trash-fill"></i></td>
                     </tr>
@@ -52,4 +80,36 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleFilters(event) {
+    event.preventDefault(); // Empêche le comportement par défaut du lien
+    event.stopPropagation(); // Empêche la fermeture immédiate
+    const filterContainer = document.getElementById('filter-container');
+    filterContainer.style.display = filterContainer.style.display === 'none' ? 'block' : 'none';
+}
+
+function applyFilters() {
+    const classFilter = document.getElementById('class-filter').value;
+    const subjectFilter = document.getElementById('subject-filter').value;
+    const gradeFilter = document.getElementById('grade-filter').value;
+
+    // Construire l'URL avec les paramètres de filtre
+    let url = '/classes/?'; // Assurez-vous que cela correspond à votre URL
+    if (classFilter) url += `class=${classFilter}&`;
+    if (subjectFilter) url += `subject=${subjectFilter}&`;
+    if (gradeFilter) url += `grade=${gradeFilter}&`;
+
+    window.location.href = url; // Redirige vers l'URL avec les filtres
+}
+
+// Ferme le popup si l'utilisateur clique en dehors
+window.onclick = function(event) {
+    const filterContainer = document.getElementById('filter-container');
+    if (event.target !== filterContainer && !filterContainer.contains(event.target)) {
+        filterContainer.style.display = 'none';
+    }
+}
+</script>
+
 {% endblock %}
