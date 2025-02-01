@@ -1,100 +1,402 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot DreaMetrix</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .chatbox {
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            background: #f4f4f4;
-        }
-        .message {
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-        .user-message {
-            background: #d1ecf1;
-            align-self: flex-end;
-        }
-        .bot-message {
-            background: #c3e6cb;
-        }
-        .btn-send {
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h3 class="text-center text-primary">Chatbot DreaMetrix</h3>
-        <div class="chatbox" id="chatbox">
-            <p class="text-muted text-center">Commencez à poser vos questions.</p>
-        </div>
-        
-        <form id="chatForm" class="mt-3">
-            <div class="mb-3">
-                <input type="text" id="userMessage" class="form-control" placeholder="Tapez votre message..." required>
+{% extends "_partials/dashboard_teacher/layaout.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+/* .container-right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+    background-color: #1e1e2e;
+    color: white;
+} */
+
+.chatbox {
+    width: 100%;
+    max-width: 500px;
+    height: 450px;
+    background: #2c2c38;
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.messages {
+    height: 350px;
+    overflow-y: auto;
+    padding-right: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #888 #2c2c38;
+}
+
+/* Custom Scrollbar */
+.messages::-webkit-scrollbar {
+    width: 5px;
+}
+
+.messages::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 5px;
+}
+
+.message {
+    max-width: 80%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    word-wrap: break-word;
+    display: inline-block;
+}
+
+.user-message {
+    background: #0e76a8;
+    color: white;
+    align-self: flex-end;
+    text-align: right;
+}
+
+.bot-message {
+    background: #40414f;
+    color: #fff;
+    align-self: flex-start;
+}
+
+/* Input Zone */
+.input-container {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: #2c2c38;
+    border-top: 1px solid #444;
+}
+
+
+
+textarea::placeholder {
+    color: #aaa;
+}
+
+textarea {
+    flex: 1;
+    width: 100%;
+    padding: 12px;
+    border-radius: 20px;
+    border: 1px solid #555;
+    background: #1e1e2e;
+    color: white;
+    outline: none;
+    resize: none;
+}
+
+.chat-button {
+    background: #0e76a8;
+    border: none;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    margin-top: 5px; /* Ajoute un espace en haut du bouton */
+}
+
+.chat-button:hover {
+    background: #0b5a87;
+    transform: scale(1.1);
+}
+
+
+</style>
+    <div class="container-right">
+        <h3 class="text-color-blue">DashBoard</h3>
+        <div class="middle-container">
+            <div class="middle">
+                <!-- School Leader Section -->
+                <!-- <div class="middleZone">
+                    <img src="{{ user.get_photo_url }}" alt="User Profile" class="woman1">
+                    <div>
+                        <h3 class="text-gray-bold" >{{ firstname }} {{ lastname }}</h3>
+                        <div class="text-color">
+                            <i class="bi bi-alarm"></i>
+                            <i class="bi bi-person"></i>
+                            <i class="bi bi-gear"></i>
+                        </div>
+                    </div>
+                </div> -->
+
+                <!-- Assistance Section -->
+                <!-- <div class="middleZone-2">
+                    <h4 class="text-gray-bold">AI Teacher Assistance</h4>
+                    <div class="check-container-new">
+                        <div class="check-container redBG">
+                            <i class="bi bi-exclamation-circle redColor"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray">Students who need you to <span class="text-bold">contact their parents</span></p>
+                        </div>
+                    </div>
+                    <div class="check-container-again">
+                        <div class="student"><p class="text-gray"><span class="text-bold">Marta Sae</span></p></div>
+                        <div><i class="bi bi-exclamation-circle blueColor"></i></div>
+                    </div>
+                    <div class="check-container-again">
+                        <div class="student"><p class="text-gray"><span class="text-bold">John Smith</span></p></div>
+                        <div><i class="bi bi-exclamation-circle blueColor"></i></div>
+                    </div>
+                    <div class="check-container-new">
+                        <div class="check-container yellowBG">
+                            <i class="bi bi-bell"></i>
+                        </div>
+                        <div class="para">
+                            <p class="text-gray">Remember that tomorrow <span class="text-bold">Class 5 - Math has an exam</span></p>
+                        </div>
+                    </div>
+                    <div class="check-container-new">
+                        <div class="check-container yellowBG">
+                            <i class="bi bi-bell"></i>
+                        </div>
+                        <div class="para">
+                            <p class="text-gray">Remember that tomorrow <span class="text-bold">Class 5 - Science has an exam</span></p>
+                        </div>
+                    </div>
+                </div> -->
+
+                <!-- <div class="container"> -->
+                    
+                <!-- </div> -->
+                <div class="chatbox">
+                    <div class="messages" id="chatbox">
+                        <p class="bot-message">Hello! How can I assist you today?</p>
+                    </div>
+                
+                    <form id="chatForm" class="input-container">
+                        {% csrf_token %}
+                        <textarea id="userMessage" placeholder="Type a message..." required></textarea>
+                        <button class="chat-button" type="submit">➤</button>
+                    </form>
+                </div>
+                
+
+                <!-- Seattings Section -->
+                <!-- <div class="middleZone-4">
+                    <h4 class="text-gray-bold">Seattings</h4>
+
+                    <form>
+                        {% csrf_token %}
+                        <div class="subjects space-bettween-element">
+                            <label class="label-settings">Add Subjects</label>
+                            <div class="input-container-tags">
+                                <div class="subject-tags">
+                                    <span class="tag">Science <span class="close">&times;</span></span>
+                                    <span class="tag">Mathematics <span class="close">&times;</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="duration-increase">
+                            <label>Maximum duration for feedback audio (minutes)</label>
+                            <div class="duration-control-increase">
+                                <button class="decrement-increase button-increase">−</button>
+                                <input type="number" value="02" min="0" class="duration-input-increase">
+                                <button class="increment-increase">+</button>
+                            </div>
+                        </div>
+
+                        <div class="space-bettween-element"></div>
+
+                        <div class="btns-container">
+                            <button class="update-button">UPDATE</button>
+                            <button class="cancel-button">Cancel</button>
+                        </div>
+                    </form>
+                </div> -->
             </div>
-            <button type="submit" class="btn btn-primary btn-send">Envoyer</button>
-        </form>
-        
-        <div class="text-center mt-3">
-            <a href="{% url 'gradebook_teacher_dashboard' %}" class="text-decoration-none text-primary">Retour au Gradebook</a>
+
+            <!-- Activity Section -->
+            <div class="right">
+
+                <div class="right-child">
+                    <h4>Activity</h4>
+                    <h6 class="text-gray">TODAY</h6>
+
+                        <div class="card-container">
+                            <div class="aligner">
+                                <div class="check-container greenBG">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div class="vertical-element"></div>
+
+                            </div>
+
+                            <div>
+                                <p class="text-gray"><span class="text-bold">Darika Samak</span> Mark as done <span class="text-bold">Listing on Science</span></p>
+                                <p class="text-gray">8:40 PM</p>
+                            </div>
+
+                        </div>
+                        <div class="card-container">
+                            <div class="aligner">
+                                <div class="check-container yellowBG">
+                                    <i class="bi bi-chat-left-dots"></i>
+                                </div>
+                                <div class="vertical-element"></div>
+
+                            </div>
+
+                            <div>
+                                <p class="text-gray"><span class="text-bold">Emilee Sinchenko</span> Sent you a message</p>
+                                <p class="text-gray">7:32 PM</p>
+                            </div>
+
+                        </div>
+                        <div class="card-container">
+                            <div class="aligner">
+                                <div class="check-container blueBG">
+                                    <i class="bi bi-box-arrow-in-down"></i>
+                                </div>
+                                <!-- <div class="vertical-element"></div> -->
+
+                            </div>
+
+                            <div>
+                                <p class="text-gray"><span class="text-bold">Darika Samak</span> uploaded 4 files on <span class="text-bold">Tasks3 - Mathematics</span></p>
+                                <p class="text-gray">6:02 PM</p>
+                            </div>
+
+                        </div>
+
+                        <div class="divider"></div>
+
+                        <div class="space-bettween-element">
+                             <h6 class="text-gray">YESTEDAY</h6>
+                        </div>
+
+
+
+                        <div class="card-container">
+                            <div class="aligner">
+                                <div class="check-container blueBG">
+                                    <i class="bi bi-box-arrow-in-down"></i>
+                                </div>
+                                <div class="vertical-element"></div>
+
+                            </div>
+
+                            <div>
+                                <p class="text-gray"><span class="text-bold">Darika Samak</span> uploaded 4 files on <span class="text-bold">Tasks2 - Mathematics</span></p>
+
+                                <p class="text-gray">6:02 PM</p>
+                            </div>
+
+                        </div>
+                        <div class="card-container">
+                            <div class="aligner">
+                                <div class="check-container greenBG">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div class="vertical-element"></div>
+
+                            </div>
+
+                            <div>
+                                <p class="text-gray"><span class="text-bold">Darika Samak</span> Mark as done <span class="text-bold">Listing on Science</span></p>
+                                <p class="text-gray">5:49 PM</p>
+                            </div>
+
+                        </div>
+                        <div class="card-container">
+                            <div class="aligner">
+                                <div class="check-container purpleBG">
+                                    <i class="bi bi-pencil"></i>
+                                </div>
+                                <div class="vertical-element"></div>
+
+                            </div>
+
+                            <div>
+                                <p class="text-gray"><span class="text-bold">Darika Samak</span> Edited <span class="text-bold">Listing on Science</span></p>
+                                <p class="text-gray">5:40 PM</p>
+                            </div>
+
+                        </div>
+
+                        <div class="card-container">
+                            <div class="aligner">
+                                <div class="check-container yellowBG">
+                                    <i class="bi bi-chat-left-dots"></i>
+                                </div>
+                                <!-- <div class="vertical-element"></div> -->
+
+                            </div>
+
+                            <div>
+                                <p class="text-gray"><span class="text-bold">Emilee Sinchenko</span> Sent you a message</p>
+                                <p class="text-gray">4:32 PM</p>
+                            </div>
+
+                        </div>
+
+                </div>
+            </div>
         </div>
     </div>
-    
+
     <script>
-        $(document).ready(function() {
-            $("#chatForm").submit(function(event) {
-                event.preventDefault();
-                sendMessage();
-            });
+        document.getElementById('profile-picture-input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    // Mettre à jour la source de l'image
+                    document.getElementById('profile-picture-preview').src = e.target.result;
+                };
+
+                reader.readAsDataURL(file);
+            }
         });
-        
-        function sendMessage() {
-            var userMessage = $("#userMessage").val().trim();
-            if (userMessage === "") return;
-
-            $("#chatbox").append(`<div class='message user-message'><strong>Vous:</strong> ${userMessage}</div>`);
-            $("#userMessage").val("");
-            $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
-
-            $.ajax({
-                type: "POST",
-                url: "{% url 'chat_api' %}",
-                data: {
-                    message: userMessage,
-                    csrfmiddlewaretoken: "{{ csrf_token }}"
-                },
-                success: function(response) {
-                    $("#chatbox").append(`<div class='message bot-message'><strong>Chatbot:</strong> ${response.response}</div>`);
-                    $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
-                },
-                error: function() {
-                    $("#chatbox").append(`<div class='message text-danger'>Erreur de communication avec le serveur.</div>`);
-                }
-            });
-        }
     </script>
-</body>
-</html>
+        <script>
+            $(document).ready(function() {
+                $("#chatForm").submit(function(event) {
+                    event.preventDefault();
+                    sendMessage();
+                });
+            });
+            
+            function sendMessage() {
+                var userMessage = $("#userMessage").val().trim();
+                if (userMessage === "") return;
+    
+                $("#chatbox").append(`<div class='message user-message'><strong>Vous:</strong> ${userMessage}</div>`);
+                $("#userMessage").val("");
+                $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+    
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'chat_api' %}",
+                    data: {
+                        message: userMessage,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    success: function(response) {
+                        $("#chatbox").append(`<div class='message bot-message'><strong>Chatbot:</strong> ${response.response}</div>`);
+                        $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+                    },
+                    error: function() {
+                        $("#chatbox").append(`<div class='message text-danger'>Erreur de communication avec le serveur.</div>`);
+                    }
+                });
+            }
+        </script>
+{% endblock %}

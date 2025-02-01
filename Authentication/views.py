@@ -25,6 +25,15 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.db import IntegrityError
 
+# Added by Henock
+import logging
+
+
+# Configuration du logger
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s %(levelname)s %(message)s')
+
+
 # ================= Helper Functions =================
 
 # Thread class for sending emails asynchronously
@@ -36,58 +45,158 @@ class EmailThread(threading.Thread):
     def run(self):
         self.email.send()
 
+# def register_user(request, user_type):
+#     if request.method == "POST":
+#         username = request.POST.get('username')
+#         email = request.POST.get('email')
+#         password = request.POST.get('password')
+#         photo = request.FILES.get('profile_picture')
+#         # Check if the email is already taken
+#         if User.objects.filter(email=email).exists():
+#             messages.error(request, "An account with this email already exists.")
+#             return render(request, 'authentication/register.html', {'user_type': user_type})
+
+#         # Check if the username is already taken
+#         if User.objects.filter(username=username).exists():
+#             messages.error(request, "An account with this username already exists.")
+#             return render(request, 'authentication/register.html', {'user_type': user_type})
+
+#         # Registration for school admins
+#         if user_type == 'school_admin':
+#             school_name = request.POST.get('school_name')
+#             address = request.POST.get('address')
+
+#             try:
+#                 # Create a user account for the school admin
+#                 user = User.objects.create_user(
+#                     username=username,
+#                     email=email,
+#                     password=password,
+#                     user_type='school_admin'
+#                 )
+#                 # Add school-specific details
+#                 user.school_name = school_name
+#                 user.address = address
+#                 user.save()
+
+#                 # Send activation email
+#                 send_activation_email(user, request)
+#                 return redirect('verify_email', user.id)
+
+#             except IntegrityError:
+#                 messages.error(request, "An error occurred while creating the account.")
+#                 return render(request, 'authentication/register.html', {'user_type': user_type})
+
+#         # Registration for students and teachers
+#         elif user_type in ['student', 'teacher']:
+#             school_code = request.POST.get('school_code')
+#             school_admin = User.objects.filter(code=school_code, user_type='school_admin').first()
+
+#             if not school_admin:
+#                 messages.error(request, "The school code is invalid.")
+#                 return render(request, 'authentication/register.html', {'user_type': user_type})
+
+#             try:
+#                 user = User.objects.create_user(
+#                     first_name=request.POST.get('first_name'),
+#                     last_name=request.POST.get('last_name'),
+#                     username=username,
+#                     email=email,
+#                     password=password,
+#                     user_type=user_type
+#                 )
+
+#                 # Link the user to the school admin through the respective profile
+#                 if user_type == 'student':
+#                     Student.objects.create(user=user, school=school_admin)
+#                 elif user_type == 'teacher':
+#                     Teacher.objects.create(user=user, school=school_admin)
+
+#                 # Send activation email
+#                 send_activation_email(user, request)
+#                 return redirect('verify_email', user.id)
+
+#             except IntegrityError:
+#                 messages.error(request, "An error occurred while creating the account.")
+#                 return render(request, 'authentication/register.html', {'user_type': user_type})
+
+#         # Registration for parents
+#         elif user_type == 'parent':
+#             student_code = request.POST.get('student_code')
+#             student = Student.objects.filter(user__code=student_code).first()
+
+#             if not student:
+#                 messages.error(request, "The student code is invalid.")
+#                 return render(request, 'authentication/register.html', {'user_type': user_type})
+
+#             try:
+#                 user = User.objects.create_user(
+#                     first_name=request.POST.get('first_name'),
+#                     last_name=request.POST.get('last_name'),
+#                     username=username,
+#                     email=email,
+#                     password=password,
+#                     user_type='parent'
+#                 )
+
+#                 # Link the parent to the specified student
+#                 Parent.objects.create(user=user, student=student)
+
+#                 send_activation_email(user, request)
+#                 return redirect('verify_email', user.id)
+
+#             except IntegrityError:
+#                 messages.error(request, "An error occurred while creating the account.")
+#                 return render(request, 'authentication/register.html', {'user_type': user_type})
+
+#     return render(request, 'authentication/register.html', {'user_type': user_type})
+
+
+# Henock
+
 def register_user(request, user_type):
     if request.method == "POST":
         username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
         photo = request.FILES.get('profile_picture')
-        # Check if the email is already taken
-        if User.objects.filter(email=email).exists():
-            messages.error(request, "An account with this email already exists.")
-            return render(request, 'authentication/register.html', {'user_type': user_type})
 
-        # Check if the username is already taken
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "An account with this username already exists.")
-            return render(request, 'authentication/register.html', {'user_type': user_type})
+        try:
+            # Vérification si l'email existe déjà
+            if User.objects.filter(email=email).exists():
+                messages.error(request, "An account with this email already exists.")
+                return render(request, 'authentication/register.html', {'user_type': user_type})
 
-        # Registration for school admins
-        if user_type == 'school_admin':
-            school_name = request.POST.get('school_name')
-            address = request.POST.get('address')
+            # Vérification si le nom d'utilisateur existe déjà
+            if User.objects.filter(username=username).exists():
+                messages.error(request, "An account with this username already exists.")
+                return render(request, 'authentication/register.html', {'user_type': user_type})
 
-            try:
-                # Create a user account for the school admin
+            if user_type == 'school_admin':
+                school_name = request.POST.get('school_name')
+                address = request.POST.get('address')
+
                 user = User.objects.create_user(
                     username=username,
                     email=email,
                     password=password,
                     user_type='school_admin'
                 )
-                # Add school-specific details
                 user.school_name = school_name
                 user.address = address
                 user.save()
 
-                # Send activation email
                 send_activation_email(user, request)
                 return redirect('verify_email', user.id)
 
-            except IntegrityError:
-                messages.error(request, "An error occurred while creating the account.")
-                return render(request, 'authentication/register.html', {'user_type': user_type})
+            elif user_type in ['student', 'teacher']:
+                school_code = request.POST.get('school_code')
+                school_admin = User.objects.filter(code=school_code, user_type='school_admin').first()
 
-        # Registration for students and teachers
-        elif user_type in ['student', 'teacher']:
-            school_code = request.POST.get('school_code')
-            school_admin = User.objects.filter(code=school_code, user_type='school_admin').first()
+                if not school_admin:
+                    messages.error(request, "The school code is invalid.")
+                    return render(request, 'authentication/register.html', {'user_type': user_type})
 
-            if not school_admin:
-                messages.error(request, "The school code is invalid.")
-                return render(request, 'authentication/register.html', {'user_type': user_type})
-
-            try:
                 user = User.objects.create_user(
                     first_name=request.POST.get('first_name'),
                     last_name=request.POST.get('last_name'),
@@ -97,30 +206,22 @@ def register_user(request, user_type):
                     user_type=user_type
                 )
 
-                # Link the user to the school admin through the respective profile
                 if user_type == 'student':
                     Student.objects.create(user=user, school=school_admin)
                 elif user_type == 'teacher':
                     Teacher.objects.create(user=user, school=school_admin)
 
-                # Send activation email
                 send_activation_email(user, request)
                 return redirect('verify_email', user.id)
 
-            except IntegrityError:
-                messages.error(request, "An error occurred while creating the account.")
-                return render(request, 'authentication/register.html', {'user_type': user_type})
+            elif user_type == 'parent':
+                student_code = request.POST.get('student_code')
+                student = Student.objects.filter(user__code=student_code).first()
 
-        # Registration for parents
-        elif user_type == 'parent':
-            student_code = request.POST.get('student_code')
-            student = Student.objects.filter(user__code=student_code).first()
+                if not student:
+                    messages.error(request, "The student code is invalid.")
+                    return render(request, 'authentication/register.html', {'user_type': user_type})
 
-            if not student:
-                messages.error(request, "The student code is invalid.")
-                return render(request, 'authentication/register.html', {'user_type': user_type})
-
-            try:
                 user = User.objects.create_user(
                     first_name=request.POST.get('first_name'),
                     last_name=request.POST.get('last_name'),
@@ -130,15 +231,16 @@ def register_user(request, user_type):
                     user_type='parent'
                 )
 
-                # Link the parent to the specified student
                 Parent.objects.create(user=user, student=student)
-
                 send_activation_email(user, request)
                 return redirect('verify_email', user.id)
 
-            except IntegrityError:
-                messages.error(request, "An error occurred while creating the account.")
-                return render(request, 'authentication/register.html', {'user_type': user_type})
+        except IntegrityError as e:
+            logger.error(f"IntegrityError while registering {user_type}: {str(e)}", exc_info=True)
+            messages.error(request, "An error occurred while creating the account.")
+        except Exception as e:
+            logger.error(f"Unexpected error during registration: {str(e)}", exc_info=True)
+            messages.error(request, "An unexpected error occurred. Please try again later.")
 
     return render(request, 'authentication/register.html', {'user_type': user_type})
 
@@ -318,7 +420,13 @@ def send_activation_email(user, request):
         to=[user.email]
     )
     email.content_subtype = "html"
-    email.send()
+    try:
+        email.send()
+        logger.info(f"✅ Email envoyé avec succès à {user.email}")
+    except Exception as e:
+        logger.error(f"❌ Erreur lors de l'envoi de l'email :", e)
+
+    # email.send()
 
 def activate_user(request, uidb64, token):
     """ View for activating user accounts via email and redirecting to OTP validation. """
