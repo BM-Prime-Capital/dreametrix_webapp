@@ -205,72 +205,132 @@ from django.conf import settings
 import pandas as pd
 import random
 from openpyxl import load_workbook
+# Vue pour générer le PDF
+from django.contrib import messages
 
 
-def filter_question(subject, year, number, grade, kind, standard):
-    # Construct the absolute path to the Excel file
-    excel_file_path = os.path.join(settings.BASE_DIR, "Digital library.xlsx")
+def filter_math_question(subject, year, number, grade, kind):
 
-    # Load the Excel file into a DataFrame
-    df = pd.read_excel(excel_file_path)
+    df = pd.read_excel("Digital library.xlsx")
 
-    # Filter the DataFrame based on the provided parameters
     filtered_df = df.loc[
         (df["Year"] == year) &
         (df["Subject"] == subject) &
         (df["Grade"] == grade) &
-        (df["MC/OR"] == kind) &
-        (df["Standard"] == standard)  # Added Standard filter
+        (df["MC/OR"] == kind)
     ]
 
-    # Load the workbook for hyperlink extraction
-    workbook = load_workbook(excel_file_path)
+    workbook = load_workbook("Digital library.xlsx")
     sheet = workbook.active
 
     links = []
-    column = df.columns.get_loc("Link to item")
 
+    column = df.columns.get_loc("Link to item")
     try:
         q = random.sample(list(filtered_df.index), number)
     except ValueError:
         raise ValueError("Not enough questions to generate test")
 
     for ele in q:
-        cell = sheet.cell(ele + 2, column + 1)
+        cell = sheet.cell(ele+2, column+1)
         link = cell.hyperlink.target
         links.append(link)
-
     return links
 
 
-# Fonction pour générer le PDF
-def generate_pdf(links):
+def filter_lang_question(year, number, grade, kind):
+    df = pd.read_excel("Dreametrix excel.xlsx")
+
+    filtered_df = df.loc[
+        (df["Year"] == year) &
+        (df["Grade"] == grade) &
+        (df["MC/OR"] == kind)
+        ]
+
+    workbook = load_workbook("Dreametrix excel.xlsx")
+    sheet = workbook.active
+
+
+    story_column = df.columns.get_loc("Story")
+    stories = random.sample(list(filtered_df.index), number)
+
+
+    story_links = {}
+
+    def _get_question(story):
+        res = []
+        value = filtered_df.loc[story, "Story"]
+        rows = filtered_df.index[filtered_df["Link to item"] == value].tolist()
+        for row in rows:
+            cell = sheet.cell(row+2, story_column+2)
+            link = cell.hyperlink.target
+            res.append(link)
+        return res
+
+    for story in stories:
+        q = tuple(_get_question(story))
+
+        cell = sheet.cell(story+2, story_column+1)
+        link = cell.hyperlink.target
+        story_links[link] = q
+
+    return story_links
+
+
+def generate_pdf(links: list | dict):
+
     doc = fitz.open()
-    pdf = doc.new_page(width=595, height=842)  # taille A4
-    x, y = 24, 24  # coordonnées initiales
-    margin = 5  # marge
+    pdf = doc.new_page(width=595, height=842) # size of an A4 sheet (595, 842)
+    x, y = 24, 24 # x and y initial coordinate
+    margin = 5 # margin
 
-    for link in links:
-        link = link.replace("dl=0", "raw=1")
+    if isinstance(links, list):
 
-        try:
-            response = requests.get(link)
-            image = BytesIO(response.content)
+        for link in links:
+            link = link.replace("dl=0", "raw=1")
 
-            if y + 228 > 842 - 24:
+            try:
+                response = requests.get(link)
+                image = BytesIO(response.content)
+
+                if y+228 > 842-24:
+                    pdf = doc.new_page(width=595, height=842)
+                    x, y = 24, 24
+
+                pdf.insert_image(fitz.Rect(x, y, x+228, y+228), stream=image)
+                y += 228+margin
+
+            except Exception as e:
+                raise ValueError(e)
+    else:
+        for story, questions in links.items():
+            story = story.replace("dl=0", "raw=1")
+
+            try:
+                response = requests.get(story)
+                image = BytesIO(response.content)
+
+                pdf.insert_image(fitz.Rect(x, y, x+500, y+750), stream=image)
                 pdf = doc.new_page(width=595, height=842)
-                x, y = 24, 24
 
-            pdf.insert_image(fitz.Rect(x, y, x + 228, y + 228), stream=image)
-            y += 228 + margin
+                for question in questions:
+                    question = question.replace("dl=0", "raw=1")
 
-        except Exception as e:
-            raise ValueError(e)
-    doc.save("test_generated_today.pdf")
+                    response = requests.get(question)
+                    image = BytesIO(response.content)
 
+                    if y + 350 > 842 - 24:
+                        pdf = doc.new_page(width=595, height=842)
+                        x, y = 24, 24
 
-# Vue pour générer le PDF
-from django.contrib import messages
+                    pdf.insert_image(fitz.Rect(x, y, x + 350, y + 350), stream=image)
+                    y += 350 + margin
+
+            except Exception as e:
+                raise ValueError(e)
+
+    doc.save("test.pdf")
+
 
 def generate_pdf_view(request):
     if request.method == "POST":
@@ -282,10 +342,12 @@ def generate_pdf_view(request):
         standard = request.POST['standard']  # Nouveau champ ajouté pour Standard
 
         try:
-            links = filter_question(subject, year, number, grade, kind, standard)
+            if subject == "Math":
+                links = filter_math_question(subject, year, number, grade, kind)
+            else:
+                links = filter_lang_question(year, number, grade, kind)
             generate_pdf(links)
-
-            with open("test_generated_today.pdf", "rb") as pdf:
+            with open("test.pdf", "rb") as pdf:
                 response = HttpResponse(pdf.read(), content_type='application/pdf')
                 response['Content-Disposition'] = 'attachment; filename="test_generated.pdf"'
                 return response
@@ -300,23 +362,17 @@ def generate_pdf_view(request):
 
 # API pour obtenir les sujets
 def get_subjects(request):
-    df = pd.read_excel("Digital library.xlsx")
+    """df = pd.read_excel("Digital library.xlsx")"""
     # Nettoyer les espaces dans les sujets
-    subjects = df['Subject'].str.strip().unique().tolist()
+    subjects = ["Math", "Language"]
     return JsonResponse({'subjects': subjects})
 
 
 def get_years(request, subject):
     df = pd.read_excel("Digital library.xlsx")
 
-    # Nettoyer le sujet pour enlever les espaces
-    subject = subject.strip()
-
-    # Vérifiez si le sujet existe dans le DataFrame
-    if subject in df['Subject'].values:
-        years = df[df['Subject'].str.strip() == subject]['Year'].unique().tolist()
-    else:
-        years = []
+    years = df["Year"].unique().tolist()
+    print(f" Content: {years}")
 
     return JsonResponse({'years': years})
 
@@ -324,31 +380,13 @@ def get_years(request, subject):
 def get_grades(request, subject, year):
     df = pd.read_excel("Digital library.xlsx")
 
-    # Nettoyer le sujet et l'année pour enlever les espaces
-    subject = subject.strip()
-    year = str(year).strip()
-
-    print("All unique years:", df['Year'].unique())
-    print("All unique grades:", df['Grade'].unique())
-
-    grades = df[(df['Subject'].str.strip() == subject) & (df['Year'].astype(str) == year)]['Grade'].unique().tolist()
+    grades = df["Grade"].unique().tolist()
     return JsonResponse({'grades': grades})
 
 # API to get standards based on subject, year, and grade
 def get_standards(request, subject, year, grade):
     df = pd.read_excel("Digital library.xlsx")
-
-    # Clean the input parameters to remove spaces
-    subject = subject.strip()
-    year = str(year).strip()
-    grade = str(grade).strip()
-
-    standards = df[
-        (df['Subject'].str.strip() == subject) &
-        (df['Year'].astype(str) == year) &
-        (df['Grade'].astype(str) == grade)
-    ]['Standard'].unique().tolist()
-
+    standards = df["Standard"].unique().tolist()
     return JsonResponse({'standards': standards})
 
 def gradebook_calculation(request):
@@ -552,3 +590,4 @@ def delete_gradebook_view(request, pk):
         return redirect('get_gradebooks')  # Redirect to the gradebook list after deletion
 
     return render(request, 'dashboard/teacher/gradebook.html', {'gradebook_instance': gradebook_instance})
+
