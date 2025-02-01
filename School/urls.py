@@ -23,7 +23,7 @@ urlpatterns = [
     path('teach_teacher_dashboard/', views.teach_teacher_dashboard, name='teach_teacher_dashboard'),
     path('teacher_dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
 
-
+    path("api/", views.chat_api, name="chat_api"),
     #STUDENT DASHBOARD
     path('class_student_dashboard/', views.class_student_dashboard, name='class_student_dashboard'),
     path('assignments_student_dashboard/', views.assignments_student_dashboard, name='assignments_student_dashboard'),
