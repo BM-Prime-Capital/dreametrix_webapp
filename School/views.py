@@ -1,5 +1,20 @@
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse
+import requests
+import fitz
+from io import BytesIO
+import os
+from django.conf import settings
+import pandas as pd
+import random
+from openpyxl import load_workbook
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.http import HttpResponseBadRequest
+from .models import Class, Student
+
 
 
 
@@ -189,32 +204,13 @@ def teach_teacher_dashboard(request):
     return render(request, 'dashboard/teacher/teach.html')
 
 
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
-import pandas as pd
-import random
-import requests
-import fitz
-from io import BytesIO
-from openpyxl import load_workbook
 
 
-# Fonction pour filtrer les questions
-import os
-from django.conf import settings
-import pandas as pd
-import random
-from openpyxl import load_workbook
-# Vue pour générer le PDF
-from django.contrib import messages
-
-
-def filter_math_question(subject, year, number, grade, kind):
+def filter_math_question(subject, number, grade, kind):
 
     df = pd.read_excel("Digital library.xlsx")
 
     filtered_df = df.loc[
-        (df["Year"] == year) &
         (df["Subject"] == subject) &
         (df["Grade"] == grade) &
         (df["MC/OR"] == kind)
@@ -238,11 +234,10 @@ def filter_math_question(subject, year, number, grade, kind):
     return links
 
 
-def filter_lang_question(year, number, grade, kind):
+def filter_lang_question( number, grade, kind):
     df = pd.read_excel("Dreametrix excel.xlsx")
 
     filtered_df = df.loc[
-        (df["Year"] == year) &
         (df["Grade"] == grade) &
         (df["MC/OR"] == kind)
         ]
@@ -335,17 +330,16 @@ def generate_pdf(links: list | dict):
 def generate_pdf_view(request):
     if request.method == "POST":
         subject = request.POST['subject']
-        year = int(request.POST['year'])
         number = int(request.POST['number'])
         grade = int(request.POST['grade'])
         kind = request.POST['kind']
-        standard = request.POST['standard']  # Nouveau champ ajouté pour Standard
+        standard = request.POST['standard']
 
         try:
             if subject == "Math":
-                links = filter_math_question(subject, year, number, grade, kind)
+                links = filter_math_question(subject, number, grade, kind)
             else:
-                links = filter_lang_question(year, number, grade, kind)
+                links = filter_lang_question( number, grade, kind)
             generate_pdf(links)
             with open("test.pdf", "rb") as pdf:
                 response = HttpResponse(pdf.read(), content_type='application/pdf')
@@ -368,34 +362,46 @@ def get_subjects(request):
     return JsonResponse({'subjects': subjects})
 
 
-def get_years(request, subject):
+# API for obtaining grades based on subject
+def get_grades(request, subject):
     df = pd.read_excel("Digital library.xlsx")
-
-    years = df["Year"].unique().tolist()
-    print(f" Content: {years}")
-
-    return JsonResponse({'years': years})
-
-# API pour obtenir les niveaux en fonction du sujet et de l'année
-def get_grades(request, subject, year):
-    df = pd.read_excel("Digital library.xlsx")
-
     grades = df["Grade"].unique().tolist()
     return JsonResponse({'grades': grades})
 
 # API to get standards based on subject, year, and grade
-def get_standards(request, subject, year, grade):
+def get_standards(request, subject, grade):
     df = pd.read_excel("Digital library.xlsx")
-    standards = df["Standard"].unique().tolist()
+
+    # Filtrer par subject et grade
+    filtered_df = df[
+        (df["Subject"] == subject) &
+        (df["Grade"] == int(grade))  # Conversion en int si nécessaire
+        ]
+
+    # Récupérer les standards uniques
+    standards = filtered_df["Standard"].unique().tolist()
+
     return JsonResponse({'standards': standards})
+# API to get available links based on subject and grade
+def get_links(request, subject, grade, standard, kind):
+    df = pd.read_excel("Digital library.xlsx")
+
+    # Ajouter le filtre Standard
+    base_filter = (
+            (df["Subject"] == subject) &
+            (df["Grade"] == int(grade)) &
+            (df["Standard"] == standard) &
+            (df["MC/OR"] == kind)
+    )
+
+    available_links = df.loc[base_filter, "Link to item"].dropna().tolist()
+
+    return JsonResponse({'links': available_links})
 
 def gradebook_calculation(request):
     return render(request, 'dashboard/teacher/calculations.html')
 
 
-from django.shortcuts import render, redirect
-from django.http import HttpResponseBadRequest
-from .models import Class, Student
 
 def class_list_view(request):
     """Affiche la liste des classes, avec option de filtrage."""

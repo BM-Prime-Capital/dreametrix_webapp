@@ -13,13 +13,6 @@
         </div>
 
         <div class="input-container">
-            <label for="year">Year:</label>
-            <select id="year" name="year" required onchange="updateOptions('year')">
-                <option value="">Select Year</option>
-            </select>
-        </div>
-
-        <div class="input-container">
             <label for="grade">Grade:</label>
             <select id="grade" name="grade" required onchange="updateOptions('grade')">
                 <option value="">Select Grade</option>
@@ -41,9 +34,26 @@
             </select>
         </div>
 
+        <!-- Message de disponibilité amélioré -->
+        <div id="availability-message" style="display: none; margin-bottom: 10px; color: #666;">
+            <span id="available-text">Questions disponibles : </span>
+            <span id="available-count">0</span>
+            <span id="max-indicator" style="display: none;"> (Max: </span><span id="max-value">0</span>)
+        </div>
+
+        <!-- Modification ici : remplacement du select par un input -->
         <div class="input-container">
             <label for="number">Number of Questions:</label>
-            <input type="number" id="number" name="number" min="1" required>
+            <input
+                type="number"
+                id="number"
+                name="number"
+                required
+                min="1"
+                max="1"
+                placeholder="Enter number between 1 and 0"
+                disabled
+            >
         </div>
 
         {% include '_partials/messages.html' %}
@@ -52,69 +62,110 @@
     </form>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Fetch initial subjects
-            fetch('/get-subjects/')
+    document.addEventListener("DOMContentLoaded", function() {
+        // Chargement initial des sujets
+        fetch('/get-subjects/')
+            .then(response => response.json())
+            .then(data => {
+                const subjectSelect = document.getElementById('subject');
+                data.subjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject;
+                    option.textContent = subject;
+                    subjectSelect.appendChild(option);
+                });
+            });
+
+        // Écouteurs d'événements
+        document.getElementById('kind').addEventListener('change', checkAvailableLinks);
+        document.getElementById('standard').addEventListener('change', checkAvailableLinks);
+    });
+
+    function updateOptions(type) {
+        if (type === 'subject') {
+            const subjectValue = document.getElementById('subject').value;
+            fetch(`/get-grades/${subjectValue}/`)
                 .then(response => response.json())
                 .then(data => {
-                    const subjectSelect = document.getElementById('subject');
-                    data.subjects.forEach(subject => {
+                    const gradeSelect = document.getElementById('grade');
+                    gradeSelect.innerHTML = '<option value="">Select Grade</option>';
+                    data.grades.forEach(grade => {
                         const option = document.createElement('option');
-                        option.value = subject;
-                        option.textContent = subject;
-                        subjectSelect.appendChild(option);
+                        option.value = grade;
+                        option.textContent = grade;
+                        gradeSelect.appendChild(option);
                     });
+                    // Réinitialisation des champs dépendants
+                    document.getElementById('standard').innerHTML = '<option value="">Select Standard</option>';
+                    resetNumberField();
                 });
-        });
-
-        function updateOptions(type) {
-            if (type === 'subject') {
-                const subjectValue = document.getElementById('subject').value;
-                fetch(`/get-years/${subjectValue}/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const yearSelect = document.getElementById('year');
-                        yearSelect.innerHTML = '<option value="">Select Year</option>';
-                        data.years.forEach(year => {
-                            const option = document.createElement('option');
-                            option.value = year;
-                            option.textContent = year;
-                            yearSelect.appendChild(option);
-                        });
-                    });
-            } else if (type === 'year') {
-                const subjectValue = document.getElementById('subject').value;
-                const yearValue = document.getElementById('year').value;
-                fetch(`/get-grades/${subjectValue}/${yearValue}/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const gradeSelect = document.getElementById('grade');
-                        gradeSelect.innerHTML = '<option value="">Select Grade</option>';
-                        data.grades.forEach(grade => {
-                            const option = document.createElement('option');
-                            option.value = grade;
-                            option.textContent = grade;
-                            gradeSelect.appendChild(option);
-                        });
-                    });
-            } else if (type === 'grade') {
-                const subjectValue = document.getElementById('subject').value;
-                const yearValue = document.getElementById('year').value;
-                const gradeValue = document.getElementById('grade').value;
-                fetch(`/get-standards/${subjectValue}/${yearValue}/${gradeValue}/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const standardSelect = document.getElementById('standard');
-                        standardSelect.innerHTML = '<option value="">Select Standard</option>';
-                        data.standards.forEach(standard => {
-                            const option = document.createElement('option');
-                            option.value = standard;
-                            option.textContent = standard;
-                            standardSelect.appendChild(option);
-                        });
-                    });
-            }
         }
-    </script>
+        else if (type === 'grade') {
+            const subjectValue = document.getElementById('subject').value;
+            const gradeValue = document.getElementById('grade').value;
+            fetch(`/get-standards/${subjectValue}/${gradeValue}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const standardSelect = document.getElementById('standard');
+                    standardSelect.innerHTML = '<option value="">Select Standard</option>';
+                    data.standards.forEach(standard => {
+                        const option = document.createElement('option');
+                        option.value = standard;
+                        option.textContent = standard;
+                        option.style.display = 'block'; // Ajout pour la recherche
+                        standardSelect.appendChild(option);
+                    });
+                    checkAvailableLinks();
+                });
+        }
+    }
+
+    function checkAvailableLinks() {
+        const subject = document.getElementById('subject').value;
+        const grade = document.getElementById('grade').value;
+        const standard = document.getElementById('standard').value;
+        const kind = document.getElementById('kind').value;
+
+        // Validation des champs requis
+        if (!subject || !grade || !standard || !kind) return;
+
+        // Appel API avec tous les paramètres
+        fetch(`/available_link/${subject}/${grade}/${standard}/${kind}/`)
+            .then(response => response.json())
+            .then(data => {
+                const count = data.links.length;
+                const numberInput = document.getElementById('number');
+                const messageElement = document.getElementById('availability-message');
+                const maxIndicator = document.getElementById('max-indicator');
+                const maxValueSpan = document.getElementById('max-value');
+
+                // Mise à jour du champ nombre
+                numberInput.disabled = count === 0;
+                numberInput.placeholder = count > 0
+                    ? `Enter number (1-${count})`
+                    : "No questions available";
+                numberInput.max = count;
+                numberInput.min = 1;
+
+                // Mise à jour du message
+                messageElement.style.display = 'block';
+                document.getElementById('available-count').textContent = count;
+                maxIndicator.style.display = count > 0 ? 'inline' : 'none';
+                maxValueSpan.textContent = count;
+
+                // Réinitialisation si nécessaire
+                if (numberInput.value > count) numberInput.value = '';
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function resetNumberField() {
+        const numberInput = document.getElementById('number');
+        numberInput.value = '';
+        numberInput.disabled = true;
+        numberInput.placeholder = "Select all required fields first";
+        document.getElementById('availability-message').style.display = 'none';
+    }
+</script>
 
 {% endblock %}
