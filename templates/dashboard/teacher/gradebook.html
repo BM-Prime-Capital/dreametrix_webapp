@@ -24,13 +24,8 @@
                             <span>Layout</span>
                         </button>
                     </a>
-                    <a href="{% url 'generate_pdf' %}">
-                        <button class="button button-print">
-                            <i class="bi bi-printer white"></i>
-                            <span>Digital library</span>
-                        </button>
-                    </a>
                 </div>
+                <p>Filter by Class here</p>
                 <select class="dropdown">
                     {% for class in classes %}
                         <option value="{{ class.id }}">{{ class.name }}</option>

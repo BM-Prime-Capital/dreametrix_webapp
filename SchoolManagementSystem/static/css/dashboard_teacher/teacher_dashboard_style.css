@@ -521,10 +521,11 @@ p{
 }
 
 .dropdown {
-    padding: 9px 45px;
+    padding: 9px 45px 9px 0; /* top, right, bottom, left */
     border: 1px solid white;
     border-radius: 9px;
     font-size: 14px;
+    width: 20%;
 }
 
 .gradebook-table {
@@ -862,4 +863,52 @@ input {
 
 #add-item-form button:hover {
     background-color: #0056b3; /* Darker blue on hover */
+}
+
+
+
+.form-container {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: infinity; /* Set width to 100% */
+    margin: 0; /* Remove auto margins */
+    max-width: 100%; /* Remove max-width restriction */
+}
+
+.input-container {
+    margin-bottom: 15px; /* Space between input fields */
+}
+
+select, input[type="number"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%; /* Full width for inputs */
+    font-size: 14px;
+}
+
+
+label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333; /* Darker text color for better readability */
+}
+
+
+.generate-button {
+    background-color: rgb(62, 179, 227); /* Button color */
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    width: 100%; /* Full width for button */
+}
+
+.generate-button:hover {
+    background-color: rgb(75, 141, 179); /* Darker on hover */
 }
