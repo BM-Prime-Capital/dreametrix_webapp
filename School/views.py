@@ -16,6 +16,9 @@ from django.http import HttpResponseBadRequest
 from .models import Class, Student, ChatHistory
 import openai
 
+import qrcode
+from io import BytesIO
+
 
 #SCHOOL_DASHBOARD
 def home_school_dashboard(request):
@@ -226,8 +229,8 @@ def chat_api(request):
         bot_response = response.choices[0].message.content
         
         # Enregistrer l'historique de chat pour les utilisateurs authentifiés
-        if user:
-            ChatHistory.objects.create(user=user, message=user_message, response=bot_response)
+        #if user:
+            #ChatHistory.objects.create(user=user, message=user_message, response=bot_response)
 
         return JsonResponse({"response": bot_response})
 
@@ -300,62 +303,144 @@ def filter_lang_question(subject, number, grade, standard,  kind):
 
     return story_links
 
-def generate_pdf(links: list | dict):
 
+def generate_pdf(links: list | dict, selected_class: str, subject: str, grade: int, teacher_name: str):
     doc = fitz.open()
-    pdf = doc.new_page(width=595, height=842) # size of an A4 sheet (595, 842)
-    x, y = 24, 24 # x and y initial coordinate
-    margin = 5 # margin
+
+    # === Page 1 - Couverture ===
+    cover = doc.new_page(width=595, height=842)
+
+    # Configuration du texte
+    text_params = {
+        "fontname": "helv",
+        "fontsize": 20,
+        "color": (0, 0, 0)
+    }
+
+    # Titre principal (centré manuellement)
+    cover.insert_text(
+        point=(297, 200),  # Centre horizontal
+        text=f"GRADE {grade} {subject.upper()}",
+        **text_params
+    )
+
+    # Nom du professeur
+    cover.insert_text(
+        (297, 250),
+        teacher_name,
+        fontsize=14
+    )
+
+    # Titre du quiz
+    cover.insert_text(
+        (297, 300),
+        "Muscle Memory Quiz 1",
+        fontsize=16
+    )
+
+    # Lignes de saisie
+    cover.insert_text((100, 650), "Name: -----------------------------", fontsize=12)
+    cover.insert_text((100, 680), f"Class: {selected_class} ------------------------", fontsize=12)
+
+    # === Page 2 - Vide ===
+    doc.new_page(width=595, height=842)
+
+    # === Pages de questions ===
+    current_page = doc.new_page(width=595, height=842)
+    x, y = 50, 50
+    img_width = (595 - 100) // 2
+    img_height = 350
 
     if isinstance(links, list):
-
-        for link in links:
+        for i, link in enumerate(links):
             link = link.replace("dl=0", "raw=1")
+
+            if i % 2 == 0 and i != 0:
+                current_page = doc.new_page(width=595, height=842)
+                y = 50
 
             try:
                 response = requests.get(link)
                 image = BytesIO(response.content)
 
-                if y+228 > 842-24:
-                    pdf = doc.new_page(width=595, height=842)
-                    x, y = 24, 24
+                if i % 2 == 0:
+                    rect = fitz.Rect(x, y, x + img_width, y + img_height)
+                else:
+                    rect = fitz.Rect(x + img_width + 10, y, 595 - x, y + img_height)
+                    y += img_height + 20
 
-                pdf.insert_image(fitz.Rect(x, y, x+228, y+228), stream=image)
-                y += 228+margin
+                current_page.insert_image(rect, stream=image)
 
             except Exception as e:
                 raise ValueError(e)
+
     else:
         for story, questions in links.items():
             story = story.replace("dl=0", "raw=1")
 
             try:
+                story_page = doc.new_page(width=595, height=842)
                 response = requests.get(story)
                 image = BytesIO(response.content)
+                story_page.insert_image(fitz.Rect(50, 50, 545, 792), stream=image)
 
-                pdf.insert_image(fitz.Rect(x, y, x+500, y+750), stream=image)
-                pdf = doc.new_page(width=595, height=842)
+                current_page = doc.new_page(width=595, height=842)
+                y = 50
 
-                for question in questions:
+                for i, question in enumerate(questions):
                     question = question.replace("dl=0", "raw=1")
+
+                    if i % 2 == 0 and i != 0:
+                        current_page = doc.new_page(width=595, height=842)
+                        y = 50
 
                     response = requests.get(question)
                     image = BytesIO(response.content)
 
-                    if y + 350 > 842 - 24:
-                        pdf = doc.new_page(width=595, height=842)
-                        x, y = 24, 24
+                    if i % 2 == 0:
+                        rect = fitz.Rect(x, y, x + img_width, y + img_height)
+                    else:
+                        rect = fitz.Rect(x + img_width + 10, y, 595 - x, y + img_height)
+                        y += img_height + 20
 
-                    pdf.insert_image(fitz.Rect(x, y, x + 350, y + 350), stream=image)
-                    y += 350 + margin
+                    current_page.insert_image(rect, stream=image)
 
             except Exception as e:
                 raise ValueError(e)
+
+    # QR Code
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=6,
+        border=2,
+    )
+    qr.add_data(selected_class)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    qr_bytes = BytesIO()
+    img.save(qr_bytes, format='PNG')
+    qr_bytes.seek(0)
+
+    for page in doc:
+        page.insert_image(
+            fitz.Rect(521, 768, 571, 818),
+            stream=qr_bytes
+        )
+        qr_bytes.seek(0)
 
     doc.save("test.pdf")
 
 def generate_pdf_view(request):
     if request.method == "POST":
+        selected_class = request.POST.get('classes', '')
+        if not selected_class:
+            messages.error(request, "Veuillez sélectionner une classe.")
+            return render(request, 'dashboard/teacher/digital_library.html')
+
+        # Récupérer les informations du professeur
+        teacher_name = request.user.get_full_name() or request.user.username
         subject = request.POST['subject']
         number = int(request.POST['number'])
         grade = int(request.POST['grade'])
@@ -367,7 +452,13 @@ def generate_pdf_view(request):
                 links = filter_math_question(subject, number, grade, standard,  kind)
             else:
                 links = filter_lang_question(subject, number, grade, standard, kind)
-            generate_pdf(links)
+            generate_pdf(
+                links=links,
+                selected_class=selected_class,
+                subject=subject,
+                grade=grade,
+                teacher_name=teacher_name  # Nouveau paramètre
+            )
             with open("test.pdf", "rb") as pdf:
                 response = HttpResponse(pdf.read(), content_type='application/pdf')
                 response['Content-Disposition'] = 'attachment; filename="test_generated.pdf"'
@@ -380,8 +471,7 @@ def generate_pdf_view(request):
     return render(request, 'dashboard/teacher/digital_library.html')
 
 def get_classes(request):
-    classes = Class.objects.values('name', 'subject', 'grade')  # Récupérer les colonnes nécessaires
-    print(list(classes))  # Debug : afficher les classes dans la console
+    classes = Class.objects.values('name', 'subject', 'grade')
     return JsonResponse({'classes': list(classes)})
 
 def get_subjects(request):
