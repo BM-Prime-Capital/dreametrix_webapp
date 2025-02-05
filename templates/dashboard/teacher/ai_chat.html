@@ -2,6 +2,121 @@
 {% load static %}
 
 {% block content %}
+<style>
+/* .container-right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+    background-color: #1e1e2e;
+    color: white;
+} */
+
+.chatbox {
+    width: 100%;
+    max-width: 500px;
+    height: 450px;
+    background: #2c2c38;
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.messages {
+    height: 350px;
+    overflow-y: auto;
+    padding-right: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #888 #2c2c38;
+}
+
+/* Custom Scrollbar */
+.messages::-webkit-scrollbar {
+    width: 5px;
+}
+
+.messages::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 5px;
+}
+
+.message {
+    max-width: 80%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    word-wrap: break-word;
+    display: inline-block;
+}
+
+.user-message {
+    background: #0e76a8;
+    color: white;
+    align-self: flex-end;
+    text-align: right;
+}
+
+.bot-message {
+    background: #40414f;
+    color: #fff;
+    align-self: flex-start;
+}
+
+/* Input Zone */
+.input-container {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: #2c2c38;
+    border-top: 1px solid #444;
+}
+
+
+
+textarea::placeholder {
+    color: #aaa;
+}
+
+textarea {
+    flex: 1;
+    width: 100%;
+    padding: 12px;
+    border-radius: 20px;
+    border: 1px solid #555;
+    background: #1e1e2e;
+    color: white;
+    outline: none;
+    resize: none;
+}
+
+.chat-button {
+    background: #0e76a8;
+    border: none;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    margin-top: 5px; /* Ajoute un espace en haut du bouton */
+}
+
+.chat-button:hover {
+    background: #0b5a87;
+    transform: scale(1.1);
+}
+
+
+</style>
     <div class="container-right">
         <h3 class="text-color-blue">DashBoard</h3>
         <div class="middle-container">
@@ -20,7 +135,7 @@
                 </div> -->
 
                 <!-- Assistance Section -->
-                <div class="middleZone-2">
+                <!-- <div class="middleZone-2">
                     <h4 class="text-gray-bold">AI Teacher Assistance</h4>
                     <div class="check-container-new">
                         <div class="check-container redBG">
@@ -54,44 +169,26 @@
                             <p class="text-gray">Remember that tomorrow <span class="text-bold">Class 5 - Science has an exam</span></p>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
-                <!-- Profile Section -->
-                <form method="POST" enctype="multipart/form-data" >
-                    <div class="middleZone-3">
-                        <h3 class="text-gray">Profile</h3>
-                        <div class="profile-picture-container">
-                            <img src="{{ user.get_photo_url }}" alt="User Profile" class="woman1">
-                            <h3 class="text-gray-bold">{{ firstname }} {{ lastname }}</h3>
-                        </div>
-                        {% csrf_token %}
-                        <div class="input-grid">
-                            <div class="input-container">
-                                <label for="username" class="text-bold">Username</label>
-                                <input type="text" id="username" name="username" value="{{ username }}" readonly>
-                            </div>
-                            <div class="input-container">
-                                <label for="email" class="text-gray-bold">Email</label>
-                                <input type="text" id="email" name="email" value="{{ email }}" readonly class="text-gray">
-                            </div>
-                            <div class="input-container" >
-                                <label for="school" class="text-gray-bold">School</label>
-                                <input type="text" id="school" name="school" value="{{ school }}" readonly class="text-gray">
-                            </div>
-                            <div class="input-container">
-                                <label for="role_user" class="text-gray-bold">Role</label>
-                                <input type="text" id="role_user" name="role_user" value="{{ role_user }}" readonly class="text-gray">
-                            </div>
-                        </div>
-                        <div class="btns-container">
-                            <button type="submit" class="update-button">Update Profile Picture</button>
-                            <button class="cancel-button">Cancel</button>
-                        </div>
+                <!-- <div class="container"> -->
+                    
+                <!-- </div> -->
+                <div class="chatbox">
+                    <div class="messages" id="chatbox">
+                        <p class="bot-message">Hello! How can I assist you today?</p>
                     </div>
-                </form>
+                
+                    <form id="chatForm" class="input-container">
+                        {% csrf_token %}
+                        <textarea id="userMessage" placeholder="Type a message..." required></textarea>
+                        <button class="chat-button" type="submit">➤</button>
+                    </form>
+                </div>
+                
 
                 <!-- Seattings Section -->
-                <div class="middleZone-4">
+                <!-- <div class="middleZone-4">
                     <h4 class="text-gray-bold">Seattings</h4>
 
                     <form>
@@ -122,7 +219,7 @@
                             <button class="cancel-button">Cancel</button>
                         </div>
                     </form>
-                </div>
+                </div> -->
             </div>
 
             <!-- Activity Section -->
@@ -269,4 +366,37 @@
             }
         });
     </script>
+        <script>
+            $(document).ready(function() {
+                $("#chatForm").submit(function(event) {
+                    event.preventDefault();
+                    sendMessage();
+                });
+            });
+            
+            function sendMessage() {
+                var userMessage = $("#userMessage").val().trim();
+                if (userMessage === "") return;
+    
+                $("#chatbox").append(`<div class='message user-message'><strong>Vous:</strong> ${userMessage}</div>`);
+                $("#userMessage").val("");
+                $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+    
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'chat_api' %}",
+                    data: {
+                        message: userMessage,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    success: function(response) {
+                        $("#chatbox").append(`<div class='message bot-message'><strong>Chatbot:</strong> ${response.response}</div>`);
+                        $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+                    },
+                    error: function() {
+                        $("#chatbox").append(`<div class='message text-danger'>Erreur de communication avec le serveur.</div>`);
+                    }
+                });
+            }
+        </script>
 {% endblock %}

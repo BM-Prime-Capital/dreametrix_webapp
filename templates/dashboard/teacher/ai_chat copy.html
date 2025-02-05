@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot DreaMetrix</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .chatbox {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background: #f4f4f4;
+        }
+        .message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .user-message {
+            background: #d1ecf1;
+            align-self: flex-end;
+        }
+        .bot-message {
+            background: #c3e6cb;
+        }
+        .btn-send {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3 class="text-center text-primary">Chatbot DreaMetrix</h3>
+        <div class="chatbox" id="chatbox">
+            <p class="text-muted text-center">Commencez à poser vos questions.</p>
+        </div>
+        
+        <form id="chatForm" class="mt-3">
+            <div class="mb-3">
+                <input type="text" id="userMessage" class="form-control" placeholder="Tapez votre message..." required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-send">Envoyer</button>
+        </form>
+        
+        <div class="text-center mt-3">
+            <a href="{% url 'gradebook_teacher_dashboard' %}" class="text-decoration-none text-primary">Retour au Gradebook</a>
+        </div>
+    </div>
+    
+    <script>
+        $(document).ready(function() {
+            $("#chatForm").submit(function(event) {
+                event.preventDefault();
+                sendMessage();
+            });
+        });
+        
+        function sendMessage() {
+            var userMessage = $("#userMessage").val().trim();
+            if (userMessage === "") return;
+
+            $("#chatbox").append(`<div class='message user-message'><strong>Vous:</strong> ${userMessage}</div>`);
+            $("#userMessage").val("");
+            $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'ai_chat_teacher_dashboard' %}",
+                data: {
+                    message: userMessage,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function(response) {
+                    $("#chatbox").append(`<div class='message bot-message'><strong>Chatbot:</strong> ${response.response}</div>`);
+                    $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+                },
+                error: function() {
+                    $("#chatbox").append(`<div class='message text-danger'>Erreur de communication avec le serveur.</div>`);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

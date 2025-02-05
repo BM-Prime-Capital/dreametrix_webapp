@@ -17,12 +17,13 @@ urlpatterns = [
     path('communicate_teacher_dashboard/', views.communicate_teacher_dashboard, name='communicate_teacher_dashboard'),
     path('gradebook_teacher_dashboard/', views.gradebook_teacher_dashboard, name='gradebook_teacher_dashboard'),
     path('polis_teacher_dashboard/', views.polis_teacher_dashboard, name='polis_teacher_dashboard'),
+    path('ai_chat_teacher_dashboard/', views.ai_chat_teacher_dashboard, name='ai_chat_teacher_dashboard'),
     path('reports_teacher_dashboard/', views.reports_teacher_dashboard, name='reports_teacher_dashboard'),
     path('seating_teacher_dashboard/', views.seating_teacher_dashboard, name='seating_teacher_dashboard'),
     path('teach_teacher_dashboard/', views.teach_teacher_dashboard, name='teach_teacher_dashboard'),
     path('teacher_dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
 
-
+    path("api/", views.chat_api, name="chat_api"),
     #STUDENT DASHBOARD
     path('class_student_dashboard/', views.class_student_dashboard, name='class_student_dashboard'),
     path('assignments_student_dashboard/', views.assignments_student_dashboard, name='assignments_student_dashboard'),
