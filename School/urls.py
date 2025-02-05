@@ -45,6 +45,7 @@ urlpatterns = [
     path('parent_dashboard/', views.parent_dashboard, name='parent_dashboard'),
 
     path('generate-pdf/', views.generate_pdf_view, name='generate_pdf'),
+    path('get-classes/', views.get_classes, name='get_classes'),
     path('get-subjects/', views.get_subjects, name='get_subjects'),
     path('get-grades/<str:subject>/', views.get_grades, name='get_grades'),
     path('get-standards/<str:subject>/<int:grade>/', views.get_standards, name='get_standards'),

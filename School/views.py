@@ -352,6 +352,11 @@ def generate_pdf_view(request):
 
     return render(request, 'dashboard/teacher/digital_library.html')
 
+def get_classes(request):
+    classes = Class.objects.values('name', 'subject', 'grade')  # Récupérer les colonnes nécessaires
+    print(list(classes))  # Debug : afficher les classes dans la console
+    return JsonResponse({'classes': list(classes)})
+
 def get_subjects(request):
     """df = pd.read_excel("Digital library.xlsx")"""
     # Nettoyer les espaces dans les sujets
