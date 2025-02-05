@@ -157,6 +157,7 @@ EMAIL_TIMEOUT = 10
 EMAIL_FAIL_SILENTLY = False
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 # Modèle personnalisé pour les utilisateurs
 AUTH_USER_MODEL = "Authentication.User"
 
