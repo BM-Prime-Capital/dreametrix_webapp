@@ -46,9 +46,8 @@ urlpatterns = [
 
     path('generate-pdf/', views.generate_pdf_view, name='generate_pdf'),
     path('get-subjects/', views.get_subjects, name='get_subjects'),
-    path('get-years/<str:subject>/', views.get_years, name='get_years'),
-    path('get-grades/<str:subject>/<int:year>/', views.get_grades, name='get_grades'),
-    path('get-standards/<str:subject>/<int:year>/<int:grade>/', views.get_standards, name='get_standards'),
+    path('get-grades/<str:subject>/', views.get_grades, name='get_grades'),
+    path('get-standards/<str:subject>/<int:grade>/', views.get_standards, name='get_standards'),
 
     #GRADEBOOK FUNCTIONALITIES
     path('gradebook_list_view/', views.gradebook_list_view, name='get_gradebooks'),  # Render template to list gradebook entries
@@ -59,6 +58,10 @@ urlpatterns = [
     path('gradebooks/<int:pk>/delete/', views.delete_gradebook_view, name='delete_gradebook'),
     # Render template to delete a gradebook entry
     path('gradebook_calculation/', views.gradebook_calculation, name='gradebook_calculation'),
+    # Ajout du paramètre 'kind' dans l'URL
+    path('available_link/<str:subject>/<str:grade>/<str:standard>/<str:kind>/', views.get_links, name='get_links'),
+
+
 
     #CLASSES FUNCTIONALITIES
     path('classes/', views.class_list_view, name='get_classes'),  # Render template to list classes
