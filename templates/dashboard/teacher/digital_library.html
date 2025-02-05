@@ -1,150 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generate Test PDF</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 40px;
-        }
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h3 {
-            text-align: center;
-            color: #AB47BC;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-        }
-        select,
-        input[type="number"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        select,
-        input[type="number"] {
-            box-sizing: border-box; /* Inclut le padding et la bordure dans la largeur totale */
-        }
-        button {
-            background-color: rgb(62,179,227);
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: rgb(75, 141, 179);
-        }
+{% extends "_partials/dashboard_teacher/layaout.html" %}
+{% load static %}
 
-        #message-container {
-            z-index: 1000; /* Priorité d'affichage */
-            padding: 6px;
-            color: white;
-            font-size: 14px;
-            opacity: 1;
-            transition: opacity 0.5s ease-out;
-        }
-
-    #message-container .message {
-        margin: 10px 0;
-        padding: 15px;
-        border-radius: 4px;
-        font-weight: 500;
-        text-align: center;
-    }
-
-    /* Messages d'information */
-    #message-container .ui.info.message {
-        background-color: #2196F3; /* Bleu */
-    }
-
-    /* Messages d'avertissement */
-    #message-container .ui.warning.message {
-        background-color: #FF9800; /* Orange */
-    }
-
-    /* Messages de succès */
-    #message-container .ui.success.message {
-        background-color: #4CAF50; /* Vert */
-    }
-
-    /* Messages d'erreur */
-    #message-container .ui.error.message {
-        background-color: #F44336; /* Rouge */
-    }
-    .back-to-gradebook {
-        margin-top: 20px;
-        font-size: 14px;
-    }
-
-    </style>
-</head>
-<body>
-
-<div class="input-grid">
-    <h3>DIGITAL LIBRARY</h3>
-    <form action="{% url 'generate_pdf' %}" method="post" id="pdfForm">
+{% block content %}
+    <h4 class="text-color-pink">CREATE SHEET</h4>
+    <form action="{% url 'generate_pdf' %}" method="post" id="pdfForm" class="form-container">
         {% csrf_token %}
-        <label for="subject">Subject:</label>
-        <select id="subject" name="subject" required onchange="updateOptions('subject')">
-            <option value="">Select Subject</option>
-        </select>
+        <div class="input-container">
+            <label for="subject">Subject:</label>
+            <select id="subject" name="subject" required onchange="updateOptions('subject')">
+                <option value="">Select Subject</option>
+            </select>
+        </div>
 
-        <label for="year">Year:</label>
-        <select id="year" name="year" required onchange="updateOptions('year')">
-            <option value="">Select Year</option>
-        </select>
+        <div class="input-container">
+            <label for="grade">Grade:</label>
+            <select id="grade" name="grade" required onchange="updateOptions('grade')">
+                <option value="">Select Grade</option>
+            </select>
+        </div>
 
-        <label for="grade">Grade:</label>
-        <select id="grade" name="grade" required onchange="updateOptions('grade')">
-            <option value="">Select Grade</option>
-        </select>
+        <div class="input-container">
+            <label for="standard">Standard:</label>
+            <select id="standard" name="standard" required>
+                <option value="">Select Standard</option>
+            </select>
+        </div>
 
-        <label for="standard">Standard:</label>
-        <select id="standard" name="standard" required>
-            <option value="">Select Standard</option>
-        </select>
+        <div class="input-container">
+            <label for="kind">Question Type:</label>
+            <select id="kind" name="kind" required>
+                <option value="MC">Multiple Choice (MC)</option>
+                <option value="OR">Open Response (OR)</option>
+            </select>
+        </div>
 
-        <label for="kind">Question Type:</label>
-        <select id="kind" name="kind" required>
-            <option value="MC">Multiple Choice (MC)</option>
-            <option value="OR">Open Response (OR)</option>
-        </select>
+        <!-- Message de disponibilité amélioré -->
+        <div id="availability-message" style="display: none; margin-bottom: 10px; color: #666;">
+            <span id="available-text">Questions disponibles : </span>
+            <span id="available-count">0</span>
+            <span id="max-indicator" style="display: none;"> (Max: </span><span id="max-value">0</span>)
+        </div>
 
-        <label for="number">Number of Questions:</label>
-        <input type="number" id="number" name="number" min="1" required>
+        <!-- Modification ici : remplacement du select par un input -->
+        <div class="input-container">
+            <label for="number">Number of Questions:</label>
+            <input
+                type="number"
+                id="number"
+                name="number"
+                required
+                min="1"
+                max="1"
+                placeholder="Enter number between 1 and 0"
+                disabled
+            >
+        </div>
 
-         {% include '_partials/messages.html' %}
+        {% include '_partials/messages.html' %}
 
-        <button type="submit">Generate Test</button>
+        <button type="submit" class="generate-button">Generate Test</button>
     </form>
 
-    <div class="back-to-gradebook">
-        <a href="{% url 'gradebook_teacher_dashboard' %}" style="color: #0073b1;">Go back to Gradebook</a>
-    </div>
-</div>
-
-<script>
+    <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Fetch initial subjects
+        // Chargement initial des sujets
         fetch('/get-subjects/')
             .then(response => response.json())
             .then(data => {
@@ -156,27 +75,16 @@
                     subjectSelect.appendChild(option);
                 });
             });
+
+        // Écouteurs d'événements
+        document.getElementById('kind').addEventListener('change', checkAvailableLinks);
+        document.getElementById('standard').addEventListener('change', checkAvailableLinks);
     });
 
     function updateOptions(type) {
         if (type === 'subject') {
             const subjectValue = document.getElementById('subject').value;
-            fetch(`/get-years/${subjectValue}/`)
-                .then(response => response.json())
-                .then(data => {
-                    const yearSelect = document.getElementById('year');
-                    yearSelect.innerHTML = '<option value="">Select Year</option>';
-                    data.years.forEach(year => {
-                        const option = document.createElement('option');
-                        option.value = year;
-                        option.textContent = year;
-                        yearSelect.appendChild(option);
-                    });
-                });
-        } else if (type === 'year') {
-            const subjectValue = document.getElementById('subject').value;
-            const yearValue = document.getElementById('year').value;
-            fetch(`/get-grades/${subjectValue}/${yearValue}/`)
+            fetch(`/get-grades/${subjectValue}/`)
                 .then(response => response.json())
                 .then(data => {
                     const gradeSelect = document.getElementById('grade');
@@ -187,12 +95,15 @@
                         option.textContent = grade;
                         gradeSelect.appendChild(option);
                     });
+                    // Réinitialisation des champs dépendants
+                    document.getElementById('standard').innerHTML = '<option value="">Select Standard</option>';
+                    resetNumberField();
                 });
-        } else if (type === 'grade') {
+        }
+        else if (type === 'grade') {
             const subjectValue = document.getElementById('subject').value;
-            const yearValue = document.getElementById('year').value;
             const gradeValue = document.getElementById('grade').value;
-            fetch(`/get-standards/${subjectValue}/${yearValue}/${gradeValue}/`)
+            fetch(`/get-standards/${subjectValue}/${gradeValue}/`)
                 .then(response => response.json())
                 .then(data => {
                     const standardSelect = document.getElementById('standard');
@@ -201,12 +112,60 @@
                         const option = document.createElement('option');
                         option.value = standard;
                         option.textContent = standard;
+                        option.style.display = 'block'; // Ajout pour la recherche
                         standardSelect.appendChild(option);
                     });
+                    checkAvailableLinks();
                 });
         }
     }
+
+    function checkAvailableLinks() {
+        const subject = document.getElementById('subject').value;
+        const grade = document.getElementById('grade').value;
+        const standard = document.getElementById('standard').value;
+        const kind = document.getElementById('kind').value;
+
+        // Validation des champs requis
+        if (!subject || !grade || !standard || !kind) return;
+
+        // Appel API avec tous les paramètres
+        fetch(`/available_link/${subject}/${grade}/${standard}/${kind}/`)
+            .then(response => response.json())
+            .then(data => {
+                const count = data.links.length;
+                const numberInput = document.getElementById('number');
+                const messageElement = document.getElementById('availability-message');
+                const maxIndicator = document.getElementById('max-indicator');
+                const maxValueSpan = document.getElementById('max-value');
+
+                // Mise à jour du champ nombre
+                numberInput.disabled = count === 0;
+                numberInput.placeholder = count > 0
+                    ? `Enter number (1-${count})`
+                    : "No questions available";
+                numberInput.max = count;
+                numberInput.min = 1;
+
+                // Mise à jour du message
+                messageElement.style.display = 'block';
+                document.getElementById('available-count').textContent = count;
+                maxIndicator.style.display = count > 0 ? 'inline' : 'none';
+                maxValueSpan.textContent = count;
+
+                // Réinitialisation si nécessaire
+                if (numberInput.value > count) numberInput.value = '';
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function resetNumberField() {
+        const numberInput = document.getElementById('number');
+        numberInput.value = '';
+        numberInput.disabled = true;
+        numberInput.placeholder = "Select all required fields first";
+        document.getElementById('availability-message').style.display = 'none';
+    }
 </script>
 
-</body>
-</html>
+{% endblock %}
