@@ -206,13 +206,14 @@ def teach_teacher_dashboard(request):
 
 
 
-def filter_math_question(subject, number, grade, kind):
+def filter_math_question(subject, number, grade, standard, kind):
 
     df = pd.read_excel("Digital library.xlsx")
 
     filtered_df = df.loc[
         (df["Subject"] == subject) &
         (df["Grade"] == grade) &
+        (df["Standard"] == standard) &
         (df["MC/OR"] == kind)
     ]
 
@@ -233,14 +234,15 @@ def filter_math_question(subject, number, grade, kind):
         links.append(link)
     return links
 
-
-def filter_lang_question( number, grade, kind):
+def filter_lang_question(subject, number, grade, standard,  kind):
     df = pd.read_excel("Dreametrix excel.xlsx")
 
     filtered_df = df.loc[
+        (df["Subject"] == subject) &
         (df["Grade"] == grade) &
+        (df["Standard"] == standard) &
         (df["MC/OR"] == kind)
-        ]
+    ]
 
     workbook = load_workbook("Dreametrix excel.xlsx")
     sheet = workbook.active
@@ -270,7 +272,6 @@ def filter_lang_question( number, grade, kind):
         story_links[link] = q
 
     return story_links
-
 
 def generate_pdf(links: list | dict):
 
@@ -326,7 +327,6 @@ def generate_pdf(links: list | dict):
 
     doc.save("test.pdf")
 
-
 def generate_pdf_view(request):
     if request.method == "POST":
         subject = request.POST['subject']
@@ -337,9 +337,9 @@ def generate_pdf_view(request):
 
         try:
             if subject == "Math":
-                links = filter_math_question(subject, number, grade, kind)
+                links = filter_math_question(subject, number, grade, standard,  kind)
             else:
-                links = filter_lang_question( number, grade, kind)
+                links = filter_lang_question(subject, number, grade, standard, kind)
             generate_pdf(links)
             with open("test.pdf", "rb") as pdf:
                 response = HttpResponse(pdf.read(), content_type='application/pdf')
@@ -352,39 +352,56 @@ def generate_pdf_view(request):
 
     return render(request, 'dashboard/teacher/digital_library.html')
 
-
-
-# API pour obtenir les sujets
 def get_subjects(request):
     """df = pd.read_excel("Digital library.xlsx")"""
     # Nettoyer les espaces dans les sujets
     subjects = ["Math", "Language"]
     return JsonResponse({'subjects': subjects})
 
-
-# API for obtaining grades based on subject
 def get_grades(request, subject):
-    df = pd.read_excel("Digital library.xlsx")
-    grades = df["Grade"].unique().tolist()
-    return JsonResponse({'grades': grades})
+    # Sélectionner le bon fichier selon le sujet
+    if subject == "Math":
+        file_path = "Digital library.xlsx"
+    else:  # Language
+        file_path = "Dreametrix excel.xlsx"
+
+    df = pd.read_excel(file_path)
+
+    # Filtrer les grades pour le sujet sélectionné
+    filtered_df = df[df["Subject"] == subject]
+    grades = filtered_df["Grade"].unique().tolist()
+
+    return JsonResponse({'grades': sorted(grades)})
 
 # API to get standards based on subject, year, and grade
 def get_standards(request, subject, grade):
-    df = pd.read_excel("Digital library.xlsx")
+    # Sélectionner le bon fichier Excel selon le sujet
+    if subject == "Math":
+        file_path = "Digital library.xlsx"
+    else:  # Language
+        file_path = "Dreametrix excel.xlsx"
+
+    df = pd.read_excel(file_path)
 
     # Filtrer par subject et grade
     filtered_df = df[
         (df["Subject"] == subject) &
-        (df["Grade"] == int(grade))  # Conversion en int si nécessaire
+        (df["Grade"] == int(grade))
         ]
 
     # Récupérer les standards uniques
     standards = filtered_df["Standard"].unique().tolist()
 
     return JsonResponse({'standards': standards})
-# API to get available links based on subject and grade
+
 def get_links(request, subject, grade, standard, kind):
-    df = pd.read_excel("Digital library.xlsx")
+    # Déterminer le bon fichier Excel selon le sujet
+    if subject == "Math":
+        file_path = "Digital library.xlsx"
+    else:  # Language
+        file_path = "Dreametrix excel.xlsx"
+
+    df = pd.read_excel(file_path)
 
     # Ajouter le filtre Standard
     base_filter = (
@@ -394,7 +411,22 @@ def get_links(request, subject, grade, standard, kind):
             (df["MC/OR"] == kind)
     )
 
-    available_links = df.loc[base_filter, "Link to item"].dropna().tolist()
+    filtered_df = df.loc[base_filter]
+
+    # Charger le classeur Excel pour accéder aux liens
+    workbook = load_workbook(file_path)
+    sheet = workbook.active
+
+    available_links = []
+
+    for index, row in filtered_df.iterrows():
+        value = row["Link to item"]
+        if pd.notna(value):
+            # Récupérer le lien hypertexte
+            cell = sheet.cell(row=index + 2, column=df.columns.get_loc("Link to item") + 1)
+            link = cell.hyperlink.target if cell.hyperlink else None
+            if link:
+                available_links.append(link)
 
     return JsonResponse({'links': available_links})
 
