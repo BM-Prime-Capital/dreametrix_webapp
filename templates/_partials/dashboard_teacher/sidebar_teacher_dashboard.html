@@ -2,6 +2,7 @@
 
 <div class="container-left">
     <div class="left">
+<<<<<<< HEAD
         <a href="{% url 'get_classes' %}">
             <button class="btn-1 btn {% if request.resolver_match.url_name == 'home_teacher_dashboard' %}active{% endif %}">
                 <i class="bi bi-house blue"></i> CLASSES
@@ -18,36 +19,73 @@
         <a href="{% url 'get_gradebooks' %}">
             <button class="btn {% if request.resolver_match.url_name == 'gradebook_teacher_dashboard' %}active{% endif %}">
                 <i class="bi bi-book green"></i> GRADEBOOK
+=======
+        <a href="{% url 'home_teacher_dashboard' %}">
+            <button class="btn-1 btn {% if request.resolver_match.url_name == 'home_teacher_dashboard' %}active{% endif %}">
+                <i class="bi bi-house blue"></i> HOME
+            </button>
+        </a>
+
+        <a href="{% url 'assignments_teacher_dashboard' %}">
+            <button class="btn {% if request.resolver_match.url_name == 'assignments_teacher_dashboard' %}active{% endif %}">
+                <i class="bi bi-clipboard-data orange"></i> ASSIGNMENTS
+            </button>
+        </a>
+
+        <a href="{% url 'gradebook_teacher_dashboard' %}">
+            <button class="btn {% if request.resolver_match.url_name == 'gradebook_teacher_dashboard' %}active{% endif %}">
+                <i class="bi bi-clipboard-data orange"></i> GRADEBOOK
+>>>>>>> cc7ae6b (henock branch initialized)
             </button>
         </a>
 
         <a href="{% url 'attendance_teacher_dashboard' %}">
             <button class="btn {% if request.resolver_match.url_name == 'attendance_teacher_dashboard' %}active{% endif %}">
+<<<<<<< HEAD
                 <i class="bi bi-person-check blue"></i> ATTENDANCE
+=======
+                <i class="bi bi-journal-text orange"></i> ATTENDANCE
+>>>>>>> cc7ae6b (henock branch initialized)
             </button>
         </a>
 
         <a href="{% url 'character_teacher_dashboard' %}">
             <button class="btn {% if request.resolver_match.url_name == 'character_teacher_dashboard' %}active{% endif %}">
+<<<<<<< HEAD
                 <i class="bi bi-map orange"></i> CHARACTER
+=======
+                <i class="bi bi-door-open green"></i> CHARACTER
+>>>>>>> cc7ae6b (henock branch initialized)
             </button>
         </a>
 
         <a href="{% url 'seating_teacher_dashboard' %}">
             <button class="btn {% if request.resolver_match.url_name == 'seating_teacher_dashboard' %}active{% endif %}">
+<<<<<<< HEAD
                 <i class="bi bi-people green"></i> SEATING
+=======
+                <i class="bi bi-mortarboard orange"></i> SEATING
+>>>>>>> cc7ae6b (henock branch initialized)
             </button>
         </a>
 
         <a href="{% url 'communicate_teacher_dashboard' %}">
             <button class="btn-4 btn {% if request.resolver_match.url_name == 'communicate_teacher_dashboard' %}active{% endif %}">
+<<<<<<< HEAD
                 <i class="bi bi-send blue"></i> COMMUNICATE
+=======
+                <i class="bi bi-send green"></i> COMMUNICATE
+>>>>>>> cc7ae6b (henock branch initialized)
             </button>
         </a>
 
         <a href="{% url 'reports_teacher_dashboard' %}">
             <button class="btn {% if request.resolver_match.url_name == 'reports_teacher_dashboard' %}active{% endif %}">
+<<<<<<< HEAD
                 <i class="bi bi-book orange"></i> REPORTS
+=======
+                <i class="bi bi-book blue"></i> REPORTS
+>>>>>>> cc7ae6b (henock branch initialized)
             </button>
         </a>
 
@@ -59,7 +97,17 @@
 
         <a href="{% url 'polis_teacher_dashboard' %}">
             <button class="btn {% if request.resolver_match.url_name == 'polis_teacher_dashboard' %}active{% endif %}">
+<<<<<<< HEAD
                 <i class="bi bi-book blue"></i> POLLS
+=======
+                <i class="bi bi-book blue"></i> POLIS
+>>>>>>> cc7ae6b (henock branch initialized)
+            </button>
+        </a>
+
+        <a href="{% url 'ai_chat_teacher_dashboard' %}">
+            <button class="btn {% if request.resolver_match.url_name == 'ai_chat_teacher_dashboard' %}active{% endif %}">
+                <i class="bi bi-book blue"></i> AI Chat
             </button>
         </a>
     </div>

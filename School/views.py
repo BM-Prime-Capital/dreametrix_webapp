@@ -13,10 +13,8 @@ from openpyxl import load_workbook
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.http import HttpResponseBadRequest
-from .models import Class, Student
-
-
-
+from .models import Class, Student, ChatHistory
+import openai
 
 
 #SCHOOL_DASHBOARD
@@ -194,6 +192,9 @@ def gradebook_teacher_dashboard(request):
 def polis_teacher_dashboard(request):
     return render(request, 'dashboard/teacher/polis.html')
 
+def ai_chat_teacher_dashboard(request):
+    return render(request, 'dashboard/teacher/ai_chat.html')
+
 def reports_teacher_dashboard(request):
     return render(request, 'dashboard/teacher/reports.html')
 
@@ -203,6 +204,32 @@ def seating_teacher_dashboard(request):
 def teach_teacher_dashboard(request):
     return render(request, 'dashboard/teacher/teach.html')
 
+# Récupérer la clé API depuis les paramètres
+openai.api_key = settings.OPENAI_API_KEY  
+
+def chatbot_view(request):
+    return render(request, "chatbot/chat.html")
+
+def chat_api(request):
+    if request.method == "POST":
+        user_message = request.POST.get("message")
+        user = request.user if request.user.is_authenticated else None
+
+        # Mise à jour de l'appel API pour correspondre à la nouvelle interface
+        response = openai.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": user_message}]
+        )
+    
+
+        # Récupérer la réponse du bot
+        bot_response = response.choices[0].message.content
+        
+        # Enregistrer l'historique de chat pour les utilisateurs authentifiés
+        if user:
+            ChatHistory.objects.create(user=user, message=user_message, response=bot_response)
+
+        return JsonResponse({"response": bot_response})
 
 
 

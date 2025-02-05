@@ -3,6 +3,9 @@ import os
 import sys
 from decouple import config, Csv
 import dj_database_url
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Construction du chemin de base du projet
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -50,7 +53,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'School',  # Application School
     'Authentication',  # Application Authentication
+    'corsheaders',  # Si vous utilisez CORS
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -132,12 +137,26 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'SchoolManagementSystem/static')]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Configuration de l'envoi des emails
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_HOST = config("EMAIL_HOST", cast=str, default=None)
+# EMAIL_PORT = config("EMAIL_PORT", cast=str, default='587') # Recommended
+# EMAIL_HOST_USER = config("EMAIL_HOST_USER", cast=str, default=None)
+# EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", cast=str, default=None)
+# EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool, default=True)  # Use EMAIL_PORT 587 for TLS
+# EMAIL_USE_SSL = config("EMAIL_USE_TLS", cast=bool, default=False)  # EUse MAIL_PORT 465 for SSL
+# EMAIL_TIMEOUT = 10
+# EMAIL_FAIL_SILENTLY = False  # Important pour voir les erreurs
+
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))  # Convertir en int
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False") == "True"
+EMAIL_TIMEOUT = 10
+EMAIL_FAIL_SILENTLY = False
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Modèle personnalisé pour les utilisateurs
 AUTH_USER_MODEL = "Authentication.User"
