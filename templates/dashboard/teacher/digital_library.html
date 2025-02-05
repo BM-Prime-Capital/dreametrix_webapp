@@ -5,6 +5,14 @@
     <h4 class="text-color-pink">CREATE SHEET</h4>
     <form action="{% url 'generate_pdf' %}" method="post" id="pdfForm" class="form-container">
         {% csrf_token %}
+
+        <div class="input-container">
+            <label for="classes">Class:</label>
+            <select id="classes" name="classes">
+                <option value="">Select classes</option>
+                <!-- Les options des classes seront ajoutées ici par JavaScript -->
+            </select>
+        </div>
         <div class="input-container">
             <label for="subject">Subject:</label>
             <select id="subject" name="subject" required onchange="updateOptions('subject')">
@@ -63,6 +71,23 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", function() {
+        fetch('/get-classes/')
+        .then(response => response.json())
+        .then(data => {
+            const classesSelect = document.getElementById('classes');
+            if (data.classes.length > 0) {
+                data.classes.forEach(classItem => {
+                    const option = document.createElement('option');
+                    option.value = classItem.name;  // Assurez-vous que `classItem.name` est correct
+                    option.textContent = `${classItem.name} - ${classItem.subject} - ${classItem.grade}`;
+                    classesSelect.appendChild(option);
+                });
+            } else {
+                console.error('Aucune classe trouvée.');
+            }
+        });
+
+
         // Chargement initial des sujets
         fetch('/get-subjects/')
             .then(response => response.json())
