@@ -1,6 +1,5 @@
 from django.shortcuts import redirect
 from django.contrib import messages
-<<<<<<< HEAD
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import requests
@@ -14,16 +13,9 @@ from openpyxl import load_workbook
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.http import HttpResponseBadRequest
-from .models import Class, Student
-
-
-
-
-=======
+from .models import Class, Student, ChatHistory
 import openai
-from .models import ChatHistory
-from django.conf import settings
->>>>>>> fea880f (Removed API key from settings.py)
+
 
 #SCHOOL_DASHBOARD
 def home_school_dashboard(request):
@@ -212,7 +204,8 @@ def seating_teacher_dashboard(request):
 def teach_teacher_dashboard(request):
     return render(request, 'dashboard/teacher/teach.html')
 
-openai.api_key = settings.OPENAI_API_KEY  # Assure-toi que la clé est bien dans settings.py
+# Récupérer la clé API depuis les paramètres
+openai.api_key = settings.OPENAI_API_KEY  
 
 def chatbot_view(request):
     return render(request, "chatbot/chat.html")
@@ -230,17 +223,13 @@ def chat_api(request):
     
 
         # Récupérer la réponse du bot
-        # bot_response = response["choices"][0]["message"]["content"]
-        # bot_response = response.choices[0].message["content"]
         bot_response = response.choices[0].message.content
         
-
         # Enregistrer l'historique de chat pour les utilisateurs authentifiés
         if user:
             ChatHistory.objects.create(user=user, message=user_message, response=bot_response)
 
         return JsonResponse({"response": bot_response})
-
 
 
 
