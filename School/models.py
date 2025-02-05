@@ -1,10 +1,10 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth import get_user_model
-
-<<<<<<< HEAD
 from Authentication.models import Student
 
+# Get the custom user model
+User = get_user_model()  
 
 # Create your models here.
 class Class(models.Model):
@@ -48,8 +48,7 @@ class Gradebook(models.Model):
 
     def __str__(self):
         return f"Gradebook entry for {self.student.user.username} in {self.class_instance.name}"
-=======
-User = get_user_model()  # Get the custom user model
+
 
 class ChatHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
@@ -59,4 +58,3 @@ class ChatHistory(models.Model):
 
     def __str__(self):
         return f"{self.user.username if self.user else 'Anonyme'}: {self.message[:50]}"
->>>>>>> fea880f (Removed API key from settings.py)
