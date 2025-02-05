@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block content %}
-<<<<<<< HEAD
 <div class="form-container">
     <img src="{% static 'img/logo.png' %}" alt="logo" style="width: 145px; margin-bottom: 15px;">
 
@@ -18,48 +17,12 @@
         </div>
         <button type="submit" class="ui button">Login</button>
     </form>
-=======
-    <div class="form-container">
-        <img src="{% static 'img/logo.png' %}" alt="logo" style="width: 145px; margin-bottom: 15px;">
-
-        {% include '_partials/messages.html' %}
-        <p>Login as a {{ user_type|title }}</p> <!-- Display the selected user type -->
-        <form method="post" action="{% url 'login' %}?user_type={{ user_type }}">
-            {% csrf_token %}
-            <div class="ui left icon input" style="border-color: #0073b1;">
-                <input type="text" name="identifier" placeholder="Email or Username" required>
-                <i class="envelope icon" style="color: #0073b1;"></i>
-            </div>
-            <div class="ui left icon input" style="border-color: #0073b1;">
-                <input type="password" name="password" placeholder="Password" required>
-                <i class="lock icon" style="color: #0073b1;"></i>
-            </div>
-
-            <div style="margin-bottom: 10px; text-align: right;">
-                <a href="{% url 'password_reset' %}"
-                   style="color: #007351; text-decoration: none;"
-                   onmouseover="this.style.color='#005582';"
-                   onmouseout="this.style.color='#0073b1';">
-                   Forgot password?
-                </a>
-            </div>
-
-            <button type="submit" class="ui button" style="background-color: #0073b1; color: white;">Login</button>
-        </form>
->>>>>>> cc7ae6b (henock branch initialized)
 
     <!-- Show register link only if the user type is not school_admin -->
     {% if user_type != 'school_admin' %}
         <div class="register-link">
-<<<<<<< HEAD
             Not registered yet? <a href="{% url 'register_user' user_type %}">Sign up as a {{ user_type|title }} here</a>.
         </div>
     {% endif %}
 </div>
-=======
-            Not registered yet? <a href="{% url 'register_user' user_type %}" style="color: #0073b1;">Sign up as a {{ user_type|title }} here</a>.
-        </div>
-    {% endif %}
-    </div>
->>>>>>> cc7ae6b (henock branch initialized)
 {% endblock %}

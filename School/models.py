@@ -58,3 +58,4 @@ class ChatHistory(models.Model):
 
     def __str__(self):
         return f"{self.user.username if self.user else 'Anonyme'}: {self.message[:50]}"
+
