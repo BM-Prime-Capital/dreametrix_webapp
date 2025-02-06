@@ -585,28 +585,32 @@ def class_list_view(request):
         'unique_grades': unique_grades,
     })
 
+
 def create_class_view(request):
     """Handle the creation of a new class."""
     if request.method == 'POST':
         name = request.POST.get('name')
         subject = request.POST.get('subject')
         grade = request.POST.get('grade')
+        student_ids = request.POST.getlist('students')
 
-        # Validate inputs
         if not name or not subject or not grade:
             return HttpResponseBadRequest("All fields are required.")
 
         try:
-            # Create the new class
             new_class = Class.objects.create(name=name, subject=subject, grade=grade)
+            # Add selected students to the class
+            if student_ids:
+                valid_student_ids = [int(sid) for sid in student_ids if sid.isdigit()]
+                new_class.students.add(*valid_student_ids)
 
-            return redirect('get_classes')  # Redirect to the class list after creation
-        except Student.DoesNotExist:
-            return HttpResponseBadRequest("Student not found.")
+            return redirect('get_classes')
         except Exception as e:
             return HttpResponseBadRequest(f"An error occurred: {e}")
-
-    return render(request, 'dashboard/teacher/add_new_item_classes.html')
+    else:
+        # Get all students to display in the form
+        students = Student.objects.all()
+        return render(request, 'dashboard/teacher/add_new_item_classes.html', {'students': students})
 
 def update_class_view(request, pk):
     """Handle the update of an existing class."""
@@ -690,6 +694,9 @@ def gradebook_list_view(request):
     gradebooks = Gradebook.objects.all()
     classes = Class.objects.all()  # Récupérer toutes les classes
     return render(request, 'dashboard/teacher/gradebook.html', {'gradebooks': gradebooks, 'classes': classes})
+def get_classes(request):
+    classes = Class.objects.values('name', 'subject', 'grade')
+    return JsonResponse({'classes': list(classes)})
 
 def create_gradebook_view(request):
     """Handle the creation of a new gradebook entry."""
