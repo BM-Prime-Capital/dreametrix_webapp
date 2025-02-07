@@ -42,41 +42,43 @@
                 <table class="gradebook-table">
                     <thead>
                         <tr class="header-row">
+                            <th>CLASS</th>
                             <th>STUDENT</th>
                             <th>AVERAGE</th>
-                            <th>EXAM (3)</th>
-                            <th>TESTS (2)</th>
-                            <th>ASSIGNMENTS (14)</th>
+                            <th>EXAM</th>
+                            <th>TESTS</th>
+                            <th>HOMEWORKS</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for gradebook in gradebooks %}
-                            <tr class="{% if forloop.counter|divisibleby:2 %}white-row{% else %}colored-row{% endif %}">
-                                <td>{{ gradebook.student.user.username }}</td>
-                                <td>
-                                    {{ gradebook.average }}%
-                                    {% if gradebook.average >= 90 %}
-                                        (A)
-                                    {% elif gradebook.average >= 80 %}
-                                        (B)
-                                    {% elif gradebook.average >= 70 %}
-                                        (C)
-                                    {% elif gradebook.average >= 55 %}
-                                        (D)
-                                    {% else %}
-                                        (F)
-                                    {% endif %}
-                                </td>
-                                <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-                                <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-                                <td><span class="view-link">View</span><i class="bi bi-mic-fill red"></i></td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="5">Aucune entrée de gradebook trouvée.</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
+    {% for entry in class_data %}
+        <tr class="{% cycle 'colored-row' 'white-row' %}">
+            <td>{{ entry.class_instance__name }}</td>
+            <td>{{ entry.total_students }} Students</td>
+            <td>
+                {{ entry.class_avg|default_if_none:"0.0"|floatformat:1 }}%
+                {% if entry.class_avg >= 90 %}
+                    (A)
+                {% elif entry.class_avg >= 80 %}
+                    (B)
+                {% elif entry.class_avg >= 70 %}
+                    (C)
+                {% elif entry.class_avg >= 55 %}
+                    (D)
+                {% else %}
+                    (F)
+                {% endif %}
+            </td>
+            <td><span class="view-link">View ({{ entry.exam_count }})</span></td>
+            <td><span class="view-link">View ({{ entry.test_count }})</span></td>
+            <td><span class="view-link">View ({{ entry.homework_count }})</span></td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="6">No gradebook entries found.</td>
+        </tr>
+    {% endfor %}
+</tbody>
                 </table>
             </div>
         </div>

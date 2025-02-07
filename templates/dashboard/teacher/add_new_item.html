@@ -7,30 +7,69 @@
             <div id="add-item-form">
                 <form method="POST" action="{% url 'create_gradebook' %}" enctype="multipart/form-data">
                     {% csrf_token %}
+                    <input type="hidden" id="class_instance" name="class_instance">
+                    <input type="hidden" id="assessment_type" name="assessment_type">
 
-                    <label for="student">Student:</label>
-                    <select id="student" name="student" required>
-                        <option value="">Select a student</option>
-                        {% for student in students %}
-                            <option value="{{ student.id }}">{{ student.user.username }}</option>
-                        {% endfor %}
-                    </select>
+                    <div class="form-group">
+                        <label for="class_selector">Select Class:</label>
+                        <select id="class_selector" class="form-control" disabled>
+                            <option value="">Class will be auto-detected from QR</option>
+                        </select>
+                    </div>
 
-                    <label for="average">Average:</label>
-                    <input type="number" id="average" name="average" placeholder="Average" required>
+                    <div class="form-group">
+                        <label for="feedback_image">Upload Feedback Image:</label>
+                        <input type="file" id="feedback_image" name="feedback_image" accept="image/*" required>
+                        <div id="qr-info" class="qr-info"></div>
+                    </div>
 
-                    <label for="exam_feedback">Exam Feedback:</label>
-                    <input type="file" id="exam_feedback" name="exam_feedback" required>
-
-                    <label for="test_feedback">Test Feedback:</label>
-                    <input type="file" id="test_feedback" name="test_feedback" required>
-
-                    <label for="homework_feedback">Homework Feedback:</label>
-                    <input type="file" id="homework_feedback" name="homework_feedback" required>
-
-                    <button type="submit" class="button button-apply">APPLY</button>
+                    <button type="submit" class="button button-apply">UPLOAD FOR ALL STUDENTS</button>
                 </form>
             </div>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+    <script>
+        document.getElementById('feedback_image').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const image = new Image();
+                image.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    context.drawImage(image, 0, 0);
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: 'dontInvert',
+                    });
+
+                    if (code) {
+                        const [classPart, typePart] = code.data.split(',');
+                        const classId = classPart.split(':')[1].trim();
+                        const assessmentType = typePart.split(':')[1].trim().toUpperCase();
+
+                        document.getElementById('class_instance').value = classId;
+                        document.getElementById('assessment_type').value = assessmentType;
+
+                        // Mettre à jour l'affichage
+                        document.getElementById('class_selector').value = classId;
+                        document.getElementById('qr-info').innerHTML = `
+                            <p>Class detected: ${classId}</p>
+                            <p>Assessment Type: ${assessmentType}</p>
+                        `;
+                    } else {
+                        alert('No QR code found in the image.');
+                    }
+                };
+                image.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    </script>
 {% endblock %}
