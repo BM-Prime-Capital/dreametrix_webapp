@@ -107,7 +107,7 @@ if DEBUG:
 else:
     # Configuration pour Railway ou production avec dj_database_url
     DATABASES = {
-        'default': dj_database_url.parse(os.environ.get("postgresql://dreametrix_db_vpp0_user:6vnLudZlHTpzyM8NyebSlV8hrv12AyuR@dpg-ctc9sfq3esus73bcvbdg-a.oregon-postgres.render.com/dreametrix_db_vpp0"))
+        'default': dj_database_url.parse(os.environ.get("DATABASE_URL"))
     }
 
 # Validation des mots de passe
