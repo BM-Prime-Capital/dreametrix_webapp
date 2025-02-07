@@ -39,15 +39,18 @@ class Assignment(models.Model):
 
 
 class Gradebook(models.Model):
+    ASSESSMENT_TYPES = (
+        ('EXAM', 'Exam'),
+        ('TEST', 'Test'),
+        ('HOMEWORK', 'Homework'),
+    )
+
     class_instance = models.ForeignKey(Class, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    average = models.FloatField()
-    exam_feedback = models.FileField(upload_to='feedback/')
-    test_feedback = models.FileField(upload_to='feedback/')
-    homework_feedback = models.FileField(upload_to='feedback/')
-
-    def __str__(self):
-        return f"Gradebook entry for {self.student.user.username} in {self.class_instance.name}"
+    assessment_type = models.CharField(max_length=10, choices=ASSESSMENT_TYPES)
+    feedback_file = models.FileField(upload_to='feedback/')
+    score = models.FloatField()  # À utiliser plus tard pour le calcul de la moyenne
+    date_added = models.DateTimeField(auto_now_add=True)
 
 
 class ChatHistory(models.Model):
