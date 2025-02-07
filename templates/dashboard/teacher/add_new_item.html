@@ -10,66 +10,231 @@
                     <input type="hidden" id="class_instance" name="class_instance">
                     <input type="hidden" id="assessment_type" name="assessment_type">
 
+                    <!-- Sélecteur de classe -->
                     <div class="form-group">
-                        <label for="class_selector">Select Class:</label>
-                        <select id="class_selector" class="form-control" disabled>
-                            <option value="">Class will be auto-detected from QR</option>
+                        <label for="class_selector">Class:</label>
+                        <select id="class_selector" name="class_selector" class="form-control" disabled>
+                            <option value="">Auto-détection par QR</option>
+                            {% for class in classes %}
+                                <option value="{{ class.id }}">{{ class.name }}</option>
+                            {% endfor %}
                         </select>
+                    </div>
+
+                    <!-- Sélecteur de type d'évaluation -->
+                    <div class="form-group">
+                        <label for="assessment_type_selector">Type d'évaluation:</label>
+                        <select id="assessment_type_selector" name="assessment_type_selector" class="form-control" disabled>
+                            <option value="">Auto-détection par QR</option>
+                            {% for type, label in ASSESSMENT_TYPES %}
+                                <option value="{{ type }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Sélecteur d'étudiants -->
+                    <div class="form-group">
+                        <label for="student_selector">Étudiants:</label>
+                        <select id="student_selector" name="students" class="form-control" multiple disabled>
+                            <option value="">Sélectionnez d'abord une classe</option>
+                        </select>
+                    </div>
+
+                    <!-- Moyenne actuelle -->
+                    <div class="form-group">
+                        <label>Moyenne actuelle:</label>
+                        <div id="current-average" class="average-display">
+                            <span id="average-value">N/A</span>
+                            <small>(sur <span id="record-count">0</span> enregistrements)</small>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="feedback_image">Upload Feedback Image:</label>
                         <input type="file" id="feedback_image" name="feedback_image" accept="image/*" required>
+                        <button type="button" id="scan-button" class="button button-secondary">Scan Image</button>
+                        <div id="image-preview-container" style="display:none;">
+                            <img id="image-preview" src="#" alt="Image Preview" style="max-width:200px; max-height:200px;">
+                        </div>
                         <div id="qr-info" class="qr-info"></div>
+                        <div id="scanning-indicator" style="display:none;">Scanning...</div>  <!-- Indicateur de scan -->
                     </div>
 
-                    <button type="submit" class="button button-apply">UPLOAD FOR ALL STUDENTS</button>
+                    <button type="submit" class="button button-apply">AJOUTER AU LIVRE</button>
                 </form>
             </div>
+            <!-- ... (section d'erreur existante) ... -->
+             {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
     <script>
-        document.getElementById('feedback_image').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+        document.addEventListener('DOMContentLoaded', () => {
+            // Éléments du formulaire
+            const feedbackImage = document.getElementById('feedback_image');
+            const imagePreviewContainer = document.getElementById('image-preview-container');
+            const imagePreview = document.getElementById('image-preview');
+            const qrInfo = document.getElementById('qr-info');
+            const classSelector = document.getElementById('class_selector');
+            const assessmentTypeSelector = document.getElementById('assessment_type_selector');
+            const studentSelector = document.getElementById('student_selector');
+            const classInstanceInput = document.getElementById('class_instance');
+            const assessmentTypeInput = document.getElementById('assessment_type');
+            const scanButton = document.getElementById('scan-button');
+            const scanningIndicator = document.getElementById('scanning-indicator');
+            const averageValue = document.getElementById('average-value');
+            const recordCount = document.getElementById('record-count');
 
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const image = new Image();
-                image.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.width = image.width;
-                    canvas.height = image.height;
-                    context.drawImage(image, 0, 0);
-                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                        inversionAttempts: 'dontInvert',
+            let imageSrc = null;
+
+            // Charger les étudiants d'une classe
+            async function loadStudents(classId) {
+                try {
+                    const response = await fetch(`/get-students/?class_id=${classId}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    const selector = document.getElementById('student_selector');
+                    selector.innerHTML = data.students.length > 0
+                        ? data.students.map(student =>
+                            `<option value="${student.id}">${student.name}</option>`
+                          ).join('')
+                        : '<option value="">Aucun étudiant dans cette classe</option>';
+
+                    selector.disabled = false;
+                } catch (error) {
+                    console.error('Error loading students:', error);
+                    studentSelector.innerHTML = `<option value="">Erreur: ${error.message}</option>`;
+                }
+            }
+
+            // Mettre à jour la moyenne
+            async function updateAverage() {
+                const classId = classSelector.value;
+                const assessmentType = assessmentTypeSelector.value;
+
+                if (!classId || !assessmentType) return;
+
+                try {
+                    const response = await fetch(
+                        `/get-average/?class_id=${classId}&assessment_type=${assessmentType}`
+                    );
+                    const data = await response.json();
+
+                    averageValue.textContent = data.average ? data.average.toFixed(2) : 'N/A';
+                    recordCount.textContent = data.count;
+                } catch (error) {
+                    console.error('Error updating average:', error);
+                    averageValue.textContent = 'Erreur';
+                    recordCount.textContent = '0';
+                }
+            }
+
+            // Gestion de l'upload d'image
+            feedbackImage.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imageSrc = event.target.result;
+                    imagePreview.src = imageSrc;
+                    imagePreviewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Scanner le QR code
+            scanButton.addEventListener('click', async function() {
+                if (!imageSrc) {
+                    alert('Veuillez d\'abord uploader une image');
+                    return;
+                }
+
+                scanningIndicator.style.display = 'block';
+
+                try {
+                    const response = await fetch('https://zxing.org/w/decode', {
+                        method: 'POST',
+                        body: new URLSearchParams({
+                            u: imageSrc,
+                            fullResult: 'true',
+                            tryHarder: 'true'
+                        }),
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
                     });
 
-                    if (code) {
-                        const [classPart, typePart] = code.data.split(',');
+                    const data = await response.text();
+                    const parser = new DOMParser();
+                    const htmlDoc = parser.parseFromString(data, 'text/html');
+                    const resultElement = htmlDoc.querySelector('pre');
+
+                    if (resultElement?.textContent.trim() !== 'No results') {
+                        const qrData = resultElement.textContent.trim();
+                        const [classPart, typePart] = qrData.split(',');
                         const classId = classPart.split(':')[1].trim();
                         const assessmentType = typePart.split(':')[1].trim().toUpperCase();
 
-                        document.getElementById('class_instance').value = classId;
-                        document.getElementById('assessment_type').value = assessmentType;
+                        // Mettre à jour les champs
+                        classInstanceInput.value = classId;
+                        assessmentTypeInput.value = assessmentType;
+                        classSelector.value = classId;
+                        assessmentTypeSelector.value = assessmentType;
 
-                        // Mettre à jour l'affichage
-                        document.getElementById('class_selector').value = classId;
-                        document.getElementById('qr-info').innerHTML = `
-                            <p>Class detected: ${classId}</p>
-                            <p>Assessment Type: ${assessmentType}</p>
+                        // Déverrouiller et rafraîchir
+                        classSelector.disabled = false;
+                        assessmentTypeSelector.disabled = false;
+                        await loadStudents(classId);
+                        await updateAverage();
+
+                        qrInfo.innerHTML = `
+                            <p>Classe détectée : ${classId}</p>
+                            <p>Type d'évaluation : ${assessmentType}</p>
                         `;
                     } else {
-                        alert('No QR code found in the image.');
+                        throw new Error('Aucun QR code trouvé');
                     }
-                };
-                image.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
+                } catch (error) {
+                    alert(error.message || 'Erreur pendant le scan');
+                    qrInfo.innerHTML = '<p>Échec du scan. Sélection manuelle nécessaire.</p>';
+                    classSelector.disabled = false;
+                    assessmentTypeSelector.disabled = false;
+                } finally {
+                    scanningIndicator.style.display = 'none';
+                }
+            });
+
+            // Écouteurs d'événements
+            classSelector.addEventListener('change', async function() {
+                classInstanceInput.value = this.value;
+                if (this.value) {
+                    await loadStudents(this.value);
+                    await updateAverage();
+                }
+            });
+
+            assessmentTypeSelector.addEventListener('change', async function() {
+                assessmentTypeInput.value = this.value;
+                await updateAverage();
+            });
+
+            // Initialisation
+            if (classSelector.value) {
+                loadStudents(classSelector.value);
+                updateAverage();
+            }
         });
     </script>
 {% endblock %}
