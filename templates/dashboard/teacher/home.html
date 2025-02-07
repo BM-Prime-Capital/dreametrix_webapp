@@ -61,6 +61,7 @@
                         <th>CLASSES</th>
                         <th>SUBJECTS</th>
                         <th>GRADES</th>
+                        <th>STUDENTS</th>
                         <th>EDIT</th>
                         <th>DELETE</th>
                     </tr>
@@ -71,6 +72,7 @@
                         <td>{{ class.name }}</td>
                         <td>{{ class.subject }}</td>
                         <td>{{ class.grade }}</td>
+                        <td>{{ class.students.count }}</td>
                         <td>
                           <button type="button" onclick='openEditPopup({
                                 name: "{{ class.name|escapejs }}",

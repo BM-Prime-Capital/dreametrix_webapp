@@ -585,28 +585,32 @@ def class_list_view(request):
         'unique_grades': unique_grades,
     })
 
+
 def create_class_view(request):
     """Handle the creation of a new class."""
     if request.method == 'POST':
         name = request.POST.get('name')
         subject = request.POST.get('subject')
         grade = request.POST.get('grade')
+        student_ids = request.POST.getlist('students')
 
-        # Validate inputs
         if not name or not subject or not grade:
             return HttpResponseBadRequest("All fields are required.")
 
         try:
-            # Create the new class
             new_class = Class.objects.create(name=name, subject=subject, grade=grade)
+            # Add selected students to the class
+            if student_ids:
+                valid_student_ids = [int(sid) for sid in student_ids if sid.isdigit()]
+                new_class.students.add(*valid_student_ids)
 
-            return redirect('get_classes')  # Redirect to the class list after creation
-        except Student.DoesNotExist:
-            return HttpResponseBadRequest("Student not found.")
+            return redirect('get_classes')
         except Exception as e:
             return HttpResponseBadRequest(f"An error occurred: {e}")
-
-    return render(request, 'dashboard/teacher/add_new_item_classes.html')
+    else:
+        # Get all students to display in the form
+        students = Student.objects.all()
+        return render(request, 'dashboard/teacher/add_new_item_classes.html', {'students': students})
 
 def update_class_view(request, pk):
     """Handle the update of an existing class."""
@@ -685,49 +689,62 @@ from .models import Gradebook
 from .models import Student
 from .serializers import GradebookSerializer
 
+from django.db.models import Count, Case, When, FloatField, F, Avg
+
+
 def gradebook_list_view(request):
-    """Render the template to list all gradebook entries."""
-    gradebooks = Gradebook.objects.all()
-    classes = Class.objects.all()  # Récupérer toutes les classes
-    return render(request, 'dashboard/teacher/gradebook.html', {'gradebooks': gradebooks, 'classes': classes})
+    # Agrégation par classe
+    class_data = Gradebook.objects.values(
+        'class_instance__name'
+    ).annotate(
+        total_students=Count('student', distinct=True),
+        exam_count=Count(Case(When(assessment_type='EXAM', then=1))),
+        test_count=Count(Case(When(assessment_type='TEST', then=1))),
+        homework_count=Count(Case(When(assessment_type='HOMEWORK', then=1))),
+        class_avg=Avg('score')
+    ).order_by('class_instance__name')
 
-def create_gradebook_view(request):
-    """Handle the creation of a new gradebook entry."""
-    if request.method == 'POST':
-        class_instance_id = request.POST.get('class_instance')  # ID de la classe
-        student_id = request.POST.get('student')  # ID de l'élève
-        average = request.POST.get('average')  # Note moyenne
-        exam_feedback = request.FILES.get('exam_feedback')  # Fichier de feedback d'examen
-        test_feedback = request.FILES.get('test_feedback')  # Fichier de feedback de test
-        homework_feedback = request.FILES.get('homework_feedback')  # Fichier de feedback de devoir
-
-        class_instance = Class.objects.get(id=class_instance_id)
-        student = Student.objects.get(id=student_id)
-
-        new_gradebook = Gradebook.objects.create(
-            class_instance=class_instance,
-            student=student,
-            average=average,
-            exam_feedback=exam_feedback,
-            test_feedback=test_feedback,
-            homework_feedback=homework_feedback
-        )
-
-        return redirect('get_gradebooks')  # Redirection vers la liste des gradebooks après la création
-
-    # Récupérer tous les étudiants et classes
-    studentss = Student.objects.all()
     classes = Class.objects.all()
 
-    if not studentss:
-        print("Aucun étudiant trouvé.")
-    else:
-        print(f"Étudiants trouvés : {[student.user.username for student in studentss]}")  #
-
-    return render(request, 'dashboard/teacher/add_new_item.html', {
-        'students': studentss,
-        'classes': classes,  # Si vous avez besoin de sélectionner une classe
+    return render(request, 'dashboard/teacher/gradebook.html', {
+        'class_data': class_data,
+        'classes': classes
     })
+
+def get_classes(request):
+    classes = Class.objects.values('name', 'subject', 'grade')
+    return JsonResponse({'classes': list(classes)})
+
+def create_gradebook_view(request):
+    if request.method == 'POST':
+        try:
+            class_id = request.POST.get('class_instance')
+            assessment_type = request.POST.get('assessment_type')
+            feedback_file = request.FILES.get('feedback_image')
+
+            # Récupérer tous les étudiants de la classe
+            students = Student.objects.filter(class_students__id=class_id)
+            if not students.exists():
+                raise ValueError("No students found in this class")
+
+            # Créer une entrée pour chaque étudiant
+            for student in students:
+                Gradebook.objects.create(
+                    class_instance_id=class_id,
+                    student=student,
+                    assessment_type=assessment_type,
+                    feedback_file=feedback_file,
+                    score=0.0  # Valeur par défaut à mettre à jour plus tard
+                )
+
+            return redirect('get_gradebooks')
+
+        except Exception as e:
+            return render(request, 'dashboard/teacher/add_new_item.html', {
+                'error': str(e)
+            })
+
+    return render(request, 'dashboard/teacher/add_new_item.html')
 
 def update_gradebook_view(request, pk):
     """Handle the update of an existing gradebook entry."""
