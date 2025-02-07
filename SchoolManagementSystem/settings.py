@@ -137,24 +137,19 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'SchoolManagementSystem/static')]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 #Configuration de l'envoi des emails
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_HOST = config("EMAIL_HOST", cast=str, default=None)
-EMAIL_PORT = config("EMAIL_PORT", cast=str, default='587') # Recommended
-EMAIL_HOST_USER = config("EMAIL_HOST_USER", cast=str, default=None)
-EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", cast=str, default=None)
-EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool, default=True)  # Use EMAIL_PORT 587 for TLS
-EMAIL_USE_SSL = config("EMAIL_USE_TLS", cast=bool, default=False)  # EUse MAIL_PORT 465 for SSL
-EMAIL_TIMEOUT = 10
-EMAIL_FAIL_SILENTLY = False  # Important pour voir les erreurs
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#EMAIL_PORT = config("EMAIL_PORT", cast=str, default='587') # Recommended
+#EMAIL_HOST_USER = config("EMAIL_HOST_USER", cast=str, default=None)
+#EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", cast=str, default=None)
 
-#EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-#EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))  # Convertir en int
-#EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-#EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-#EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
-#EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False") == "True"
-#EMAIL_TIMEOUT = 10
-#EMAIL_FAIL_SILENTLY = False
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))  # Convertir en int
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False") == "True"
+EMAIL_TIMEOUT = 10
+EMAIL_FAIL_SILENTLY = False
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
