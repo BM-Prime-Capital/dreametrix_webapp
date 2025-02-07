@@ -50,10 +50,6 @@ class Assignment(models.Model):
     def __str__(self):
         return f"{self.assignment_type} for {self.class_instance.name}"
 
-
-
-
-
 class ChatHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     message = models.TextField()
