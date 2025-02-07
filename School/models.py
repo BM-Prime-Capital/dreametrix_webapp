@@ -16,6 +16,19 @@ class Class(models.Model):
     def __str__(self):
         return f"{self.name} - {self.subject} (Grade {self.grade})"
 
+class Gradebook(models.Model):
+    ASSESSMENT_TYPES = (
+        ('EXAM', 'Exam'),
+        ('TEST', 'Test'),
+        ('HOMEWORK', 'Homework'),
+    )
+
+    class_instance = models.ForeignKey(Class, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    assessment_type = models.CharField(max_length=10, choices=ASSESSMENT_TYPES)
+    feedback_file = models.FileField(upload_to='feedback/')
+    score = models.FloatField()  # À utiliser plus tard pour le calcul de la moyenne
+    date_added = models.DateTimeField(auto_now_add=True)
 
 class Assignment(models.Model):
     HOMEWORK = 'HW'
@@ -38,19 +51,7 @@ class Assignment(models.Model):
         return f"{self.assignment_type} for {self.class_instance.name}"
 
 
-class Gradebook(models.Model):
-    ASSESSMENT_TYPES = (
-        ('EXAM', 'Exam'),
-        ('TEST', 'Test'),
-        ('HOMEWORK', 'Homework'),
-    )
 
-    class_instance = models.ForeignKey(Class, on_delete=models.CASCADE)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    assessment_type = models.CharField(max_length=10, choices=ASSESSMENT_TYPES)
-    feedback_file = models.FileField(upload_to='feedback/')
-    score = models.FloatField()  # À utiliser plus tard pour le calcul de la moyenne
-    date_added = models.DateTimeField(auto_now_add=True)
 
 
 class ChatHistory(models.Model):

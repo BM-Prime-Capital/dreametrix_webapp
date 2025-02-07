@@ -52,8 +52,10 @@ urlpatterns = [
     path('get-standards/<str:subject>/<int:grade>/', views.get_standards, name='get_standards'),
 
     #GRADEBOOK FUNCTIONALITIES
-    path('gradebook_list_view/', views.gradebook_list_view, name='get_gradebooks'),  # Render template to list gradebook entries
-    path('create_gradebook/', views.create_gradebook_view, name='create_gradebook'),
+    path('gradebook_list_view/', views.gradebook_list_view, name='get_gradebooks'),
+    path('create-gradebook/', views.create_gradebook_view, name='create_gradebook'),
+    path('get-students/', views.get_students, name='get_students'),
+    path('get-average/', views.get_average, name='get_average'),
     # Render template to create a gradebook entry
     path('gradebooks/<int:pk>/update/', views.update_gradebook_view, name='update_gradebook'),
     # Render template to update a gradebook entry
