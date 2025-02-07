@@ -684,12 +684,12 @@ def delete_assignment_view(request, pk):
     return render(request, 'assignments/delete_assignment.html', {'assignment_instance': assignment_instance})
 
 
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Gradebook
-from .models import Student
-from .serializers import GradebookSerializer
-
+from django.shortcuts import get_object_or_404
+from django.shortcuts import render, redirect
+from .models import Gradebook, Student, Class
+from django.core.files.storage import FileSystemStorage
 from django.db.models import Count, Case, When, FloatField, F, Avg
+from django.http import JsonResponse
 
 
 def gradebook_list_view(request):
@@ -715,37 +715,6 @@ def get_classes(request):
     classes = Class.objects.values('name', 'subject', 'grade')
     return JsonResponse({'classes': list(classes)})
 
-def create_gradebook_view(request):
-    if request.method == 'POST':
-        try:
-            class_id = request.POST.get('class_instance')
-            assessment_type = request.POST.get('assessment_type')
-            feedback_file = request.FILES.get('feedback_image')
-
-            # Récupérer tous les étudiants de la classe
-            students = Student.objects.filter(class_students__id=class_id)
-            if not students.exists():
-                raise ValueError("No students found in this class")
-
-            # Créer une entrée pour chaque étudiant
-            for student in students:
-                Gradebook.objects.create(
-                    class_instance_id=class_id,
-                    student=student,
-                    assessment_type=assessment_type,
-                    feedback_file=feedback_file,
-                    score=0.0  # Valeur par défaut à mettre à jour plus tard
-                )
-
-            return redirect('get_gradebooks')
-
-        except Exception as e:
-            return render(request, 'dashboard/teacher/add_new_item.html', {
-                'error': str(e)
-            })
-
-    return render(request, 'dashboard/teacher/add_new_item.html')
-
 def update_gradebook_view(request, pk):
     """Handle the update of an existing gradebook entry."""
     gradebook_instance = get_object_or_404(Gradebook, pk=pk)
@@ -767,4 +736,92 @@ def delete_gradebook_view(request, pk):
         return redirect('get_gradebooks')  # Redirect to the gradebook list after deletion
 
     return render(request, 'dashboard/teacher/gradebook.html', {'gradebook_instance': gradebook_instance})
+
+
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from .models import Gradebook, Student, Class
+from django.core.files.storage import FileSystemStorage
+
+
+def create_gradebook_view(request):
+    if request.method == 'POST':
+        try:
+            class_id = request.POST.get('class_instance')
+            assessment_type = request.POST.get('assessment_type')
+            feedback_file = request.FILES.get('feedback_image')
+            student_ids = request.POST.getlist('students')
+
+            if not all([class_id, assessment_type, feedback_file, student_ids]):
+                raise ValueError("Tous les champs requis ne sont pas remplis")
+
+            for student_id in student_ids:
+                student = Student.objects.get(id=student_id)
+                fs = FileSystemStorage(location='media/feedback')
+                filename = fs.save(f"{student_id}_{feedback_file.name}", feedback_file)
+
+                Gradebook.objects.create(
+                    class_instance_id=class_id,
+                    student=student,
+                    assessment_type=assessment_type,
+                    feedback_file=filename,
+                    score=0.0
+                )
+
+            return redirect('get_gradebooks')
+
+        except Exception as e:
+            classes = Class.objects.all()
+            return render(request, 'dashboard/teacher/add_new_item.html', {
+                'error': str(e),
+                'classes': classes,
+                'ASSESSMENT_TYPES': Gradebook.ASSESSMENT_TYPES,
+            })
+
+    # Code pour les requêtes GET
+    classes = Class.objects.all()
+    return render(request, 'dashboard/teacher/add_new_item.html', {
+        'classes': classes,
+        'ASSESSMENT_TYPES': Gradebook.ASSESSMENT_TYPES,
+    })
+
+
+def get_students(request):
+    try:
+        class_id = request.GET.get('class_id')
+        if not class_id:
+            return JsonResponse({'error': 'Class ID missing'}, status=400)
+
+        students = Student.objects.filter(classes__id=class_id).values('id', 'user__first_name', 'user__last_name')
+
+        return JsonResponse({
+            'students': [
+                {
+                    'id': s['id'],
+                    'name': f"{s['user__first_name']} {s['user__last_name']}"
+                }
+                for s in students
+            ]
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def get_average(request):
+    class_id = request.GET.get('class_id')
+    assessment_type = request.GET.get('assessment_type')
+
+    stats = Gradebook.objects.filter(
+        class_instance_id=class_id,
+        assessment_type=assessment_type
+    ).aggregate(
+        average=Avg('score'),
+        count=Count('id')
+    )
+
+    return JsonResponse({
+        'average': stats['average'] if stats['average'] is not None else 0,
+        'count': stats['count']
+    })
 
