@@ -340,7 +340,7 @@ def generate_pdf(links: list | dict, selected_class: str, subject: str, grade: i
 
     # Lignes de saisie
     cover.insert_text((100, 650), "Name: -----------------------------", fontsize=12)
-    cover.insert_text((100, 680), f"Class: {selected_class} ------------------------", fontsize=12)
+    cover.insert_text((100, 680), f"Class: ----{selected_class}--------", fontsize=12)
 
     # === Page 2 - Vide ===
     doc.new_page(width=595, height=842)
