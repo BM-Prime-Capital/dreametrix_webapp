@@ -5,14 +5,6 @@
     <h4 class="text-color-pink">CREATE SHEET</h4>
     <form action="{% url 'generate_pdf' %}" method="post" id="pdfForm" class="form-container">
         {% csrf_token %}
-
-        <div class="input-container">
-            <label for="classes">Class:</label>
-            <select id="classes" name="classes">
-                <option value="">Select classes</option>
-                <!-- Les options des classes seront ajoutées ici par JavaScript -->
-            </select>
-        </div>
         <div class="input-container">
             <label for="subject">Subject:</label>
             <select id="subject" name="subject" required onchange="updateOptions('subject')">
@@ -65,26 +57,83 @@
         </div>
 
         {% include '_partials/messages.html' %}
+        <!-- Nouvelle section pour les radio buttons -->
+        <div class="classes-radio-container">
+            <h4>Select Class:</h4>
+            <div class="radio-grid" id="classesRadio"></div>
+            <input type="hidden" id="classes" name="classes" value="">
+        </div>
 
         <button type="submit" class="generate-button">Generate Test</button>
     </form>
+    <style>
+        .classes-radio-container {
+            margin: 20px 0;
+            width: 100%;
+        }
 
+        .radio-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .radio-card {
+            flex: 1 1 calc(25% - 10px);
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .radio-card:hover {
+            border-color: #ff69b4;
+            background-color: #fff5f8;
+        }
+
+        .radio-card input[type="radio"] {
+            display: none;
+        }
+
+        .radio-card input[type="radio"]:checked + label {
+            color: #ff69b4;
+            font-weight: bold;
+        }
+
+        .radio-card label {
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    </style>
     <script>
     document.addEventListener("DOMContentLoaded", function() {
+        // Chargement des classes
         fetch('/get-classes/')
         .then(response => response.json())
         .then(data => {
-            const classesSelect = document.getElementById('classes');
-            if (data.classes.length > 0) {
-                data.classes.forEach(classItem => {
-                    const option = document.createElement('option');
-                    option.value = classItem.name;  // Assurez-vous que `classItem.name` est correct
-                    option.textContent = `${classItem.name} - ${classItem.subject} - ${classItem.grade}`;
-                    classesSelect.appendChild(option);
+            const container = document.getElementById('classesRadio');
+            data.classes.forEach(classItem => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'radio-card';
+
+                const radioId = `class_${classItem.name.replace(/\s+/g, '_')}`;
+
+                wrapper.innerHTML = `
+                    <input type="radio" id="${radioId}" name="classes_radio" value="${classItem.name}">
+                    <label for="${radioId}">${classItem.name}<br>
+                    <small>${classItem.subject} - ${classItem.grade}</small></label>
+                `;
+
+                // Gestionnaire d'événements pour mettre à jour la valeur cachée
+                wrapper.querySelector('input').addEventListener('change', function() {
+                    document.getElementById('classes').value = this.value;
                 });
-            } else {
-                console.error('Aucune classe trouvée.');
-            }
+
+                container.appendChild(wrapper);
+            });
         });
 
 
