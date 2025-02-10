@@ -13,11 +13,10 @@
                             <i class="bi bi-clipboard-data white"></i> <span>Add New Item</span>
                         </button>
                     </a>
-                    <a href="{% url 'gradebook_calculation' %}">
-                        <button class="button button-calculations">
-                            <i class="bi bi-gear white"></i> <span>Calculations</span>
-                        </button>
-                    </a>
+                    <!-- Modified Calculations Button -->
+                    <button class="button button-calculations" onclick="openCalculationsModal()">
+                        <i class="bi bi-gear white"></i> <span>Calculations</span>
+                    </button>
                     <a href="">
                         <button class="button button-layout">
                             <i class="bi bi-layout-text-sidebar white"></i>
@@ -51,36 +50,226 @@
                         </tr>
                     </thead>
                     <tbody>
-    {% for entry in class_data %}
-        <tr class="{% cycle 'colored-row' 'white-row' %}">
-            <td>{{ entry.class_instance__name }}</td>
-            <td>{{ entry.total_students }} Students</td>
-            <td>
-                {{ entry.class_avg|default_if_none:"0.0"|floatformat:1 }}%
-                {% if entry.class_avg >= 90 %}
-                    (A)
-                {% elif entry.class_avg >= 80 %}
-                    (B)
-                {% elif entry.class_avg >= 70 %}
-                    (C)
-                {% elif entry.class_avg >= 55 %}
-                    (D)
-                {% else %}
-                    (F)
-                {% endif %}
-            </td>
-            <td><span class="view-link">View ({{ entry.exam_count }})</span></td>
-            <td><span class="view-link">View ({{ entry.test_count }})</span></td>
-            <td><span class="view-link">View ({{ entry.homework_count }})</span></td>
-        </tr>
-    {% empty %}
-        <tr>
-            <td colspan="6">No gradebook entries found.</td>
-        </tr>
-    {% endfor %}
-</tbody>
+                        {% for entry in class_data %}
+                            <tr class="{% cycle 'colored-row' 'white-row' %}">
+                                <td>{{ entry.class_instance__name }}</td>
+                                <td>{{ entry.total_students }} Students</td>
+                                <td>
+                                    {{ entry.class_avg|default_if_none:"0.0"|floatformat:1 }}%
+                                    {% if entry.class_avg >= 90 %}
+                                        (A)
+                                    {% elif entry.class_avg >= 80 %}
+                                        (B)
+                                    {% elif entry.class_avg >= 70 %}
+                                        (C)
+                                    {% elif entry.class_avg >= 55 %}
+                                        (D)
+                                    {% else %}
+                                        (F)
+                                    {% endif %}
+                                </td>
+                                <td><span class="view-link">View ({{ entry.exam_count }})</span></td>
+                                <td><span class="view-link">View ({{ entry.test_count }})</span></td>
+                                <td><span class="view-link">View ({{ entry.homework_count }})</span></td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6">No gradebook entries found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
+            </div>
+            <!-- Calculations Modal -->
+            <div id="calculationsModal" class="modal-gradebook">
+    <div class="modal-gradebook-content">
+        <span class="modal-gradebook-close" onclick="closeCalculationsModal()">&times;</span>
+
+        <div class="modal-gradebook-body">
+            <h2 class="modal-gradebook-title">Calculations</h2>
+
+            <div class="modal-gradebook-header">
+                <div class="modal-gradebook-percent">%</div>
+                <div class="modal-gradebook-gauge">◐</div>
+            </div>
+
+            <div class="modal-gradebook-row">
+                <div class="modal-gradebook-range">100 - 90</div>
+                <div class="modal-gradebook-grade-container">
+                    <span class="grade grade-a">A</span>
+                    <span class="modal-gradebook-delete">🗑️</span>
+                </div>
+            </div>
+
+            <div class="modal-gradebook-row">
+                <div class="modal-gradebook-range">89 - 80</div>
+                <div class="modal-gradebook-grade-container">
+                    <span class="modal-gradebook-grade modal-grade-b">B</span>
+                    <span class="modal-gradebook-delete">🗑️</span>
+                </div>
+            </div>
+
+            <div class="modal-gradebook-row">
+                <div class="modal-gradebook-range">79 - 70</div>
+                <div class="modal-gradebook-grade-container">
+                    <span class="modal-gradebook-grade modal-grade-c">C</span>
+                    <span class="modal-gradebook-delete">🗑️</span>
+                </div>
+            </div>
+
+            <div class="modal-gradebook-row">
+                <div class="modal-gradebook-range">69 - 55</div>
+                <div class="modal-gradebook-grade-container">
+                    <span class="modal-gradebook-grade modal-grade-d">D</span>
+                    <span class="modal-gradebook-delete">🗑️</span>
+                </div>
+            </div>
+
+            <div class="modal-gradebook-row">
+                <div class="modal-gradebook-range">54 - 0</div>
+                <div class="modal-gradebook-grade-container">
+                    <span class="modal-gradebook-grade modal-grade-f">F</span>
+                    <span class="modal-gradebook-delete">🗑️</span>
+                </div>
+            </div>
+
+            <div class="modal-gradebook-row">
+                <div class="modal-gradebook-range">-- - --</div>
+                <div class="modal-gradebook-grade-container">
+                    <span class="modal-gradebook-grade modal-grade-unknown">?</span>
+                    <span class="modal-gradebook-delete">🗑️</span>
+                </div>
+            </div>
+
+            <div class="modal-gradebook-footer">
+                <h4 class="modal-gradebook-school-mark">School mark</h4>
             </div>
         </div>
     </div>
+</div>
+        </div>
+    </div>
+
+    <style>
+        /* Styles modaux spécifiques */
+        .modal-gradebook {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-gradebook-content {
+            background-color: #fff;
+            margin: 2% auto;
+            padding: 10px 20px; /* 10px pour le padding vertical, 20px pour le padding horizontal */
+            width: 20%;
+            height: 80%;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-gradebook-close {
+            color: #aaa;
+            float: right;
+            font-size: 32px;
+            line-height: 1;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        /* Styles spécifiques au contenu */
+        .modal-gradebook-body {
+            padding: 20px;
+        }
+
+        .modal-gradebook-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .modal-gradebook-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .modal-gradebook-grade {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .grade {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+        }
+
+        .grade-a { background-color: #4CAF50; }
+        .grade-b { background-color: #2980b9; }
+        .grade-c { background-color: #f1c40f; }
+        .grade-d { background-color: #e67e22; }
+        .grade-f { background-color: #e74c3c; }
+        .grade-unknown { background-color: #bdc3c7; }
+
+        .delete {
+            cursor: pointer;
+            font-size: 18px;
+            color: #95a5a6;
+            transition: color 0.3s ease;
+        }
+
+        .delete:hover {
+            color: #e74c3c;
+        }
+
+        .text-color-pink {
+            color: #e91e63;
+            margin-top: 25px;
+            font-size: 18px;
+        }
+
+        .gauge {
+            font-size: 24px;
+            color: #7f8c8d;
+        }
+    </style>
+
+    <script>
+        function openCalculationsModal() {
+            document.getElementById('calculationsModal').style.display = 'block';
+        }
+
+        function closeCalculationsModal() {
+            document.getElementById('calculationsModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('calculationsModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
 {% endblock %}
