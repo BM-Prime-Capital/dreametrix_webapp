@@ -1,25 +1,29 @@
-from django.shortcuts import redirect
-from django.contrib import messages
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+
+from django.http import HttpResponse
 import requests
 import fitz
-from io import BytesIO
-import os
 from django.conf import settings
 import pandas as pd
 import random
 from openpyxl import load_workbook
 from django.contrib import messages
-from django.shortcuts import render, redirect
 from django.http import HttpResponseBadRequest
-from .models import Class, Student, ChatHistory
 import openai
-
 import qrcode
 from io import BytesIO
 
 
+#############################################################
+#############################################################
+#############################################################
+#######                                             #########
+#######                                             #########
+#######                 SCHOOL DASHBOARD            #########
+#######                                             #########
+#######                                             #########
+#############################################################
+#############################################################
+#############################################################
 #SCHOOL_DASHBOARD
 def home_school_dashboard(request):
    return render(request, 'dashboard/school/home.html')
@@ -49,7 +53,17 @@ def communicate_school_dashboard(request):
 
 
 
-
+#############################################################
+#############################################################
+#############################################################
+#######                                             #########
+#######                                             #########
+#######                 STUDENT DASHBOARD           #########
+#######                                             #########
+#######                                             #########
+#############################################################
+#############################################################
+#############################################################
 #STUDENT_DASHBOARD
 def class_student_dashboard(request):
    return render(request, 'dashboard/student/class.html')
@@ -89,7 +103,17 @@ def tutor_student_dashboard(request):
     return render(request, 'dashboard/student/tutor.html')
 
 
-
+#############################################################
+#############################################################
+#############################################################
+#######                                             #########
+#######                                             #########
+#######                 PARENT DASHBOARD            #########
+#######                                             #########
+#######                                             #########
+#############################################################
+#############################################################
+#############################################################
 #PARENT_DASHBOARD
 def class_parent_dashboard(request):
    return render(request, 'dashboard/parent/class.html')
@@ -120,9 +144,26 @@ def library_parent_dashboard(request):
     return render(request, 'dashboard/parent/library.html')
 
 
+#############################################################
+#############################################################
+#############################################################
+#######                                             #########
+#######                                             #########
+#######                 TEAHCER DASHBOARD           #########
+#######                                             #########
+#######                                             #########
+#############################################################
+#############################################################
+#############################################################
 
-#TEACHER_DASHBOARD
-
+#############################################################
+#######                                             #########
+#######                                             #########
+#######                  NAVIGATION MENU            #########
+#######                                             #########
+#######                                             #########
+#############################################################
+# USER FLOW, UPDATE USER INFORMATIONS
 def update_profile_photo(request):
     if request.method == "POST":
         user = request.user
@@ -140,6 +181,7 @@ def update_profile_photo(request):
 
     return render(request, 'dashboard/teacher/teacher_dashboard.html')
 
+# DASHBOARD PAGE OF THE TEAHCER
 def teacher_dashboard(request):
 
     if request.method == "POST":
@@ -176,39 +218,41 @@ def teacher_dashboard(request):
     }
     return render(request, 'dashboard/teacher/teacher_dashboard.html',context)
 
-
+# ASSIGNMENTS PAGE OF THE TEAHCER
 def assignments_teacher_dashboard(request):
    return render(request, 'dashboard/teacher/assignments.html')
 
+# ATTENDANCE PAGE OF THE TEAHCER
 def attendance_teacher_dashboard(request):
    return render(request, 'dashboard/teacher/attendance.html')
 
+# CHARACTER PAGE OF THE TEAHCER
 def character_teacher_dashboard(request):
    return render(request, 'dashboard/teacher/character.html')
 
+# COMMUNICATE PAGE OF THE TEAHCER
 def communicate_teacher_dashboard(request):
     return render(request, 'dashboard/teacher/communicate.html')
 
+# GRADEBOOK PAGE OF THE TEAHCER
 def gradebook_teacher_dashboard(request):
    return render(request, 'dashboard/teacher/gradebook.html')
 
+# POLLS PAGE OF THE TEAHCER
 def polis_teacher_dashboard(request):
     return render(request, 'dashboard/teacher/polis.html')
 
+#############################################################
+#######                                             #########
+#######                                             #########
+#######            AI_CHAT PAGE OF THE TEAHCER      #########
+#######                                             #########
+#######                                             #########
+#############################################################
+
+openai.api_key = settings.OPENAI_API_KEY  # Récupérer la clé API depuis les paramètres
 def ai_chat_teacher_dashboard(request):
     return render(request, 'dashboard/teacher/ai_chat.html')
-
-def reports_teacher_dashboard(request):
-    return render(request, 'dashboard/teacher/reports.html')
-
-def seating_teacher_dashboard(request):
-    return render(request, 'dashboard/teacher/seating.html')
-
-def teach_teacher_dashboard(request):
-    return render(request, 'dashboard/teacher/teach.html')
-
-# Récupérer la clé API depuis les paramètres
-openai.api_key = settings.OPENAI_API_KEY  
 
 def chatbot_view(request):
     return render(request, "chatbot/chat.html")
@@ -223,19 +267,39 @@ def chat_api(request):
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": user_message}]
         )
-    
 
         # Récupérer la réponse du bot
         bot_response = response.choices[0].message.content
-        
+
         # Enregistrer l'historique de chat pour les utilisateurs authentifiés
-        #if user:
-            #ChatHistory.objects.create(user=user, message=user_message, response=bot_response)
+        # if user:
+        # ChatHistory.objects.create(user=user, message=user_message, response=bot_response)
 
         return JsonResponse({"response": bot_response})
 
+# REPORTS PAGE OF THE TEACHER
+def reports_teacher_dashboard(request):
+    return render(request, 'dashboard/teacher/reports.html')
+
+# SEATING PAGE OF THE TEAHCER
+def seating_teacher_dashboard(request):
+    return render(request, 'dashboard/teacher/seating.html')
+
+# TEACH PAGE OF THE TEAHCER
+def teach_teacher_dashboard(request):
+    return render(request, 'dashboard/teacher/teach.html')
 
 
+
+#############################################################
+#######                                             #########
+#######                                             #########
+#######    DIGITAL LIBRAR PAGE OF THE TEACHER       #########
+#######                                             #########
+#######                                             #########
+#############################################################
+
+# Function to filter the questions from the EXCEL SHEET OF MATHEMATICS
 def filter_math_question(subject, number, grade, standard, kind):
 
     df = pd.read_excel("Digital library.xlsx")
@@ -264,6 +328,7 @@ def filter_math_question(subject, number, grade, standard, kind):
         links.append(link)
     return links
 
+# Function to filter the questions from the EXCEL SHEET OF LANGUAGES
 def filter_lang_question(subject, number, grade, standard,  kind):
     df = pd.read_excel("Dreametrix excel.xlsx")
 
@@ -303,7 +368,7 @@ def filter_lang_question(subject, number, grade, standard,  kind):
 
     return story_links
 
-
+# Function to generate the pdf which is dowloaded
 def generate_pdf(links: list | dict, selected_class: str, subject: str, grade: int, teacher_name: str):
     doc = fitz.open()
 
@@ -432,6 +497,8 @@ def generate_pdf(links: list | dict, selected_class: str, subject: str, grade: i
 
     doc.save("test.pdf")
 
+# Function that interact with the frontend to pass the informations that the user chose, and
+# these informations will be passed to the generate_pdf() funtion
 def generate_pdf_view(request):
     if request.method == "POST":
         selected_class = request.POST.get('classes', '')
@@ -470,16 +537,19 @@ def generate_pdf_view(request):
 
     return render(request, 'dashboard/teacher/digital_library.html')
 
+# This is the function that allow us to fetch the classes in the Digital library form
 def get_classes(request):
     classes = Class.objects.values('name', 'subject', 'grade')
     return JsonResponse({'classes': list(classes)})
 
+# This is the function that allow us to fetch the subject in the Digital library form
 def get_subjects(request):
     """df = pd.read_excel("Digital library.xlsx")"""
     # Nettoyer les espaces dans les sujets
     subjects = ["Math", "Language"]
     return JsonResponse({'subjects': subjects})
 
+# This is the function that allow us to fetch the grade in the Digital library form
 def get_grades(request, subject):
     # Sélectionner le bon fichier selon le sujet
     if subject == "Math":
@@ -495,7 +565,7 @@ def get_grades(request, subject):
 
     return JsonResponse({'grades': sorted(grades)})
 
-# API to get standards based on subject, year, and grade
+# API to get standards based on subject, year, and grade in the digital library form
 def get_standards(request, subject, grade):
     # Sélectionner le bon fichier Excel selon le sujet
     if subject == "Math":
@@ -516,6 +586,7 @@ def get_standards(request, subject, grade):
 
     return JsonResponse({'standards': standards})
 
+# API to get_links containings questions based on subject, year, grade and standars in the digital library form
 def get_links(request, subject, grade, standard, kind):
     # Déterminer le bon fichier Excel selon le sujet
     if subject == "Math":
@@ -552,11 +623,19 @@ def get_links(request, subject, grade, standard, kind):
 
     return JsonResponse({'links': available_links})
 
+#############################################################
+#######                                             #########
+#######                                             #########
+#######                     CLASSES                 #########
+#######                                             #########
+#######                                             #########
+#############################################################
+
+# Calculation Button of the gradebook
 def gradebook_calculation(request):
     return render(request, 'dashboard/teacher/calculations.html')
 
-
-
+# Function that return the list of all classes in the app
 def class_list_view(request):
     """Affiche la liste des classes, avec option de filtrage."""
     classes = Class.objects.all()  # Récupérer toutes les classes
@@ -585,7 +664,7 @@ def class_list_view(request):
         'unique_grades': unique_grades,
     })
 
-
+# Function to create a new classe
 def create_class_view(request):
     """Handle the creation of a new class."""
     if request.method == 'POST':
@@ -612,6 +691,7 @@ def create_class_view(request):
         students = Student.objects.all()
         return render(request, 'dashboard/teacher/add_new_item_classes.html', {'students': students})
 
+# Function to update a classe
 def update_class_view(request, pk):
     """Handle the update of an existing class."""
     class_instance = get_object_or_404(Class, pk=pk)
@@ -624,6 +704,7 @@ def update_class_view(request, pk):
 
     return render(request, 'classes/update_class.html', {'class_instance': class_instance})
 
+# Function to delete a classe
 def delete_class_view(request, pk):
     """Handle the deletion of a class."""
     class_instance = get_object_or_404(Class, pk=pk)
@@ -633,7 +714,13 @@ def delete_class_view(request, pk):
 
     return render(request, 'dashboard/teacher/add_new_item_classes.html', {'class_instance': class_instance})
 
-
+#############################################################
+#######                                             #########
+#######                                             #########
+#######                   ASSIGNMENT                #########
+#######                                             #########
+#######                                             #########
+#############################################################
 
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Assignment
@@ -683,6 +770,13 @@ def delete_assignment_view(request, pk):
 
     return render(request, 'assignments/delete_assignment.html', {'assignment_instance': assignment_instance})
 
+#############################################################
+#######                                             #########
+#######                                             #########
+#######                  GRADEBOOK                  #########
+#######                                             #########
+#######                                             #########
+#############################################################
 
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
@@ -690,8 +784,12 @@ from .models import Gradebook, Student, Class
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Count, Case, When, FloatField, F, Avg
 from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from .models import Gradebook, Student, Class
+from django.core.files.storage import FileSystemStorage
 
-
+# Function to list all entry of the gradebook
 def gradebook_list_view(request):
     # Agrégation par classe
     class_data = Gradebook.objects.values(
@@ -711,10 +809,12 @@ def gradebook_list_view(request):
         'classes': classes
     })
 
+# Function that return the list of all classes in the app
 def get_classes(request):
     classes = Class.objects.values('name', 'subject', 'grade')
     return JsonResponse({'classes': list(classes)})
 
+# Function to update the gradebook entry element
 def update_gradebook_view(request, pk):
     """Handle the update of an existing gradebook entry."""
     gradebook_instance = get_object_or_404(Gradebook, pk=pk)
@@ -728,6 +828,7 @@ def update_gradebook_view(request, pk):
 
     return render(request, 'dashboard/teacher/gradebook.html', {'gradebook_instance': gradebook_instance})
 
+# Function to delete one entry of the grade_book
 def delete_gradebook_view(request, pk):
     """Handle the deletion of a gradebook entry."""
     gradebook_instance = get_object_or_404(Gradebook, pk=pk)
@@ -737,13 +838,7 @@ def delete_gradebook_view(request, pk):
 
     return render(request, 'dashboard/teacher/gradebook.html', {'gradebook_instance': gradebook_instance})
 
-
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from .models import Gradebook, Student, Class
-from django.core.files.storage import FileSystemStorage
-
-
+# Function to create the grade book
 def create_gradebook_view(request):
     if request.method == 'POST':
         try:
@@ -785,7 +880,7 @@ def create_gradebook_view(request):
         'ASSESSMENT_TYPES': Gradebook.ASSESSMENT_TYPES,
     })
 
-
+# Function to list all student belonging to the selected class
 def get_students(request):
     try:
         class_id = request.GET.get('class_id')
@@ -807,7 +902,7 @@ def get_students(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-
+# Function to list all sum of the average of each class
 def get_average(request):
     class_id = request.GET.get('class_id')
     assessment_type = request.GET.get('assessment_type')
