@@ -378,39 +378,111 @@ def filter_lang_question(subject, number, grade, standard,  kind):
 
     return story_links
 
+# def generate_pdf(links, selected_class, subject, grade, teacher_name, student_id, assignment_type):
+#     """ Génère un PDF pour un élève spécifique """
+#     logger.info('Génération du PDF pour un élève spécifique')
 
-#############################################################
+#     student = get_object_or_404(Student, id=student_id)
+#     student_name = f"{student.user.first_name} {student.user.last_name}"
+
+#     doc = fitz.open()
+
+#     # === Page de couverture ===
+#     cover = doc.new_page(width=595, height=842)
+#     text_params = {"fontname": "helv", "fontsize": 20, "color": (0, 0, 0)}
+#     cover.insert_text((297, 200), f"GRADE {grade} {subject.upper()}", **text_params)
+#     cover.insert_text((297, 250), teacher_name, fontsize=14)
+#     cover.insert_text((297, 300), f"{assignment_type} Quiz", fontsize=16)
+#     cover.insert_text((100, 650), f"Name: {student_name}", fontsize=12)
+#     cover.insert_text((100, 680), f"Class: {selected_class}", fontsize=12)
+
+#     # === Page blanche pour réponses ===
+#     doc.new_page(width=595, height=842)
+
+#     # === Pages de questions ===
+#     current_page = doc.new_page(width=595, height=842)
+#     x, y = 50, 50  # Position initiale
+#     question_number = 1
+
+#     if isinstance(links, list):
+#         for i, link in enumerate(links):
+#             link = link.replace("dl=0", "raw=1")
+
+#             if i % 2 == 0 and i != 0:
+#                 current_page = doc.new_page(width=595, height=842)
+#                 y = 50  # Reset Y position
+
+#             try:
+#                 response = requests.get(link)
+#                 image = BytesIO(response.content)
+
+#                 # --- Positionnement amélioré ---
+#                 question_text = f"{question_number}. "
+#                 text_position = (x, y)
+
+#                 # Insérer le numéro + texte de la question sur la même ligne
+#                 current_page.insert_text(text_position, question_text, fontsize=14)
+
+#                 img_width, img_height = 500, 120  # Taille standard de l'image
+#                 image_position = (x + 20, y - 5)  # Ajustement plus proche du texte
+
+#                 rect = fitz.Rect(image_position[0], image_position[1],
+#                                  image_position[0] + img_width, image_position[1] + img_height)
+
+#                 current_page.insert_image(rect, stream=image)
+
+#                 y += img_height + 20  # Ajustement vertical pour éviter l'espace vide
+#                 question_number += 1
+
+#             except Exception as e:
+#                 raise ValueError(e)
+
+#     # === Ajout du QR Code ===
+#     class_instance = Class.objects.get(name=selected_class)
+#     qr_data = f"student_id:{student_id}|class_id:{class_instance.id}|assignment_type:{assignment_type}"
+#     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=6, border=2)
+#     qr.add_data(qr_data)
+#     qr.make(fit=True)
+#     img = qr.make_image(fill_color="black", back_color="white")
+
+#     qr_bytes = BytesIO()
+#     img.save(qr_bytes, format='PNG')
+#     qr_bytes.seek(0)
+
+#     for page in doc:
+#         page.insert_image(fitz.Rect(521, 768, 571, 818), stream=qr_bytes)
+#         qr_bytes.seek(0)
+
+#     pdf_filename = f"test_{student_name}.pdf"
+#     logger.info(f"PDF généré : {pdf_filename}")
+#     doc.save(pdf_filename)
+#     return pdf_filename
+
 def generate_pdf(links, selected_class, subject, grade, teacher_name, student_id, assignment_type):
     """ Génère un PDF pour un élève spécifique """
-    logger.info('Génère un PDF pour un élève spécifique')
-    
-    # Récupérer l'élève à partir de l'ID
+    logger.info('Génération du PDF pour un élève spécifique')
+
     student = get_object_or_404(Student, id=student_id)
     student_name = f"{student.user.first_name} {student.user.last_name}"
-    
+
     doc = fitz.open()
 
-    # === Page 1 - Couverture ===
+    # === Page de couverture ===
     cover = doc.new_page(width=595, height=842)
-    
     text_params = {"fontname": "helv", "fontsize": 20, "color": (0, 0, 0)}
     cover.insert_text((297, 200), f"GRADE {grade} {subject.upper()}", **text_params)
     cover.insert_text((297, 250), teacher_name, fontsize=14)
     cover.insert_text((297, 300), f"{assignment_type} Quiz", fontsize=16)
-    
     cover.insert_text((100, 650), f"Name: {student_name}", fontsize=12)
     cover.insert_text((100, 680), f"Class: {selected_class}", fontsize=12)
 
-    # === Page 2 - Vide (espace pour répondre) ===
+    # === Page blanche pour réponses ===
     doc.new_page(width=595, height=842)
 
     # === Pages de questions ===
-    # === Pages de questions ===
     current_page = doc.new_page(width=595, height=842)
-    x, y = 50, 50  # Position de départ
-    img_width = (595 - 100) // 2  # Largeur de l'image
-    img_height = 350  # Hauteur de l'image
-    question_number = 1  # Numérotation des questions
+    x, y = 50, 50  # Position initiale
+    question_number = 1
 
     if isinstance(links, list):
         for i, link in enumerate(links):
@@ -418,36 +490,42 @@ def generate_pdf(links, selected_class, subject, grade, teacher_name, student_id
 
             if i % 2 == 0 and i != 0:
                 current_page = doc.new_page(width=595, height=842)
-                y = 50
+                y = 50  # Reset Y position
 
             try:
                 response = requests.get(link)
                 image = BytesIO(response.content)
 
-                # Position du texte (question) à gauche
-                question_text = f"{question_number}. Ma question ?"
-                current_page.insert_text((x, y), question_text, fontsize=12)
+                # === Ajout du fond gris pour le numéro ===
+                num_size = 18
+                rect_size = 25  # Taille du carré de fond
+                rect = fitz.Rect(x, y, x + rect_size, y + rect_size)
+                current_page.draw_rect(rect, color=(0.8, 0.8, 0.8), fill=(0.8, 0.8, 0.8))
 
-                # Position de l'image à droite de la question
-                if i % 2 == 0:
-                    rect = fitz.Rect(x + len(question_text) * 7, y, x + len(question_text) * 7 + img_width, y + img_height)
-                else:
-                    rect = fitz.Rect(x + len(question_text) * 7 + img_width + 10, y, 595 - x, y + img_height)
-                    y += img_height + 20
+                # === Insérer le numéro de la question au centre du carré ===
+                question_text = f"{question_number}"
+                text_x = x + 7  # Ajustement pour centrer le texte
+                text_y = y + 17
+                current_page.insert_text((text_x, text_y), question_text, fontsize=num_size, color=(0, 0, 0))
+
+                # === Insérer l’image à côté du numéro ===
+                img_width, img_height = 500, 120
+                image_position = (x + 35, y - 3)
+
+                rect = fitz.Rect(image_position[0], image_position[1],
+                                 image_position[0] + img_width, image_position[1] + img_height)
 
                 current_page.insert_image(rect, stream=image)
 
-                # Ajout du numéro de question et de l'image côte à côte
+                y += img_height + 20  # Ajustement vertical
                 question_number += 1
 
             except Exception as e:
                 raise ValueError(e)
 
-
-    # === QR Code unique par élève ===
+    # === Ajout du QR Code ===
     class_instance = Class.objects.get(name=selected_class)
     qr_data = f"student_id:{student_id}|class_id:{class_instance.id}|assignment_type:{assignment_type}"
-    logger.info(f"QR Code Data : {qr_data}")
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=6, border=2)
     qr.add_data(qr_data)
     qr.make(fit=True)
@@ -461,11 +539,11 @@ def generate_pdf(links, selected_class, subject, grade, teacher_name, student_id
         page.insert_image(fitz.Rect(521, 768, 571, 818), stream=qr_bytes)
         qr_bytes.seek(0)
 
-    # Sauvegarde du PDF unique pour l'élève
     pdf_filename = f"test_{student_name}.pdf"
-    logger.info(f"PDF unique pour l'élève : {pdf_filename}")
+    logger.info(f"PDF généré : {pdf_filename}")
     doc.save(pdf_filename)
     return pdf_filename
+
 
 # =============================== #
 # Vue Django pour la génération   #
@@ -474,10 +552,10 @@ def generate_pdf(links, selected_class, subject, grade, teacher_name, student_id
 
 def generate_pdf_view(request):
     logger.info("LOG Requête reçue pour la génération du PDF")
-    
+
     # Log du type de requête (GET ou POST)
     # logger.info(f"Méthode de requête : {request.method}")
-    
+
     # # Log du corps de la requête
     # if request.method == "GET":
     #     logger.info(f"Contenu de request.GET : {request.GET}")
@@ -487,10 +565,10 @@ def generate_pdf_view(request):
 
     # # Log des en-têtes de la requête
     # logger.info(f"Headers de la requête : {dict(request.headers)}")
-    
+
     # # Log de l'adresse IP de l'utilisateur
     # logger.info(f"Adresse IP du client : {request.META.get('REMOTE_ADDR')}")
-  
+
 
     if request.method == "POST":
         selected_class = request.POST.get('classes', '')
@@ -500,7 +578,7 @@ def generate_pdf_view(request):
 
         teacher_name = request.user.get_full_name() or request.user.username
         logger.info(f"Nom du professeur : {teacher_name}")
-      
+
 
         subject = request.POST['subject']
         number = int(request.POST['number'])
@@ -509,7 +587,7 @@ def generate_pdf_view(request):
         standard = request.POST['standard']
         assignment_type = request.POST.get('assignment_type', 'Quiz')
 
-        
+
 
         try:
             # Générer les liens de questions selon la matière
@@ -537,17 +615,17 @@ def generate_pdf_view(request):
                     INNER JOIN "public"."School_class_students" AS sc ON s."id" = sc."student_id"
                     WHERE sc."class_id" = %s;
                 """, [class_instance.id])  # Utilisation du paramètre 'class_id' de manière sécurisée pour éviter les injections SQL
-                
+
                 # Récupérer tous les résultats
                 results = cursor.fetchall()
-            
-         
+
+
                 logger.info(f"Nombre d'étudiants récupérés : {len(results)}")
-           
+
             # Now iterate over students_in_class
             for student in results:
                 student_id = student[0]   # Access the related student object and then the id
-                logger.info(f"Début de génération du PDF pour l'élève ID : {student_id}") 
+                logger.info(f"Début de génération du PDF pour l'élève ID : {student_id}")
                 pdf_filename = generate_pdf(
                     links=links,
                     selected_class=selected_class,
@@ -575,7 +653,7 @@ def generate_pdf_view(request):
             with ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 for pdf in pdf_files:
                     zipf.write(os.path.join(temp_dir, os.path.basename(pdf)), arcname=os.path.basename(pdf))
-            
+
             # Vérification : Le ZIP a-t-il été bien créé ?
             if not os.path.exists(zip_filename) or os.path.getsize(zip_filename) == 0:
                 logger.error("Le fichier ZIP n'a pas été correctement généré !")
@@ -635,8 +713,8 @@ def generate_pdf_view(request):
 #         "Muscle Memory Quiz 1",
 #         fontsize=16
 #     )
-    
-    
+
+
 
 #     # Lignes de saisie
 #     cover.insert_text((100, 650), "Name: -----------------------------", fontsize=12)
@@ -750,11 +828,11 @@ def generate_pdf_view(request):
 #         grade = int(request.POST['grade'])
 #         kind = request.POST['kind']
 #         standard = request.POST['standard']
-        
+
 #         students = Student.objects.filter(classes__id=selected_class).values('id', 'user__first_name', 'user__last_name')
 #         logger.info(f"Nombre d'élèves trouvés : {len(students)}")
-        
-    
+
+
 
 #         try:
 #             if subject == "Math":
@@ -787,7 +865,7 @@ def get_classes(request):
 def get_classes_by_grade(request, grade):
     # Filtrer les classes par grade
     classes = Class.objects.filter(grade=grade).values('name', 'subject', 'grade')
-    
+
     # Retourner la réponse JSON avec les classes filtrées
     return JsonResponse({'classes': list(classes)})
 
