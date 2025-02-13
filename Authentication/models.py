@@ -53,6 +53,7 @@ class Student(models.Model):
         return self.user.username
 
 
+
 # Modèle pour Teacher avec clé étrangère vers un User de type School Admin
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher_profile')
