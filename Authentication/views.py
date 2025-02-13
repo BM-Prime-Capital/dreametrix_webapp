@@ -379,10 +379,6 @@ def select_role(request):
     """ View to display role selection screen for Teachers, Students, and Parents """
     return render(request, 'authentication/select_role.html')
 
-def home_page(request):
-    """ View to display role selection screen for Teachers, Students, and Parents """
-    return render(request, 'index.html')
-
 def to_delete_after_dashboard_brige(request):
     """ View to display role selection screen for Teachers, Students, and Parents """
     return render(request, 'dashboard/school/school_dashboard.html')
