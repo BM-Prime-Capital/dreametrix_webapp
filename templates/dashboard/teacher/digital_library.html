@@ -3,7 +3,7 @@
 
 {% block content %}
     <h4 class="text-color-pink">CREATE SHEET</h4>
-    <form action="{% url 'generate_pdf' %}" method="post" id="pdfForm" class="form-container">
+    <form action="{% url 'generate_pdf' %}" method="POST" id="pdfForm" class="form-container">
         {% csrf_token %}
         <div class="input-container">
             <label for="subject">Subject:</label>
@@ -58,7 +58,7 @@
 
         {% include '_partials/messages.html' %}
         <!-- Nouvelle section pour les radio buttons -->
-        <div class="classes-radio-container">
+        <div class="classes-radio-container" id="classesRadioContainer" style="display: none;">
             <h4>Select Class:</h4>
             <div class="radio-grid" id="classesRadio"></div>
             <input type="hidden" id="classes" name="classes" value="">
@@ -66,6 +66,7 @@
 
         <button type="submit" class="generate-button">Generate Test</button>
     </form>
+
     <style>
         .classes-radio-container {
             margin: 20px 0;
@@ -108,35 +109,50 @@
             display: block;
         }
     </style>
+
     <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Chargement des classes
-        fetch('/get-classes/')
-        .then(response => response.json())
-        .then(data => {
-            const container = document.getElementById('classesRadio');
-            data.classes.forEach(classItem => {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'radio-card';
+            // Chargement des classes
+    fetch('/get-classes/')
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById('classesRadio');
+        const radioContainer = document.getElementById('classesRadioContainer');
 
-                const radioId = `class_${classItem.name.replace(/\s+/g, '_')}`;
+        // Si aucune classe n'est récupérée, on ne montre rien
+        if (data.classes.length === 0) {
+            radioContainer.style.display = 'none';  // Masquer le conteneur
+            return;
+        }
 
-                wrapper.innerHTML = `
-                    <input type="radio" id="${radioId}" name="classes_radio" value="${classItem.name}">
-                    <label for="${radioId}">${classItem.name}<br>
-                    <small>${classItem.subject} - ${classItem.grade}</small></label>
-                `;
+        // Affichage de la section après le remplissage des données
+        radioContainer.style.display = 'block';
 
-                // Gestionnaire d'événements pour mettre à jour la valeur cachée
-                wrapper.querySelector('input').addEventListener('change', function() {
-                    document.getElementById('classes').value = this.value;
-                });
+        // Ajout des options de classes
+        data.classes.forEach(classItem => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'radio-card';
 
-                container.appendChild(wrapper);
+            const radioId = `class_${classItem.name.replace(/\s+/g, '_')}`;
+
+            wrapper.innerHTML = `
+                <input type="radio" id="${radioId}" name="classes_radio" value="${classItem.name}">
+                <label for="${radioId}">${classItem.name}<br>
+                <small>${classItem.subject} - ${classItem.grade}</small></label>
+            `;
+
+            // Gestionnaire d'événements pour mettre à jour la valeur cachée
+            wrapper.querySelector('input').addEventListener('change', function() {
+                const selectedClass = this.value;
+                document.getElementById('classes').value = selectedClass;
+
+                // Ajoutez un log pour vérifier si la valeur est mise à jour correctement
+                console.log('Selected Class:', selectedClass);
             });
+
+            container.appendChild(wrapper);
         });
-
-
+    });
         // Chargement initial des sujets
         fetch('/get-subjects/')
             .then(response => response.json())
@@ -175,23 +191,85 @@
                 });
         }
         else if (type === 'grade') {
-            const subjectValue = document.getElementById('subject').value;
-            const gradeValue = document.getElementById('grade').value;
-            fetch(`/get-standards/${subjectValue}/${gradeValue}/`)
-                .then(response => response.json())
-                .then(data => {
-                    const standardSelect = document.getElementById('standard');
-                    standardSelect.innerHTML = '<option value="">Select Standard</option>';
-                    data.standards.forEach(standard => {
-                        const option = document.createElement('option');
-                        option.value = standard;
-                        option.textContent = standard;
-                        option.style.display = 'block'; // Ajout pour la recherche
-                        standardSelect.appendChild(option);
-                    });
-                    checkAvailableLinks();
-                });
+    // Déclarer gradeValue avant d'utiliser
+    const subjectValue = document.getElementById('subject').value;
+    const gradeValue = document.getElementById('grade').value; // Déplace cette ligne avant son utilisation
+
+    // Nouvelle API pour récupérer les classes par grade
+    fetch(`/get-classes-by-grade/${gradeValue}/`)
+    .then(response => response.json())
+    .then(data => {
+        console.log("Classes data:", data); // Vérifie la réponse de l'API
+
+        const radioContainer = document.getElementById('classesRadioContainer');
+        const container = document.getElementById('classesRadio');
+
+        // Vider les classes actuelles
+        container.innerHTML = '';
+
+        // Si aucune classe n'est récupérée
+        if (data.classes.length === 0) {
+            radioContainer.style.display = 'none';
+            alert("Aucune classe trouvée pour ce grade.");
+            return;
         }
+
+        // Filtrer les classes selon le sujet sélectionné
+        const subjectValue = document.getElementById('subject').value;
+        const filteredClasses = data.classes.filter(classItem => classItem.subject === subjectValue);
+
+        // Si aucune classe correspondante au sujet, cacher la section
+        if (filteredClasses.length === 0) {
+            radioContainer.style.display = 'none';
+            alert(`Aucune classe trouvée pour le sujet ${subjectValue}.`);
+            return;
+        }
+
+        // Affichage de la section après le filtrage des données
+        radioContainer.style.display = 'block';
+
+        // Ajouter les nouvelles classes filtrées
+        filteredClasses.forEach(classItem => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'radio-card';
+
+            const radioId = `class_${classItem.name.replace(/\s+/g, '_')}`;
+
+            wrapper.innerHTML = `
+                <input type="radio" id="${radioId}" name="classes_radio" value="${classItem.name}">
+                <label for="${radioId}">${classItem.name}<br>
+                <small>${classItem.subject} - ${classItem.grade}</small></label>
+            `;
+
+            // Gestionnaire d'événements pour mettre à jour la valeur cachée
+            wrapper.querySelector('input').addEventListener('change', function() {
+                document.getElementById('classes').value = this.value;
+            });
+
+            container.appendChild(wrapper);
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching classes:', error);
+    });
+
+    // Récupérer les standards
+    fetch(`/get-standards/${subjectValue}/${gradeValue}/`)
+        .then(response => response.json())
+        .then(data => {
+            const standardSelect = document.getElementById('standard');
+            standardSelect.innerHTML = '<option value="">Select Standard</option>';
+            data.standards.forEach(standard => {
+                const option = document.createElement('option');
+                option.value = standard;
+                option.textContent = standard;
+                option.style.display = 'block'; // Ajout pour la recherche
+                standardSelect.appendChild(option);
+            });
+            checkAvailableLinks();
+        });
+}
+
     }
 
     function checkAvailableLinks() {
@@ -207,6 +285,7 @@
         fetch(`/available_link/${subject}/${grade}/${standard}/${kind}/`)
             .then(response => response.json())
             .then(data => {
+                
                 const count = data.links.length;
                 const numberInput = document.getElementById('number');
                 const messageElement = document.getElementById('availability-message');
@@ -240,6 +319,5 @@
         numberInput.placeholder = "Select all required fields first";
         document.getElementById('availability-message').style.display = 'none';
     }
-</script>
-
+    </script>
 {% endblock %}

@@ -50,6 +50,7 @@ urlpatterns = [
     path('get-subjects/', views.get_subjects, name='get_subjects'),
     path('get-grades/<str:subject>/', views.get_grades, name='get_grades'),
     path('get-standards/<str:subject>/<int:grade>/', views.get_standards, name='get_standards'),
+    path('get-classes-by-grade/<str:grade>/', views.get_classes_by_grade, name='get_classes_by_grade'),
 
     #GRADEBOOK FUNCTIONALITIES
     path('gradebook_list_view/', views.gradebook_list_view, name='get_gradebooks'),
