@@ -6,7 +6,7 @@
     <img src="{% static 'img/logo.png' %}" alt="logo" style="width: 145px; margin-bottom: 15px;">
 
     {% include '_partials/messages.html' %}
-    <p>Login as a {{ user_type|title }}</p> <!-- Display the selected user type -->
+    <p>Login here</p>
     <form method="post" action="{% url 'login' %}?user_type={{ user_type }}">
         {% csrf_token %}
         <div class="ui input">
@@ -22,12 +22,8 @@
         <button type="submit" class="ui button">Login</button>
     </form>
 
-    <!-- Show register link only if the user type is not school_admin -->
-    {% if user_type != 'school_admin' %}
-        <div class="register-link">
-            Not registered yet? <a href="{% url 'register_user' user_type %}">Sign up as a {{ user_type|title }} here</a>.
-        </div>
-        
-    {% endif %}
+    <div class="register-link">
+        Not registered yet? <a href="{% url 'register_school_admin' %}">Register your School here</a>.
+    </div>
 </div>
 {% endblock %}
