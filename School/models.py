@@ -16,6 +16,8 @@ class Class(models.Model):
     def __str__(self):
         return f"{self.name} - {self.subject} (Grade {self.grade})"
 
+
+
 class Gradebook(models.Model):
     ASSESSMENT_TYPES = (
         ('EXAM', 'Exam'),
@@ -58,4 +60,11 @@ class ChatHistory(models.Model):
 
     def __str__(self):
         return f"{self.user.username if self.user else 'Anonyme'}: {self.message[:50]}"
+
+class School_class_students(models.Model):
+    class_id = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='school_class_students')  # Added related_name
+    student_id = models.ForeignKey(Student, on_delete=models.CASCADE)  # Clé étrangère vers Student
+
+    def __str__(self):
+        return f"Classe: {self.class_id.name}, Élève: {self.student_id.user.first_name} {self.student_id.user.last_name}"
 
