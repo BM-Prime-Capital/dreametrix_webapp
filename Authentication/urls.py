@@ -8,9 +8,6 @@ urlpatterns = [
     #path('select_role/', views.select_role, name='select_role'),
     #path('test/', views.to_delete_after_dashboard_brige, name='to_delete_after_dashboard_brige'),
 
-    # Home page (index.html)
-    #path('', views.home_page, name='home_page'),
-
     # School selection endpoint for redirecting to the appropriate subdomain
     #path('select_school/', views.select_school, name='select_school'),
     path('', views.login_user, name='login'),  # Nouvelle homepage
