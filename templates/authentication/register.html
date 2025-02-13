@@ -7,7 +7,7 @@
 
     {% include '_partials/messages.html' %}
 
-    <p>Register as a {{ user_type|title }}</p>
+    <p>Register your School here</p>
 
     <form method="post" action="{% url 'register_user' user_type %}">
     {% csrf_token %}
@@ -23,56 +23,32 @@
             <i class="map marker icon" style="color: #1A73E8;"></i>
             <input type="text" required name="address" placeholder="School Address" value="{{ data.address }}">
         </div>
-    {% else %}
-        <!-- Fields for Other User Types (Students, Teachers, Parents) -->
+
         <div class="ui left icon input" style="margin-bottom: 15px;">
             <i class="user icon" style="color: #1A73E8;"></i>
-            <input type="text" required name="first_name" placeholder="First Name" value="{{ data.first_name }}">
+            <input type="text" required name="username" placeholder="Username" value="{{ data.username }}">
         </div>
 
         <div class="ui left icon input" style="margin-bottom: 15px;">
-            <i class="user icon" style="color: #1A73E8;"></i>
-            <input type="text" required name="last_name" placeholder="Last Name" value="{{ data.last_name }}">
+            <i class="mail icon" style="color: #1A73E8;"></i>
+            <input type="email" required name="email" placeholder="{% if user_type == 'school_admin' %}School Email{% else %}Email{% endif %}" value="{{ data.email }}">
         </div>
 
-        <!-- School Code Field for Students and Teachers -->
-        {% if user_type in 'student' or user_type in 'teacher' %}
-            <div class="ui left icon input" style="margin-bottom: 15px;">
-                <i class="building icon" style="color: #1A73E8;"></i>
-                <input type="text" required name="school_code" placeholder="School Code" value="{{ data.school_code }}">
-            </div>
-        {% endif %}
-    {% endif %}
-
-    <div class="ui left icon input" style="margin-bottom: 15px;">
-        <i class="user icon" style="color: #1A73E8;"></i>
-        <input type="text" required name="username" placeholder="Username" value="{{ data.username }}">
-    </div>
-
-    <div class="ui left icon input" style="margin-bottom: 15px;">
-        <i class="mail icon" style="color: #1A73E8;"></i>
-        <input type="email" required name="email" placeholder="{% if user_type == 'school_admin' %}School Email{% else %}Email{% endif %}" value="{{ data.email }}">
-    </div>
-
-    <div class="ui left icon input" style="margin-bottom: 15px;">
-        <i class="lock icon" style="color: #1A73E8;"></i>
-        <input type="password" required name="password" placeholder="Password">
-    </div>
-
-    <div class="ui left icon input" style="margin-bottom: 10px;">
-        <i class="lock icon" style="color: #1A73E8;"></i>
-        <input type="password" required name="password2" placeholder="Repeat Password">
-    </div>
-
-    {% if user_type == 'parent' %}
         <div class="ui left icon input" style="margin-bottom: 15px;">
-            <i class="user icon" style="color: #1A73E8;"></i>
-            <input type="text" required name="student_code" placeholder="Student Code">
+            <i class="lock icon" style="color: #1A73E8;"></i>
+            <input type="password" required name="password" placeholder="Password">
+        </div>
+
+        <div class="ui left icon input" style="margin-bottom: 10px;">
+            <i class="lock icon" style="color: #1A73E8;"></i>
+            <input type="password" required name="password2" placeholder="Repeat Password">
         </div>
     {% endif %}
 
     <button type="submit" class="ui fluid large button" style="margin-top: 15px;">Register</button>
 </form>
-
+    <div class="register-link">
+        Don't you want to continue? <a href="{% url 'login' %}" style="color: #0073b1;">Back To Login</a>.
+    </div>
 </div>
 {% endblock %}

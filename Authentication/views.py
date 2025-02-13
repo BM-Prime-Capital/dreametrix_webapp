@@ -154,7 +154,15 @@ class EmailThread(threading.Thread):
 
 # Henock
 
-def register_user(request, user_type):
+def register_user(request, user_type='school_admin'):  # Valeur par défaut ajoutée
+    # Une validation added au début de la fonction
+    if user_type != 'school_admin' and not request.user.is_authenticated:
+        return redirect('login')
+
+    if user_type != 'school_admin' and not request.user.is_school_admin:
+        messages.error(request, "Unauthorized access")
+        return redirect('login')
+
     if request.method == "POST":
         username = request.POST.get('username')
         email = request.POST.get('email')
@@ -263,8 +271,7 @@ def update_profile_photo(request):
 
     return render(request, 'dashboard/teacher/teacher_dashboard.html')
 
-
-@never_cache  # To clear cache on the browser when the user authenticates
+@never_cache
 def login_user(request):
     """Login view that handles authentication for all user types, including school admins."""
     user_type = request.GET.get('user_type', 'student')  # Default to 'student' if no type is provided
@@ -280,7 +287,6 @@ def login_user(request):
         # Check if the identifier is an email or username
         if '@' in identifier:
             try:
-                # Use filter instead of get to handle multiple users
                 users = User.objects.filter(email=identifier)
 
                 if not users.exists():
@@ -288,38 +294,35 @@ def login_user(request):
                     return render(request, 'authentication/login.html', {'user_type': user_type})
 
                 if users.count() > 1:
-                    # Handle multiple users with the same email (optional: log or notify admins)
                     messages.error(request, 'Multiple accounts found with this email. Please contact support.')
                     return render(request, 'authentication/login.html', {'user_type': user_type})
 
-                # Retrieve the username from the first user in the result
                 username = users.first().username
 
+                # Authenticate using the username
+                user = authenticate(request, username=username, password=password)
+
             except User.MultipleObjectsReturned:
-                # Graceful fallback for edge cases
                 messages.error(request, 'Multiple accounts found with this email. Please contact support.')
                 return render(request, 'authentication/login.html', {'user_type': user_type})
 
         else:
-            # Treat as username if it's not an email
-            username = identifier
+            # Assume identifier is a username
+            user = authenticate(request, username=identifier, password=password)
 
-        # Authenticate the user
-        user = authenticate(request, username=username, password=password)
-
-        if user:
-            login(request, user)  # Starts a session for the authenticated user
-            # Redirect based on user type
-            if user.user_type == 'student':
-                return redirect('student_dashboard')
+        if user is not None:
+            login(request, user)
+            # Redirection selon le type d'utilisateur
+            if user.user_type == 'school_admin':
+                return redirect('school_dashboard')
             elif user.user_type == 'teacher':
                 return redirect('teacher_dashboard')
+            elif user.user_type == 'student':
+                return redirect('student_dashboard')
             elif user.user_type == 'parent':
                 return redirect('parent_dashboard')
-            elif user.user_type == 'school_admin':
-                return redirect('school_dashboard')
         else:
-            messages.error(request, 'Invalid username/email or password')
+            messages.error(request, 'Invalid credentials')
 
     return render(request, 'authentication/login.html', {'user_type': user_type})
 
