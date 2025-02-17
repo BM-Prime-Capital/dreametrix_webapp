@@ -20,10 +20,17 @@
         </div>
 
         <div class="input-container">
-            <label for="standard">Standard:</label>
-            <select id="standard" name="standard" required>
-                <option value="">Select Standard</option>
+            <label for="domain">Domain:</label>
+            <select id="domain" name="domain" required>
+                <option value="">Select Domain</option>
             </select>
+        </div>
+
+        <div>
+            <h2>Select All <input type="checkbox" id="select-all" checked></h2>
+            <div class="checkbox-container" id="standardsContainer">
+                <!-- Les standards seront chargés dynamiquement ici -->
+            </div>
         </div>
 
         <div class="input-container">
@@ -108,6 +115,23 @@
             height: 100%;
             display: block;
         }
+             .checkbox-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .checkbox-item {
+        flex: 0 0 calc(25% - 10px); /* 4 items per row considering gap */
+        min-width: 0; /* Prevents overflow */
+    }
+
+    .checkbox-item label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+    }
     </style>
 
     <script>
@@ -168,7 +192,7 @@
 
         // Écouteurs d'événements
         document.getElementById('kind').addEventListener('change', checkAvailableLinks);
-        document.getElementById('standard').addEventListener('change', checkAvailableLinks);
+        document.getElementById('domain').addEventListener('change', checkAvailableLinks);
     });
 
     function updateOptions(type) {
@@ -186,7 +210,7 @@
                         gradeSelect.appendChild(option);
                     });
                     // Réinitialisation des champs dépendants
-                    document.getElementById('standard').innerHTML = '<option value="">Select Standard</option>';
+                    document.getElementById('domain').innerHTML = '<option value="">Select Domain</option>';
                     resetNumberField();
                 });
         }
@@ -253,18 +277,18 @@
         console.error('Error fetching classes:', error);
     });
 
-    // Récupérer les standards
-    fetch(`/get-standards/${subjectValue}/${gradeValue}/`)
+    // Récupérer les domains
+    fetch(`/get-domains/${subjectValue}/${gradeValue}/`)
         .then(response => response.json())
         .then(data => {
-            const standardSelect = document.getElementById('standard');
-            standardSelect.innerHTML = '<option value="">Select Standard</option>';
-            data.standards.forEach(standard => {
+            const domainSelect = document.getElementById('domain');
+            domainSelect.innerHTML = '<option value="">Select Domain</option>';
+            data.domains.forEach(domain => {
                 const option = document.createElement('option');
-                option.value = standard;
-                option.textContent = standard;
+                option.value = domain;
+                option.textContent = domain;
                 option.style.display = 'block'; // Ajout pour la recherche
-                standardSelect.appendChild(option);
+                domainSelect.appendChild(option);
             });
             checkAvailableLinks();
         });
@@ -275,14 +299,14 @@
     function checkAvailableLinks() {
         const subject = document.getElementById('subject').value;
         const grade = document.getElementById('grade').value;
-        const standard = document.getElementById('standard').value;
+        const domain = document.getElementById('domain').value;
         const kind = document.getElementById('kind').value;
 
         // Validation des champs requis
-        if (!subject || !grade || !standard || !kind) return;
+        if (!subject || !grade || !domain || !kind) return;
 
         // Appel API avec tous les paramètres
-        fetch(`/available_link/${subject}/${grade}/${standard}/${kind}/`)
+        fetch(`/available_link/${subject}/${grade}/${domain}/${kind}/`)
             .then(response => response.json())
             .then(data => {
                 
@@ -319,5 +343,83 @@
         numberInput.placeholder = "Select all required fields first";
         document.getElementById('availability-message').style.display = 'none';
     }
+        function loadStandards() {
+            const subject = document.getElementById('subject').value;
+            const grade = parseInt(document.getElementById('grade').value);
+            const domain = document.getElementById('domain').value;
+
+            if (!subject || !grade || !domain) {
+                document.getElementById('standardsContainer').innerHTML = '';
+                document.getElementById('select-all').style.display = 'none';
+                return;
+            }
+
+            const encodedDomain = encodeURIComponent(domain);
+
+            fetch(`/available_standards/${subject}/${grade}/${encodedDomain}/`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to load standards');
+                    return response.json();
+                })
+                .then(data => {
+                    const container = document.getElementById('standardsContainer');
+                    container.innerHTML = '';
+                    const selectAllCheckbox = document.getElementById('select-all');
+
+                    if (!data.standards || data.standards.length === 0) {
+                        container.innerHTML = '<div class="no-standards">No standards available</div>';
+                        selectAllCheckbox.style.display = 'none';
+                        return;
+                    }
+
+                    selectAllCheckbox.style.display = 'inline';
+
+                    data.standards.forEach(standard => {
+                        const div = document.createElement('div');
+                        div.className = 'checkbox-item';
+                        div.innerHTML = `
+                            <label>
+                                <input type="checkbox" name="standards" value="${standard}" checked>
+                                ${standard}
+                            </label>
+                        `;
+                        container.appendChild(div);
+                    });
+
+                    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+
+                    // Initial state
+                    selectAllCheckbox.checked = true;
+                    checkboxes.forEach(checkbox => checkbox.checked = true);
+
+                    // Select All functionality
+                    selectAllCheckbox.addEventListener('change', (e) => {
+                        checkboxes.forEach(checkbox => {
+                            checkbox.checked = e.target.checked;
+                        });
+                    });
+
+                    // Individual checkbox logic
+                    checkboxes.forEach(checkbox => {
+                        checkbox.addEventListener('change', () => {
+                            const allChecked = [...checkboxes].every(cb => cb.checked);
+                            selectAllCheckbox.checked = allChecked;
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('standardsContainer').innerHTML =
+                        '<div class="error">Error loading standards</div>';
+                    document.getElementById('select-all').style.display = 'none';
+                });
+        }
+
+        // Initial event listener setup
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('domain').addEventListener('change', loadStandards);
+            document.getElementById('grade').addEventListener('change', loadStandards);
+            document.getElementById('subject').addEventListener('change', loadStandards);
+        });
     </script>
 {% endblock %}

@@ -310,18 +310,18 @@ def teach_teacher_dashboard(request):
 #############################################################
 
 # Function to filter the questions from the EXCEL SHEET OF MATHEMATICS
-def filter_math_question(subject, number, grade, standard, kind):
+def filter_math_question(subject, number, grade, domain, kind):
 
-    df = pd.read_excel("Digital library.xlsx")
+    df = pd.read_excel("Digital library2.xlsx")
 
     filtered_df = df.loc[
         (df["Subject"] == subject) &
         (df["Grade"] == grade) &
-        (df["Standard"] == standard) &
+        (df["Domain"] == domain) &
         (df["MC/OR"] == kind)
     ]
 
-    workbook = load_workbook("Digital library.xlsx")
+    workbook = load_workbook("Digital library2.xlsx")
     sheet = workbook.active
 
     links = []
@@ -339,13 +339,13 @@ def filter_math_question(subject, number, grade, standard, kind):
     return links
 
 # Function to filter the questions from the EXCEL SHEET OF LANGUAGES
-def filter_lang_question(subject, number, grade, standard,  kind):
+def filter_lang_question(subject, number, grade, domain,  kind):
     df = pd.read_excel("Dreametrix excel.xlsx")
 
     filtered_df = df.loc[
         (df["Subject"] == subject) &
         (df["Grade"] == grade) &
-        (df["Standard"] == standard) &
+        (df["Domain"] == domain) &
         (df["MC/OR"] == kind)
     ]
 
@@ -423,7 +423,7 @@ def filter_lang_question(subject, number, grade, standard,  kind):
 #                 # Insérer le numéro + texte de la question sur la même ligne
 #                 current_page.insert_text(text_position, question_text, fontsize=14)
 
-#                 img_width, img_height = 500, 120  # Taille standard de l'image
+#                 img_width, img_height = 500, 120  # Taille Domain de l'image
 #                 image_position = (x + 20, y - 5)  # Ajustement plus proche du texte
 
 #                 rect = fitz.Rect(image_position[0], image_position[1],
@@ -584,7 +584,7 @@ def generate_pdf_view(request):
         number = int(request.POST['number'])
         grade = int(request.POST['grade'])
         kind = request.POST['kind']
-        standard = request.POST['standard']
+        domain = request.POST['domain']
         assignment_type = request.POST.get('assignment_type', 'Quiz')
 
 
@@ -592,9 +592,9 @@ def generate_pdf_view(request):
         try:
             # Générer les liens de questions selon la matière
             if subject == "Math":
-                links = filter_math_question(subject, number, grade, standard, kind)
+                links = filter_math_question(subject, number, grade, domain, kind)
             else:
-                links = filter_lang_question(subject, number, grade, standard, kind)
+                links = filter_lang_question(subject, number, grade, domain, kind)
 
             pdf_files = []
             temp_dir = f"quiz_class_{selected_class}"  # Dossier temporaire pour stocker les PDFs
@@ -827,7 +827,7 @@ def generate_pdf_view(request):
 #         number = int(request.POST['number'])
 #         grade = int(request.POST['grade'])
 #         kind = request.POST['kind']
-#         standard = request.POST['standard']
+#         domain = request.POST['domain']
 
 #         students = Student.objects.filter(classes__id=selected_class).values('id', 'user__first_name', 'user__last_name')
 #         logger.info(f"Nombre d'élèves trouvés : {len(students)}")
@@ -836,9 +836,9 @@ def generate_pdf_view(request):
 
 #         try:
 #             if subject == "Math":
-#                 links = filter_math_question(subject, number, grade, standard,  kind)
+#                 links = filter_math_question(subject, number, grade, domain,  kind)
 #             else:
-#                 links = filter_lang_question(subject, number, grade, standard, kind)
+#                 links = filter_lang_question(subject, number, grade, domain, kind)
 #             generate_pdf(
 #                 links=links,
 #                 selected_class=selected_class,
@@ -880,7 +880,7 @@ def get_subjects(request):
 def get_grades(request, subject):
     # Sélectionner le bon fichier selon le sujet
     if subject == "Math":
-        file_path = "Digital library.xlsx"
+        file_path = "Digital library2.xlsx"
     else:  # Language
         file_path = "Dreametrix excel.xlsx"
 
@@ -892,11 +892,12 @@ def get_grades(request, subject):
 
     return JsonResponse({'grades': sorted(grades)})
 
-# API to get standards based on subject, year, and grade in the digital library form
-def get_standards(request, subject, grade):
+# API to get Domain based on subject, year, and grade in the digital library form
+def get_domains(request, subject, grade):
+
     # Sélectionner le bon fichier Excel selon le sujet
     if subject == "Math":
-        file_path = "Digital library.xlsx"
+        file_path = "Digital library2.xlsx"
     else:  # Language
         file_path = "Dreametrix excel.xlsx"
 
@@ -908,26 +909,56 @@ def get_standards(request, subject, grade):
         (df["Grade"] == int(grade))
         ]
 
-    # Récupérer les standards uniques
-    standards = filtered_df["Standard"].unique().tolist()
+    # Récupérer les domains uniques
 
-    return JsonResponse({'standards': standards})
+    if filtered_df.empty:
+        domains = []  # Handle empty DataFrame case
+    else:
+        domains = filtered_df["Domain"].unique().tolist()
 
-# API to get_links containings questions based on subject, year, grade and standars in the digital library form
-def get_links(request, subject, grade, standard, kind):
+    return JsonResponse({'domains': domains})
+
+# Specific Standard
+def get_standards(request, subject, grade, domain):
     # Déterminer le bon fichier Excel selon le sujet
     if subject == "Math":
-        file_path = "Digital library.xlsx"
+        file_path = "Digital library2.xlsx"
     else:  # Language
         file_path = "Dreametrix excel.xlsx"
 
     df = pd.read_excel(file_path)
 
-    # Ajouter le filtre Standard
+    # Ajouter le filtre Domain
+    filtered_df = df[
+        (df["Subject"] == subject) &
+        (df["Grade"] == int(grade)) &
+        (df["Domain"] == domain)
+        ]
+
+    if filtered_df.empty:
+        available_standars = []  # Handle empty DataFrame case
+    else:
+        available_standars = filtered_df["Specific_Standard"].unique().tolist()
+
+    print(f'HEEEEEEEEEEEEEEEEEEERE IS JOSUE : {available_standars}')
+    return JsonResponse({'standards': available_standars})
+
+
+# API to get_links containings questions based on subject, year, grade and standars in the digital library form
+def get_links(request, subject, grade, domain, kind):
+    # Déterminer le bon fichier Excel selon le sujet
+    if subject == "Math":
+        file_path = "Digital library2.xlsx"
+    else:  # Language
+        file_path = "Dreametrix excel.xlsx"
+
+    df = pd.read_excel(file_path)
+
+    # Ajouter le filtre Domain
     base_filter = (
             (df["Subject"] == subject) &
             (df["Grade"] == int(grade)) &
-            (df["Standard"] == standard) &
+            (df["Domain"] == domain) &
             (df["MC/OR"] == kind)
     )
 
@@ -964,6 +995,7 @@ def gradebook_calculation(request):
 
 # Function that return the list of all classes in the app
 def class_list_view(request):
+    print(Class._meta.get_field('students').remote_field.through._meta.db_table)  # Devrait afficher "School_class_students"
     """Affiche la liste des classes, avec option de filtrage."""
     classes = Class.objects.all()  # Récupérer toutes les classes
 

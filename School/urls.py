@@ -49,7 +49,12 @@ urlpatterns = [
     path('get-classes/', views.get_classes, name='get_classes'),
     path('get-subjects/', views.get_subjects, name='get_subjects'),
     path('get-grades/<str:subject>/', views.get_grades, name='get_grades'),
-    path('get-standards/<str:subject>/<int:grade>/', views.get_standards, name='get_standards'),
+    path('get-domains/<str:subject>/<int:grade>/', views.get_domains, name='get_domains'),
+    # Ajout du paramètre 'kind' dans l'URL
+    path('available_link/<str:subject>/<str:grade>/<str:domain>/<str:kind>/', views.get_links, name='get_links'),
+    # Standards
+    path('available_standards/<str:subject>/<int:grade>/<str:domain>/', views.get_standards, name='get_standards'),
+
     path('get-classes-by-grade/<str:grade>/', views.get_classes_by_grade, name='get_classes_by_grade'),
 
     #GRADEBOOK FUNCTIONALITIES
@@ -63,8 +68,7 @@ urlpatterns = [
     path('gradebooks/<int:pk>/delete/', views.delete_gradebook_view, name='delete_gradebook'),
     # Render template to delete a gradebook entry
     path('gradebook_calculation/', views.gradebook_calculation, name='gradebook_calculation'),
-    # Ajout du paramètre 'kind' dans l'URL
-    path('available_link/<str:subject>/<str:grade>/<str:standard>/<str:kind>/', views.get_links, name='get_links'),
+
 
 
 
