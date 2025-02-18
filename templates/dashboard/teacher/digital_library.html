@@ -26,16 +26,25 @@
             </select>
         </div>
 
-        <div>
-            <h2>Select All <input type="checkbox" id="select-all" checked></h2>
-            <div class="checkbox-container" id="standardsContainer">
-                <!-- Les standards seront chargés dynamiquement ici -->
+    <!-- Ajouter une div wrapper avec display:none -->
+        <div id="standardsSection" style="display: none;">
+            <div class="select-all-container">
+                <label class="select-all-label">
+                    <span>Specific Standards: </span>
+                    <span class="custom-checkbox">
+                        <input type="checkbox" id="select-all" checked>
+                        <span class="checkmark"></span>
+                    </span>
+                    <span class="select-all-text">Select all</span>
+                </label>
             </div>
+            <div class="checkbox-grid" id="standardsContainer"></div>
         </div>
 
         <div class="input-container">
             <label for="kind">Question Type:</label>
             <select id="kind" name="kind" required>
+                <option value="">Select Question Type</option>
                 <option value="MC">Multiple Choice (MC)</option>
                 <option value="OR">Open Response (OR)</option>
             </select>
@@ -43,7 +52,7 @@
 
         <!-- Message de disponibilité amélioré -->
         <div id="availability-message" style="display: none; margin-bottom: 10px; color: #666;">
-            <span id="available-text">Questions disponibles : </span>
+            <span id="available-text">Available questions : </span>
             <span id="available-count">0</span>
             <span id="max-indicator" style="display: none;"> (Max: </span><span id="max-value">0</span>)
         </div>
@@ -106,7 +115,6 @@
 
         .radio-card input[type="radio"]:checked + label {
             color: #ff69b4;
-            font-weight: bold;
         }
 
         .radio-card label {
@@ -115,23 +123,64 @@
             height: 100%;
             display: block;
         }
-             .checkbox-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
 
-    .checkbox-item {
-        flex: 0 0 calc(25% - 10px); /* 4 items per row considering gap */
-        min-width: 0; /* Prevents overflow */
-    }
 
-    .checkbox-item label {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        cursor: pointer;
-    }
+        /* Remplacer les styles existants par */
+        .checkbox-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 10px;
+        }
+
+        .checkbox-item {
+            flex: 0 0 calc(5% - 15px);
+            display: flex;
+            align-items: center;
+        }
+
+        .custom-checkbox {
+            position: relative;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            border: 2px solid #ff69b4;
+            border-radius: 4px;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+
+        .custom-checkbox input[type="checkbox"] {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 12px;
+            height: 12px;
+            background-color: #ff69b4;
+            border-radius: 2px;
+            display: none;
+        }
+
+        .custom-checkbox input:checked ~ .checkmark {
+            display: block;
+        }
+
+        .checkbox-item label {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+            user-select: none;
+        }
     </style>
 
     <script>
@@ -374,12 +423,16 @@
 
                     selectAllCheckbox.style.display = 'inline';
 
+                    // Ajout des checkboxes...
                     data.standards.forEach(standard => {
                         const div = document.createElement('div');
                         div.className = 'checkbox-item';
                         div.innerHTML = `
                             <label>
-                                <input type="checkbox" name="standards" value="${standard}" checked>
+                                <span class="custom-checkbox">
+                                    <input type="checkbox" name="standards" value="${standard}" checked>
+                                    <span class="checkmark"></span>
+                                </span>
                                 ${standard}
                             </label>
                         `;
@@ -407,19 +460,19 @@
                         });
                     });
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('standardsContainer').innerHTML =
-                        '<div class="error">Error loading standards</div>';
-                    document.getElementById('select-all').style.display = 'none';
-                });
+            .catch(error => {
+                console.error('Error:', error);
+                container.innerHTML = '<div class="error">Erreur de chargement</div>';
+            });
         }
 
-        // Initial event listener setup
+       // Modifier l'écouteur d'événements pour le domaine
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('domain').addEventListener('change', loadStandards);
-            document.getElementById('grade').addEventListener('change', loadStandards);
-            document.getElementById('subject').addEventListener('change', loadStandards);
+            document.getElementById('domain').addEventListener('change', function() {
+                const domainSelected = this.value !== '';
+                document.getElementById('standardsSection').style.display = domainSelected ? 'block' : 'none';
+                if (domainSelected) loadStandards();
+            });
         });
     </script>
 {% endblock %}
