@@ -392,7 +392,7 @@ def generate_pdf(links, selected_class, subject, grade, teacher_name, student_id
     text_params = {"fontname": "helv", "fontsize": 20, "color": (0, 0, 0)}
     cover.insert_text((200, 200), f"GRADE {grade} {subject.upper()}", **text_params)
     cover.insert_text((225, 250), f" Mr. {teacher_name}", fontsize=14)
-    cover.insert_text((200, 300), f"{assignment_type} : {domain}", fontsize=16)
+    cover.insert_text((175, 300), f"{assignment_type} : {domain}", fontsize=16)
     cover.insert_text((100, 650), f"Name: {student_name}", fontsize=12)
     cover.insert_text((100, 680), f"Class: {selected_class}", fontsize=12)
 
@@ -441,6 +441,7 @@ def generate_pdf(links, selected_class, subject, grade, teacher_name, student_id
                 raise ValueError(e)
 
     # === Ajout du QR Code ===
+
     class_instance = Class.objects.get(name=selected_class)
     qr_data = f"student_id:{student_id}|class_id:{class_instance.id}|assignment_type:{assignment_type}"
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=6, border=2)
@@ -654,7 +655,7 @@ def get_standards(request, subject, grade, domain):
     if filtered_df.empty:
         available_standars = []  # Handle empty DataFrame case
     else:
-        available_standars = filtered_df["Specific_Standard"].unique().tolist()
+        available_standars = filtered_df["Specific Standard"].unique().tolist()
 
     print(f'HEEEEEEEEEEEEEEEEEEERE IS JOSUE : {available_standars}')
     return JsonResponse({'standards': available_standars})
