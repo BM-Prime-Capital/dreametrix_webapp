@@ -264,67 +264,67 @@
                 });
         }
         else if (type === 'grade') {
-    // Déclarer gradeValue avant d'utiliser
-    const subjectValue = document.getElementById('subject').value;
-    const gradeValue = document.getElementById('grade').value; // Déplace cette ligne avant son utilisation
-
-    // Nouvelle API pour récupérer les classes par grade
-    fetch(`/get-classes-by-grade/${gradeValue}/`)
-    .then(response => response.json())
-    .then(data => {
-        console.log("Classes data:", data); // Vérifie la réponse de l'API
-
-        const radioContainer = document.getElementById('classesRadioContainer');
-        const container = document.getElementById('classesRadio');
-
-        // Vider les classes actuelles
-        container.innerHTML = '';
-
-        // Si aucune classe n'est récupérée
-        if (data.classes.length === 0) {
-            radioContainer.style.display = 'none';
-            alert("Aucune classe trouvée pour ce grade.");
-            return;
-        }
-
-        // Filtrer les classes selon le sujet sélectionné
+        // Déclarer gradeValue avant d'utiliser
         const subjectValue = document.getElementById('subject').value;
-        const filteredClasses = data.classes.filter(classItem => classItem.subject === subjectValue);
+        const gradeValue = document.getElementById('grade').value; // Déplace cette ligne avant son utilisation
 
-        // Si aucune classe correspondante au sujet, cacher la section
-        if (filteredClasses.length === 0) {
-            radioContainer.style.display = 'none';
-            alert(`Aucune classe trouvée pour le sujet ${subjectValue}.`);
-            return;
-        }
+        // Nouvelle API pour récupérer les classes par grade
+        fetch(`/get-classes-by-grade/${gradeValue}/`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Classes data:", data); // Vérifie la réponse de l'API
 
-        // Affichage de la section après le filtrage des données
-        radioContainer.style.display = 'block';
+            const radioContainer = document.getElementById('classesRadioContainer');
+            const container = document.getElementById('classesRadio');
 
-        // Ajouter les nouvelles classes filtrées
-        filteredClasses.forEach(classItem => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'radio-card';
+            // Vider les classes actuelles
+            container.innerHTML = '';
 
-            const radioId = `class_${classItem.name.replace(/\s+/g, '_')}`;
+            // Si aucune classe n'est récupérée
+            if (data.classes.length === 0) {
+                radioContainer.style.display = 'none';
+                alert("Aucune classe trouvée pour ce grade.");
+                return;
+            }
 
-            wrapper.innerHTML = `
-                <input type="radio" id="${radioId}" name="classes_radio" value="${classItem.name}">
-                <label for="${radioId}">${classItem.name}<br>
-                <small>${classItem.subject} - ${classItem.grade}</small></label>
-            `;
+            // Filtrer les classes selon le sujet sélectionné
+            const subjectValue = document.getElementById('subject').value;
+            const filteredClasses = data.classes.filter(classItem => classItem.subject === subjectValue);
 
-            // Gestionnaire d'événements pour mettre à jour la valeur cachée
-            wrapper.querySelector('input').addEventListener('change', function() {
-                document.getElementById('classes').value = this.value;
+            // Si aucune classe correspondante au sujet, cacher la section
+            if (filteredClasses.length === 0) {
+                radioContainer.style.display = 'none';
+                alert(`Aucune classe trouvée pour le sujet ${subjectValue}.`);
+                return;
+            }
+
+            // Affichage de la section après le filtrage des données
+            radioContainer.style.display = 'block';
+
+            // Ajouter les nouvelles classes filtrées
+            filteredClasses.forEach(classItem => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'radio-card';
+
+                const radioId = `class_${classItem.name.replace(/\s+/g, '_')}`;
+
+                wrapper.innerHTML = `
+                    <input type="radio" id="${radioId}" name="classes_radio" value="${classItem.name}">
+                    <label for="${radioId}">${classItem.name}<br>
+                    <small>${classItem.subject} - ${classItem.grade}</small></label>
+                `;
+
+                // Gestionnaire d'événements pour mettre à jour la valeur cachée
+                wrapper.querySelector('input').addEventListener('change', function() {
+                    document.getElementById('classes').value = this.value;
+                });
+
+                container.appendChild(wrapper);
             });
-
-            container.appendChild(wrapper);
+        })
+        .catch(error => {
+            console.error('Error fetching classes:', error);
         });
-    })
-    .catch(error => {
-        console.error('Error fetching classes:', error);
-    });
 
     // Récupérer les domains
     fetch(`/get-domains/${subjectValue}/${gradeValue}/`)
