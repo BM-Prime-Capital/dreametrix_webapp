@@ -50,8 +50,8 @@ urlpatterns = [
     path('get-subjects/', views.get_subjects, name='get_subjects'),
     path('get-grades/<str:subject>/', views.get_grades, name='get_grades'),
     path('get-domains/<str:subject>/<int:grade>/', views.get_domains, name='get_domains'),
-    # Ajout du paramètre 'kind' dans l'URL
-    path('available_link/<str:subject>/<str:grade>/<str:domain>/<str:kind>/', views.get_links, name='get_links'),
+    # URL pour récupérer les liens disponibles, avec le paramètre standards
+    path('available_link/<str:subject>/<str:grade>/<str:domain>/<str:standards>/<str:kind>/', views.get_links, name='get_links'),
     # Standards
     path('available_standards/<str:subject>/<int:grade>/<str:domain>/', views.get_standards, name='get_standards'),
 

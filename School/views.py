@@ -660,41 +660,39 @@ def get_standards(request, subject, grade, domain):
 
 
 # API to get_links containings questions based on subject, year, grade and standars in the digital library form
-def get_links(request, subject, grade, domain, kind):
-    # Déterminer le bon fichier Excel selon le sujet
-    if subject == "Math":
-        file_path = "Digital library2.xlsx"
-    else:  # Language
-        file_path = "Dreametrix excel.xlsx"
+def get_links(request, subject, grade, domain, standards, kind ):
+    try:
+        # Déterminer le fichier correct en fonction du sujet
+        file_path = "Digital library2.xlsx" if subject == "Math" else "Dreametrix excel.xlsx"
 
-    df = pd.read_excel(file_path)
+        # Charger le fichier Excel
+        df = pd.read_excel(file_path)
+        workbook = load_workbook(file_path)
+        sheet = workbook.active
 
-    # Ajouter le filtre Domain
-    base_filter = (
+        # Appliquer les filtres
+        base_filter = (
             (df["Subject"] == subject) &
             (df["Grade"] == int(grade)) &
             (df["Domain"] == domain) &
+            (df["Specific Standard"].isin(standards.split(','))) &  # Utiliser split pour gérer plusieurs standards
             (df["MC/OR"] == kind)
-    )
+        )
+        filtered_df = df.loc[base_filter]
 
-    filtered_df = df.loc[base_filter]
+        # Extraire les liens disponibles
+        available_links = []
+        for index, row in filtered_df.iterrows():
+            value = row["Link to item"]
+            if pd.notna(value):
+                cell = sheet.cell(row=index + 2, column=df.columns.get_loc("Link to item") + 1)
+                link = cell.hyperlink.target if cell.hyperlink else None
+                if link:
+                    available_links.append(link)
+        return JsonResponse({'links': available_links})
 
-    # Charger le classeur Excel pour accéder aux liens
-    workbook = load_workbook(file_path)
-    sheet = workbook.active
-
-    available_links = []
-
-    for index, row in filtered_df.iterrows():
-        value = row["Link to item"]
-        if pd.notna(value):
-            # Récupérer le lien hypertexte
-            cell = sheet.cell(row=index + 2, column=df.columns.get_loc("Link to item") + 1)
-            link = cell.hyperlink.target if cell.hyperlink else None
-            if link:
-                available_links.append(link)
-
-    return JsonResponse({'links': available_links})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 #############################################################
 #######                                             #########

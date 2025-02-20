@@ -339,50 +339,53 @@
                 option.style.display = 'block'; // Ajout pour la recherche
                 domainSelect.appendChild(option);
             });
-            checkAvailableLinks();
         });
 }
 
     }
 
     function checkAvailableLinks() {
-        const subject = document.getElementById('subject').value;
-        const grade = document.getElementById('grade').value;
-        const domain = document.getElementById('domain').value;
-        const kind = document.getElementById('kind').value;
+    const subject = document.getElementById('subject').value;
+    const grade = document.getElementById('grade').value;
+    const domain = document.getElementById('domain').value;
+    const kind = document.getElementById('kind').value;
 
-        // Validation des champs requis
-        if (!subject || !grade || !domain || !kind) return;
+    // Récupérer les standards sélectionnés
+    const selectedStandards = Array.from(document.querySelectorAll('input[name="standards"]:checked'))
+        .map(checkbox => checkbox.value)
+        .join(',');
 
-        // Appel API avec tous les paramètres
-        fetch(`/available_link/${subject}/${grade}/${domain}/${kind}/`)
-            .then(response => response.json())
-            .then(data => {
-                
-                const count = data.links.length;
-                const numberInput = document.getElementById('number');
-                const messageElement = document.getElementById('availability-message');
-                const maxIndicator = document.getElementById('max-indicator');
-                const maxValueSpan = document.getElementById('max-value');
+    // Validation des champs requis
+    if (!subject || !grade || !domain || !selectedStandards || !kind) return;
 
-                // Mise à jour du champ nombre
-                numberInput.disabled = count === 0;
-                numberInput.placeholder = count > 0
-                    ? `Enter number (1-${count})`
-                    : "No questions available";
-                numberInput.max = count;
-                numberInput.min = 1;
+    // Appel API avec tous les paramètres
+    fetch(`/available_link/${subject}/${grade}/${domain}/${selectedStandards}/${kind}/`)
+        .then(response => response.json())
+        .then(data => {
+            const count = data.links.length;
+            const numberInput = document.getElementById('number');
+            const messageElement = document.getElementById('availability-message');
+            const maxIndicator = document.getElementById('max-indicator');
+            const maxValueSpan = document.getElementById('max-value');
 
-                // Mise à jour du message
-                messageElement.style.display = 'block';
-                document.getElementById('available-count').textContent = count;
-                maxIndicator.style.display = count > 0 ? 'inline' : 'none';
-                maxValueSpan.textContent = count;
+            // Mise à jour du champ nombre
+            numberInput.disabled = count === 0;
+            numberInput.placeholder = count > 0
+                ? `Enter number (1-${count})`
+                : "No questions available";
+            numberInput.max = count;
+            numberInput.min = 1;
 
-                // Réinitialisation si nécessaire
-                if (numberInput.value > count) numberInput.value = '';
-            })
-            .catch(error => console.error('Error:', error));
+            // Mise à jour du message
+            messageElement.style.display = 'block';
+            document.getElementById('available-count').textContent = count;
+            maxIndicator.style.display = count > 0 ? 'inline' : 'none';
+            maxValueSpan.textContent = count;
+
+            // Réinitialisation si nécessaire
+            if (numberInput.value > count) numberInput.value = '';
+        })
+        .catch(error => console.error('Error:', error));
     }
 
     function resetNumberField() {
@@ -392,81 +395,104 @@
         numberInput.placeholder = "Select all required fields first";
         document.getElementById('availability-message').style.display = 'none';
     }
-        function loadStandards() {
-            const subject = document.getElementById('subject').value;
-            const grade = parseInt(document.getElementById('grade').value);
-            const domain = document.getElementById('domain').value;
 
-            if (!subject || !grade || !domain) {
-                document.getElementById('standardsContainer').innerHTML = '';
-                document.getElementById('select-all').style.display = 'none';
+
+
+        function loadStandards() {
+    const subject = document.getElementById('subject').value;
+    const grade = parseInt(document.getElementById('grade').value);
+    const domain = document.getElementById('domain').value;
+
+    if (!subject || !grade || !domain) {
+        document.getElementById('standardsContainer').innerHTML = '';
+        document.getElementById('select-all').style.display = 'none';
+        return;
+    }
+
+    const encodedDomain = encodeURIComponent(domain);
+
+    fetch(`/available_standards/${subject}/${grade}/${encodedDomain}/`)
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to load standards');
+            return response.json();
+        })
+        .then(data => {
+            const container = document.getElementById('standardsContainer');
+            container.innerHTML = '';
+            const selectAllCheckbox = document.getElementById('select-all');
+
+            if (!data.standards || data.standards.length === 0) {
+                container.innerHTML = '<div class="no-standards">No standards available</div>';
+                selectAllCheckbox.style.display = 'none';
                 return;
             }
 
-            const encodedDomain = encodeURIComponent(domain);
+            selectAllCheckbox.style.display = 'inline';
 
-            fetch(`/available_standards/${subject}/${grade}/${encodedDomain}/`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Failed to load standards');
-                    return response.json();
-                })
-                .then(data => {
-                    const container = document.getElementById('standardsContainer');
-                    container.innerHTML = '';
-                    const selectAllCheckbox = document.getElementById('select-all');
-
-                    if (!data.standards || data.standards.length === 0) {
-                        container.innerHTML = '<div class="no-standards">No standards available</div>';
-                        selectAllCheckbox.style.display = 'none';
-                        return;
-                    }
-
-                    selectAllCheckbox.style.display = 'inline';
-
-                    // Ajout des checkboxes...
-                    data.standards.forEach(standard => {
-                        const div = document.createElement('div');
-                        div.className = 'checkbox-item';
-                        div.innerHTML = `
-                            <label>
-                                <span class="custom-checkbox">
-                                    <input type="checkbox" name="standards" value="${standard}" checked>
-                                    <span class="checkmark"></span>
-                                </span>
-                                ${standard}
-                            </label>
-                        `;
-                        container.appendChild(div);
-                    });
-
-                    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-
-                    // Initial state
-                    selectAllCheckbox.checked = true;
-                    checkboxes.forEach(checkbox => checkbox.checked = true);
-
-                    // Select All functionality
-                    selectAllCheckbox.addEventListener('change', (e) => {
-                        checkboxes.forEach(checkbox => {
-                            checkbox.checked = e.target.checked;
-                        });
-                    });
-
-                    // Individual checkbox logic
-                    checkboxes.forEach(checkbox => {
-                        checkbox.addEventListener('change', () => {
-                            const allChecked = [...checkboxes].every(cb => cb.checked);
-                            selectAllCheckbox.checked = allChecked;
-                        });
-                    });
-                })
-            .catch(error => {
-                console.error('Error:', error);
-                container.innerHTML = '<div class="error">Erreur de chargement</div>';
+            // Trier les standards par ordre numérique et alphabétique
+            const sortedStandards = data.standards.sort((a, b) => {
+                const numA = parseFloat(a.match(/\d+/)[0]);
+                const numB = parseFloat(b.match(/\d+/)[0]);
+                if (numA !== numB) return numA - numB;
+                return a.localeCompare(b);
             });
+
+            // Ajout des checkboxes...
+            sortedStandards.forEach(standard => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-item';
+                div.innerHTML = `
+                    <label>
+                        <span class="custom-checkbox">
+                            <input type="checkbox" name="standards" value="${standard}" checked>
+                            <span class="checkmark"></span>
+                        </span>
+                        ${standard}
+                    </label>
+                `;
+                container.appendChild(div);
+            });
+
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+
+            // Initial state
+            selectAllCheckbox.checked = true;
+            checkboxes.forEach(checkbox => checkbox.checked = true);
+
+            // Select All functionality
+            selectAllCheckbox.addEventListener('change', (e) => {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = e.target.checked;
+                });
+                resetQuestionType(); // Réinitialiser le "Question Type"
+                checkAvailableLinks(); // Rafraîchir les liens disponibles
+            });
+
+            // Individual checkbox logic
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const allChecked = [...checkboxes].every(cb => cb.checked);
+                    selectAllCheckbox.checked = allChecked;
+                    resetQuestionType(); // Réinitialiser le "Question Type"
+                    checkAvailableLinks(); // Rafraîchir les liens disponibles
+                });
+            });
+
+            checkAvailableLinks(); // Vérifier les liens disponibles au chargement
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            container.innerHTML = '<div class="error">Erreur de chargement</div>';
+        });
         }
 
-       // Modifier l'écouteur d'événements pour le domaine
+        // Fonction pour réinitialiser le "Question Type"
+        function resetQuestionType() {
+            const kindSelect = document.getElementById('kind');
+            kindSelect.value = ''; // Réinitialiser à "Select Question Type"
+        }
+
+        // Ajouter un écouteur d'événements pour le domaine
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('domain').addEventListener('change', function() {
                 const domainSelected = this.value !== '';
@@ -474,5 +500,18 @@
                 if (domainSelected) loadStandards();
             });
         });
+
+        document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById('pdfForm');
+
+    form.addEventListener('submit', function(event) {
+        const selectedClass = document.getElementById('classes').value;
+
+        if (!selectedClass) {
+            event.preventDefault(); // Empêcher la soumission du formulaire
+            alert("Sorry, you didn't select the class.");
+        }
+    });
+});
     </script>
 {% endblock %}
