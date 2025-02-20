@@ -83,6 +83,19 @@
         <button type="submit" class="generate-button">Generate Test</button>
     </form>
 
+<!-- Add this modal at the end of your form -->
+<div id="previewModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Preview</h3>
+        <iframe id="previewFrame" style="width: 100%; height: 500px; border: none;"></iframe>
+        <div class="modal-buttons">
+            <button id="downloadButton" class="generate-button">Download</button>
+            <button id="sendToClassButton" class="generate-button">Send to Class</button>
+        </div>
+    </div>
+</div>
+
     <style>
         .classes-radio-container {
             margin: 20px 0;
@@ -181,6 +194,41 @@
             cursor: pointer;
             user-select: none;
         }
+
+        .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 80%;
+        max-width: 800px;
+        position: relative;
+    }
+
+    .close {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
     </style>
 
     <script>
@@ -512,6 +560,76 @@
             alert("Sorry, you didn't select the class.");
         }
     });
+});
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById('pdfForm');
+    const previewModal = document.getElementById('previewModal');
+    const closeModal = document.querySelector('.close');
+    const previewFrame = document.getElementById('previewFrame');
+    const downloadButton = document.getElementById('downloadButton');
+    const sendToClassButton = document.getElementById('sendToClassButton');
+
+    // Prevent form submission
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        // Vérifier si la classe est sélectionnée
+        const selectedClass = document.getElementById('classes').value;
+        if (!selectedClass) {
+            alert("Sorry, you didn't select the class.");
+            return; // Ne pas ouvrir le POPUP si la classe n'est pas sélectionnée
+        }
+
+        // Show the modal
+        previewModal.style.display = 'block';
+
+        // Fetch a preview file (e.g., the first PDF)
+        fetchPreviewFile();
+    });
+
+    // Close the modal
+    closeModal.addEventListener('click', function () {
+        previewModal.style.display = 'none';
+    });
+
+    // Download the ZIP file
+    downloadButton.addEventListener('click', function () {
+        // Submit the form to trigger the ZIP download
+        form.submit();
+    });
+
+    // Send to Class (no logic for now)
+    sendToClassButton.addEventListener('click', function () {
+        alert("Send to Class functionality is not implemented yet.");
+    });
+
+    // Function to fetch a preview file
+    function fetchPreviewFile() {
+        const formData = new FormData(form);
+        fetch('/generate-pdf-preview/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            },
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch preview');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                previewFrame.src = url; // Display the PDF in the iframe
+            })
+            .catch(error => {
+                console.error('Error fetching preview:', error);
+                alert("Failed to load preview.");
+            });
+    }
 });
     </script>
 {% endblock %}

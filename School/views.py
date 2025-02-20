@@ -575,6 +575,98 @@ def generate_pdf_view(request):
 
     return render(request, 'dashboard/teacher/digital_library.html')
 
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.conf import settings
+import os
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+def generate_pdf_preview(request):
+    if request.method == "POST":
+        logger.info("Début de la génération du preview")
+        try:
+            # Extraire les données du formulaire
+            selected_class = request.POST.get('classes', '')
+            subject = request.POST['subject']
+            number = int(request.POST['number'])
+            grade = int(request.POST['grade'])
+            kind = request.POST['kind']
+            domain = request.POST['domain']
+            teacher_name = request.user.get_full_name() or request.user.username
+
+            logger.info(f"Données du formulaire : subject={subject}, number={number}, grade={grade}, kind={kind}, domain={domain}")
+
+            # Vérifier si une classe est sélectionnée
+            if not selected_class:
+                raise Exception("Aucune classe sélectionnée.")
+
+            # Générer les liens de questions selon la matière
+            if subject == "Math":
+                links = filter_math_question(subject, number, grade, domain, kind)
+            else:
+                links = filter_lang_question(subject, number, grade, domain, kind)
+
+            logger.info(f"Liens générés : {links}")
+
+            # Récupérer un étudiant de la classe sélectionnée
+            class_instance = Class.objects.get(name=selected_class)
+            logger.info(f"Classe sélectionnée : {selected_class}")
+            logger.info(f"Classe ID : {class_instance.id}")
+
+            with connection.cursor() as cursor:
+                # Exécution de la requête SQL brute pour récupérer un étudiant
+                cursor.execute("""
+                    SELECT sc."student_id"
+                    FROM "public"."Authentication_user" AS u
+                    INNER JOIN "public"."Authentication_student" AS s ON u."id" = s."user_id"
+                    INNER JOIN "public"."School_class_students" AS sc ON s."id" = sc."student_id"
+                    WHERE sc."class_id" = %s;
+                """, [class_instance.id])
+
+                # Récupérer le premier étudiant
+                student = cursor.fetchone()
+
+                if student:
+                    student_id = student[0]
+                    logger.info(f"Étudiant récupéré pour le preview : ID={student_id}")
+                else:
+                    # Aucun étudiant trouvé, utiliser un nom fictif
+                    student_id = None
+                    logger.warning("Aucun étudiant trouvé dans la classe. Utilisation d'un nom fictif.")
+
+            # Générer un fichier PDF pour le preview
+            preview_pdf = generate_pdf(
+                links=links,
+                selected_class=selected_class,
+                subject=subject,
+                grade=grade,
+                teacher_name=teacher_name,
+                student_id=student_id,  # Utiliser l'ID de l'étudiant ou None
+                domain=domain,
+                assignment_type="Quiz",
+            )
+
+            logger.info(f"Fichier PDF généré : {preview_pdf}")
+
+            # Vérifier si le fichier PDF a été généré
+            if not os.path.exists(preview_pdf) or os.path.getsize(preview_pdf) == 0:
+                raise Exception("Le fichier PDF est vide ou n'a pas été généré.")
+
+            # Retourner le fichier PDF en réponse
+            with open(preview_pdf, 'rb') as f:
+                response = HttpResponse(f.read(), content_type='application/pdf')
+                response['Content-Disposition'] = 'inline; filename="preview.pdf"'
+                return response
+
+        except Exception as e:
+            logger.error(f"Erreur lors de la génération du preview : {str(e)}")
+            return HttpResponse(f"Erreur lors de la génération du preview : {str(e)}", status=500)
+
+    return HttpResponse("Invalid request method.", status=400)
+
 def get_classes(request):
     classes = Class.objects.values('name', 'subject', 'grade')
     return JsonResponse({'classes': list(classes)})
