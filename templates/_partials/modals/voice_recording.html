@@ -1,0 +1,25 @@
+<div class="modal fade" id="voiceModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Enregistrement vocal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="waveform" class="waveform-container"></div>
+
+                <div class="d-flex justify-content-center gap-2">
+                    <button id="recordButton" class="btn btn-danger btn-sm">
+                        <i class="bi bi-record-circle me-1"></i>Démarrer
+                    </button>
+                    <button id="playButton" class="btn btn-success btn-sm" disabled>
+                        <i class="bi bi-play-circle me-1"></i>Écouter
+                    </button>
+                    <button id="saveButton" class="btn btn-primary btn-sm" disabled>
+                        <i class="bi bi-save me-1"></i>Enregistrer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

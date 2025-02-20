@@ -656,8 +656,6 @@ def get_standards(request, subject, grade, domain):
         available_standars = []  # Handle empty DataFrame case
     else:
         available_standars = filtered_df["Specific Standard"].unique().tolist()
-
-    print(f'HEEEEEEEEEEEEEEEEEEERE IS JOSUE : {available_standars}')
     return JsonResponse({'standards': available_standars})
 
 
@@ -864,32 +862,157 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .models import Gradebook, Student, Class
 from django.core.files.storage import FileSystemStorage
+from django.db.models import Q
 
 # Function to list all entry of the gradebook
+# views.py
+
 def gradebook_list_view(request):
-    # Agrégation par classe
-    class_data = Gradebook.objects.values(
-        'class_instance__name'
-    ).annotate(
-        total_students=Count('student', distinct=True),
-        exam_count=Count(Case(When(assessment_type='EXAM', then=1))),
-        test_count=Count(Case(When(assessment_type='TEST', then=1))),
-        homework_count=Count(Case(When(assessment_type='HOMEWORK', then=1))),
-        class_avg=Avg('score')
-    ).order_by('class_instance__name')
+    selected_class_id = request.GET.get('class_id')
 
-    classes = Class.objects.all()
+    if selected_class_id:
+        # Récupération de la classe sélectionnée
+        selected_class = get_object_or_404(Class, id=selected_class_id)
 
-    return render(request, 'dashboard/teacher/gradebook.html', {
-        'class_data': class_data,
-        'classes': classes
-    })
+        # 1. Récupération des sous-types existants pour chaque type d'évaluation
+
+        exam_subtypes = Gradebook.objects.filter(
+            class_instance=selected_class,
+            assessment_type='EXAM'
+        ).exclude(subtype__isnull=True).values_list('subtype', flat=True).distinct()
+
+        test_subtypes = Gradebook.objects.filter(
+            class_instance=selected_class,
+            assessment_type='TEST'
+        ).exclude(subtype__isnull=True).values_list('subtype', flat=True).distinct()
+
+        homework_subtypes = Gradebook.objects.filter(
+            class_instance=selected_class,
+            assessment_type='HOMEWORK'
+        ).exclude(subtype__isnull=True).values_list('subtype', flat=True).distinct()
+
+        # 2. Récupération des étudiants avec leurs données détaillées
+        students = Student.objects.filter(classes=selected_class)
+        student_data = []
+
+        for student in students:
+            # Calcul de la moyenne générale
+            avg = Gradebook.objects.filter(
+                student=student,
+                class_instance=selected_class
+            ).aggregate(average=Avg('score'))['average'] or 0.0
+
+            # Récupération des counts par sous-type
+            exam_counts = {
+                subtype: Gradebook.objects.filter(
+                    student=student,
+                    class_instance=selected_class,
+                    assessment_type='EXAM',
+                    subtype=subtype
+                ).count()
+                for subtype in exam_subtypes
+            }
+
+            test_counts = {
+                subtype: Gradebook.objects.filter(
+                    student=student,
+                    class_instance=selected_class,
+                    assessment_type='TEST',
+                    subtype=subtype
+                ).count()
+                for subtype in test_subtypes
+            }
+
+            homework_counts = {
+                subtype: Gradebook.objects.filter(
+                    student=student,
+                    class_instance=selected_class,
+                    assessment_type='HOMEWORK',
+                    subtype=subtype
+                ).count()
+                for subtype in homework_subtypes
+            }
+
+            student_data.append({
+                'student': student,
+                'average': avg,
+                'exam_counts': exam_counts,
+                'test_counts': test_counts,
+                'homework_counts': homework_counts,
+            })
+
+        return render(request, 'dashboard/teacher/gradebook.html', {
+            'student_data': student_data,
+            'classes': Class.objects.all(),
+            'selected_class_id': int(selected_class_id),
+            'exam_subtypes': list(exam_subtypes),  # Ensure this is a list
+            'test_subtypes': list(test_subtypes),
+            'homework_subtypes': list(homework_subtypes),
+            'has_selected_class': True,
+        })
+
+    else:
+        # Mode agrégation globale (non filtré par classe)
+        class_data = Gradebook.objects.values(
+            'class_instance__name'
+        ).annotate(
+            total_students=Count('student', distinct=True),
+            exam_count=Count(Case(When(assessment_type='EXAM', then=1))),
+            test_count=Count(Case(When(assessment_type='TEST', then=1))),
+            homework_count=Count(Case(When(assessment_type='HOMEWORK', then=1))),
+            class_avg=Avg('score')
+        ).order_by('class_instance__name')
+
+        return render(request, 'dashboard/teacher/gradebook.html', {
+            'class_data': class_data,
+            'classes': Class.objects.all(),
+            'has_selected_class': False,
+        })
 
 # Function that return the list of all classes in the app
 def get_classes(request):
     classes = Class.objects.values('name', 'subject', 'grade')
     return JsonResponse({'classes': list(classes)})
 
+# views.py
+def get_assessment_subtypes(request):
+    class_id = request.GET.get('class_id')
+    subtypes = Gradebook.objects.filter(
+        class_instance_id=class_id
+    ).exclude(subtype__isnull=True).values(
+        'assessment_type',
+        'subtype'
+    ).distinct()
+
+    return JsonResponse({'subtypes': list(subtypes)})
+
+# views.py
+def get_class_students(request):
+    class_id = request.GET.get('class_id')
+    students = Student.objects.filter(classes__id=class_id)
+
+    data = []
+    for student in students:
+        aggregates = Gradebook.objects.filter(
+            student=student,
+            class_instance_id=class_id
+        ).aggregate(
+            average=Avg('score'),
+            exam_count=Count('id', filter=Q(assessment_type='EXAM')),
+            test_count=Count('id', filter=Q(assessment_type='TEST')),
+            homework_count=Count('id', filter=Q(assessment_type='HOMEWORK'))
+        )
+
+        data.append({
+            'id': student.id,
+            'name': f"{student.user.first_name} {student.user.last_name}",
+            'average': aggregates['average'] or 0.0,
+            'exam_count': aggregates['exam_count'],
+            'test_count': aggregates['test_count'],
+            'homework_count': aggregates['homework_count'],
+        })
+
+    return JsonResponse({'students': data})
 # Function to update the gradebook entry element
 def update_gradebook_view(request, pk):
     """Handle the update of an existing gradebook entry."""
@@ -943,7 +1066,7 @@ def create_gradebook_view(request):
 
         except Exception as e:
             classes = Class.objects.all()
-            return render(request, 'dashboard/teacher/add_new_item.html', {
+            return render(request, 'dashboard/teacher/add_new_item_gradebook.html', {
                 'error': str(e),
                 'classes': classes,
                 'ASSESSMENT_TYPES': Gradebook.ASSESSMENT_TYPES,
@@ -951,7 +1074,7 @@ def create_gradebook_view(request):
 
     # Code pour les requêtes GET
     classes = Class.objects.all()
-    return render(request, 'dashboard/teacher/add_new_item.html', {
+    return render(request, 'dashboard/teacher/add_new_item_gradebook.html', {
         'classes': classes,
         'ASSESSMENT_TYPES': Gradebook.ASSESSMENT_TYPES,
     })
@@ -996,3 +1119,30 @@ def get_average(request):
         'count': stats['count']
     })
 
+
+# views.py
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+
+
+@csrf_exempt
+def upload_voice_note(request):
+    if request.method == 'POST' and request.FILES.get('audio'):
+        try:
+            student = Student.objects.get(id=request.POST.get('student_id'))
+            assessment_type = request.POST.get('assessment_type')
+            subtype = request.POST.get('subtype', 'general')
+
+            gradebook_entry, created = Gradebook.objects.update_or_create(
+                student=student,
+                assessment_type=assessment_type,
+                subtype=subtype,
+                defaults={'voice_note': request.FILES['audio']}
+            )
+
+            return JsonResponse({'status': 'success', 'url': gradebook_entry.voice_note.url})
+
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+    return JsonResponse({'status': 'error'}, status=400)

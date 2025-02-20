@@ -1,0 +1,62 @@
+{% extends "_partials/dashboard_teacher/layaout.html" %}
+{% load static %}
+
+{% block content %}
+    <div class="gradebook-container">
+        <div class="content">
+            <h4 class="text-color-pink">Add New Gradebook Entry</h4>
+            <div id="add-item-form">
+                <form method="POST" action="{% url 'create_gradebook' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" id="class_instance" name="class_instance">
+                    <input type="hidden" id="assessment_type" name="assessment_type">
+
+                    <!-- Class and Assessment Type Selection -->
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label for="class_selector">Class:</label>
+                            <select id="class_selector" name="class_instance" class="form-control">
+                                <option value="">Select a class</option>
+                                {% for class in classes %}
+                                    <option value="{{ class.id }}">{{ class.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group half-width">
+                            <label for="assessment_type_selector">Assessment Type:</label>
+                            <select id="assessment_type_selector" name="assessment_type" class="form-control">
+                                <option value="">Select assessment type</option>
+                                {% for assessment in ASSESSMENT_TYPES %}
+                                    <option value="{{ assessment.0 }}">{{ assessment.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Feedback File Upload -->
+                    <div class="form-group">
+                        <label for="feedback_file">Feedback File:</label>
+                        <input type="file" id="feedback_file" name="feedback_file" class="form-control" required>
+                    </div>
+                    <button type="submit" class="button button-apply">Add to the gradebook</button>
+                </form>
+
+                {% if error %}
+                    <div class="alert alert-danger mt-3">{{ error }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .half-width {
+            width: 48%;
+        }
+    </style>
+{% endblock %}

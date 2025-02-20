@@ -68,6 +68,11 @@ urlpatterns = [
     path('gradebooks/<int:pk>/delete/', views.delete_gradebook_view, name='delete_gradebook'),
     # Render template to delete a gradebook entry
     path('gradebook_calculation/', views.gradebook_calculation, name='gradebook_calculation'),
+    # urls.py
+    path('get-class-students/', views.get_class_students, name='get_class_students'),
+    path('get-subtypes/', views.get_assessment_subtypes, name='get_subtypes'),
+    # urls.py
+    path('upload_voice/', views.upload_voice_note, name='upload_voice'),
 
 
 

@@ -17,7 +17,6 @@ class Class(models.Model):
         return f"{self.name} - {self.subject} (Grade {self.grade})"
 
 
-
 class Gradebook(models.Model):
     ASSESSMENT_TYPES = (
         ('EXAM', 'Exam'),
@@ -25,12 +24,29 @@ class Gradebook(models.Model):
         ('HOMEWORK', 'Homework'),
     )
 
+    # Champs existants conservés
     class_instance = models.ForeignKey(Class, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     assessment_type = models.CharField(max_length=10, choices=ASSESSMENT_TYPES)
     feedback_file = models.FileField(upload_to='feedback/')
-    score = models.FloatField()  # À utiliser plus tard pour le calcul de la moyenne
+    score = models.FloatField()
     date_added = models.DateTimeField(auto_now_add=True)
+
+    # Nouveaux champs avec valeurs par défaut et migration sécurisée
+    subtype = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        default='GENERAL',  # Valeur par défaut pour les nouvelles entrées
+        help_text="Sous-type d'évaluation (ex: 'Unit 1', 'Quiz 2')"
+    )
+
+    voice_note = models.FileField(
+        upload_to='voice_notes/',
+        null=True,
+        blank=True,
+        verbose_name="Commentaire audio"
+    )
 
 class Assignment(models.Model):
     HOMEWORK = 'HW'

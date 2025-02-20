@@ -1,5 +1,7 @@
+
 {% extends "_partials/dashboard_teacher/layaout.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block content %}
     <!-- Assistance Section -->
@@ -25,9 +27,11 @@
                     </a>
                 </div>
                 <p>Filter by Class here</p>
-                <select class="dropdown">
+                <select class="dropdown" id="classFilter">
                     {% for class in classes %}
-                        <option value="{{ class.id }}">{{ class.name }}</option>
+                        <option value="{{ class.id }}" {% if class.id == selected_class_id %}selected{% endif %}>
+                            {{ class.name }}
+                        </option>
                     {% endfor %}
                 </select>
                 <a href="">
@@ -39,42 +43,103 @@
 
             <div class="table-container">
                 <table class="gradebook-table">
+                    <!-- Dans l'en-tête du tableau -->
+                    <!-- En-tête dynamique -->
                     <thead>
                         <tr class="header-row">
-                            <th>CLASS</th>
-                            <th>STUDENT</th>
-                            <th>AVERAGE</th>
-                            <th>EXAM</th>
-                            <th>TESTS</th>
-                            <th>HOMEWORKS</th>
+                            <th rowspan="2">STUDENT</th>
+                            <th rowspan="2">AVERAGE</th>
+
+                            <!-- Colonnes dynamiques pour EXAM -->
+                            <th colspan="{{ exam_subtypes|length }}">EXAM</th>
+
+                            <!-- Colonnes dynamiques pour TEST -->
+                            <th colspan="{{ test_subtypes|length }}">TEST</th>
+
+                            <!-- Colonnes dynamiques pour HOMEWORK -->
+                            <th colspan="{{ homework_subtypes|length }}">HOMEWORK</th>
+
+                            <th rowspan="2">ACTIONS</th>
                         </tr>
+                        <tr class="sub-header-row">
+
+</tr>
+                    <tr class="sub-header-row">
+                        {% for subtype in exam_subtypes %}
+                            <th>{{ subtype }}</th>
+                        {% endfor %}
+                        {% for subtype in test_subtypes %}
+                            <th>{{ subtype }}</th>
+                        {% endfor %}
+                        {% for subtype in homework_subtypes %}
+                            <th>{{ subtype }}</th>
+                        {% endfor %}
+                    </tr>
+
                     </thead>
+
+                    <!-- Corps du tableau -->
                     <tbody>
-                        {% for entry in class_data %}
-                            <tr class="{% cycle 'colored-row' 'white-row' %}">
-                                <td>{{ entry.class_instance__name }}</td>
-                                <td>{{ entry.total_students }} Students</td>
-                                <td>
-                                    {{ entry.class_avg|default_if_none:"0.0"|floatformat:1 }}%
-                                    {% if entry.class_avg >= 90 %}
-                                        (A)
-                                    {% elif entry.class_avg >= 80 %}
-                                        (B)
-                                    {% elif entry.class_avg >= 70 %}
-                                        (C)
-                                    {% elif entry.class_avg >= 55 %}
-                                        (D)
-                                    {% else %}
-                                        (F)
-                                    {% endif %}
-                                </td>
-                                <td><span class="view-link">View ({{ entry.exam_count }})</span></td>
-                                <td><span class="view-link">View ({{ entry.test_count }})</span></td>
-                                <td><span class="view-link">View ({{ entry.homework_count }})</span></td>
-                            </tr>
-                        {% empty %}
+                        {% for data in student_data %}
                             <tr>
-                                <td colspan="6">No gradebook entries found.</td>
+                                <!-- Nom étudiant -->
+                                <td>{{ data.student.user.get_full_name }}</td>
+
+                                <td class="average-cell">
+                                    {{ data.average|floatformat:1 }}%
+                                    <i class="bi bi-mic voice-icon"
+                                       data-student="{{ data.student.id }}"
+                                       data-type="average"
+                                       style="font-size: 1.2rem; margin-left: 8px;"></i>
+                                </td>
+
+                                <!-- Données EXAM par sous-type -->
+                                {% for subtype in exam_subtypes %}
+                                    <td>
+                                        {{ data.exam_counts|get_item:subtype|default:0 }}
+                                        <i class="bi bi-mic voice-icon"
+                                           data-student="{{ data.student.id }}"
+                                           data-assessment="EXAM"
+                                           data-subtype="{{ subtype }}"></i>
+                                    </td>
+                                {% endfor %}
+
+                                <!-- Données TEST par sous-type -->
+                                {% for subtype in test_subtypes %}
+                                    <td>
+                                        {{ data.test_counts|get_item:subtype|default:0 }}
+                                        <i class="bi bi-mic voice-icon"
+                                           data-student="{{ data.student.id }}"
+                                           data-assessment="TEST"
+                                           data-subtype="{{ subtype }}"></i>
+                                    </td>
+                                {% endfor %}
+
+                                <!-- Données HOMEWORK par sous-type -->
+                                {% for subtype in homework_subtypes %}
+                                    <td>
+                                        {{ data.homework_counts|get_item:subtype|default:0 }}
+                                        <i class="bi bi-mic voice-icon"
+                                           data-student="{{ data.student.id }}"
+                                           data-assessment="HOMEWORK"
+                                           data-subtype="{{ subtype }}"></i>
+                                    </td>
+                                {% endfor %}
+
+                                <!-- Menu d'actions amélioré -->
+                               <td class="actions">
+                                    <div class="icon-group">
+                                        <a href="#" class="icon-item" title="Modifier">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a href="#" class="icon-item text-danger" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                        <a href="#" class="icon-item" title="Détails">
+                                            <i class="bi bi-file-earmark-text"></i>
+                                        </a>
+                                    </div>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -82,75 +147,158 @@
             </div>
             <!-- Calculations Modal -->
             <div id="calculationsModal" class="modal-gradebook">
-    <div class="modal-gradebook-content">
-        <span class="modal-gradebook-close" onclick="closeCalculationsModal()">&times;</span>
+            <div class="modal-gradebook-content">
+                <span class="modal-gradebook-close" onclick="closeCalculationsModal()">&times;</span>
 
-        <div class="modal-gradebook-body">
-            <h2 class="modal-gradebook-title">Calculations</h2>
+                <div class="modal-gradebook-body">
+                    <h2 class="modal-gradebook-title">Calculations</h2>
 
-            <div class="modal-gradebook-header">
-                <div class="modal-gradebook-percent">%</div>
-                <div class="modal-gradebook-gauge">◐</div>
-            </div>
+                    <div class="modal-gradebook-header">
+                        <div class="modal-gradebook-percent">%</div>
+                        <div class="modal-gradebook-gauge">◐</div>
+                    </div>
 
-            <div class="modal-gradebook-row">
-                <div class="modal-gradebook-range">100 - 90</div>
-                <div class="modal-gradebook-grade-container">
-                    <span class="grade grade-a">A</span>
-                    <span class="modal-gradebook-delete">🗑️</span>
+                    <div class="modal-gradebook-row">
+                        <div class="modal-gradebook-range">100 - 90</div>
+                        <div class="modal-gradebook-grade-container">
+                            <span class="grade grade-a">A</span>
+                            <span class="modal-gradebook-delete">🗑️</span>
+                        </div>
+                    </div>
+
+                    <div class="modal-gradebook-row">
+                        <div class="modal-gradebook-range">89 - 80</div>
+                        <div class="modal-gradebook-grade-container">
+                            <span class="modal-gradebook-grade modal-grade-b">B</span>
+                            <span class="modal-gradebook-delete">🗑️</span>
+                        </div>
+                    </div>
+
+                    <div class="modal-gradebook-row">
+                        <div class="modal-gradebook-range">79 - 70</div>
+                        <div class="modal-gradebook-grade-container">
+                            <span class="modal-gradebook-grade modal-grade-c">C</span>
+                            <span class="modal-gradebook-delete">🗑️</span>
+                        </div>
+                    </div>
+
+                    <div class="modal-gradebook-row">
+                        <div class="modal-gradebook-range">69 - 55</div>
+                        <div class="modal-gradebook-grade-container">
+                            <span class="modal-gradebook-grade modal-grade-d">D</span>
+                            <span class="modal-gradebook-delete">🗑️</span>
+                        </div>
+                    </div>
+
+                    <div class="modal-gradebook-row">
+                        <div class="modal-gradebook-range">54 - 0</div>
+                        <div class="modal-gradebook-grade-container">
+                            <span class="modal-gradebook-grade modal-grade-f">F</span>
+                            <span class="modal-gradebook-delete">🗑️</span>
+                        </div>
+                    </div>
+
+                    <div class="modal-gradebook-row">
+                        <div class="modal-gradebook-range">-- - --</div>
+                        <div class="modal-gradebook-grade-container">
+                            <span class="modal-gradebook-grade modal-grade-unknown">?</span>
+                            <span class="modal-gradebook-delete">🗑️</span>
+                        </div>
+                    </div>
+
+                    <div class="modal-gradebook-footer">
+                        <h4 class="modal-gradebook-school-mark">School mark</h4>
+                    </div>
                 </div>
             </div>
 
-            <div class="modal-gradebook-row">
-                <div class="modal-gradebook-range">89 - 80</div>
-                <div class="modal-gradebook-grade-container">
-                    <span class="modal-gradebook-grade modal-grade-b">B</span>
-                    <span class="modal-gradebook-delete">🗑️</span>
-                </div>
-            </div>
+        </div>
 
-            <div class="modal-gradebook-row">
-                <div class="modal-gradebook-range">79 - 70</div>
-                <div class="modal-gradebook-grade-container">
-                    <span class="modal-gradebook-grade modal-grade-c">C</span>
-                    <span class="modal-gradebook-delete">🗑️</span>
-                </div>
+            <div id="voiceModal" class="modal fade" tabindex="-1">
+            <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Enregistrement vocal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-
-            <div class="modal-gradebook-row">
-                <div class="modal-gradebook-range">69 - 55</div>
-                <div class="modal-gradebook-grade-container">
-                    <span class="modal-gradebook-grade modal-grade-d">D</span>
-                    <span class="modal-gradebook-delete">🗑️</span>
+            <div class="modal-body">
+                <div class="voice-recorder">
+                    <div id="waveform"></div>
+                    <div class="controls mt-3">
+                        <button id="recordButton" class="btn btn-danger">
+                            <i class="bi bi-record-circle"></i> Démarrer
+                        </button>
+                        <button id="playButton" class="btn btn-success" disabled>
+                            <i class="bi bi-play-circle"></i> Écouter
+                        </button>
+                        <button id="saveButton" class="btn btn-primary" disabled>
+                            <i class="bi bi-save"></i> Enregistrer
+                        </button>
+                    </div>
+                    <audio id="audioPreview" controls class="mt-3"></audio>
                 </div>
-            </div>
-
-            <div class="modal-gradebook-row">
-                <div class="modal-gradebook-range">54 - 0</div>
-                <div class="modal-gradebook-grade-container">
-                    <span class="modal-gradebook-grade modal-grade-f">F</span>
-                    <span class="modal-gradebook-delete">🗑️</span>
-                </div>
-            </div>
-
-            <div class="modal-gradebook-row">
-                <div class="modal-gradebook-range">-- - --</div>
-                <div class="modal-gradebook-grade-container">
-                    <span class="modal-gradebook-grade modal-grade-unknown">?</span>
-                    <span class="modal-gradebook-delete">🗑️</span>
-                </div>
-            </div>
-
-            <div class="modal-gradebook-footer">
-                <h4 class="modal-gradebook-school-mark">School mark</h4>
             </div>
         </div>
     </div>
-</div>
+            </div>
         </div>
     </div>
 
     <style>
+        /* Style des sous-colonnes */
+        .sub-header-row th {
+            background: #f8f9fa;
+            font-size: 0.9em;
+            padding: 8px;
+        }
+
+        /* Style des icônes vocales */
+        .voice-icon {
+            color: #2196F3;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: transform 0.2s;
+        }
+
+        .voice-icon:hover {
+            transform: scale(1.2);
+            color: #1976D2;
+        }
+
+        /* Style des menus déroulants */
+        .dropdown-menu {
+            min-width: 160px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .dropdown-item {
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Style du menu déroulant amélioré */
+        .actions .dropdown-menu {
+            min-width: 120px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .actions .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+        }
+
+        .actions .dropdown-item i {
+            font-size: 14px;
+        }
         /* Styles modaux spécifiques */
         .modal-gradebook {
             display: none;
@@ -253,7 +401,55 @@
             font-size: 24px;
             color: #7f8c8d;
         }
+
+        .actions button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #fff;
+            background: #007bff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background: #f8f9fa;
+        }
+        /* Voice Recording Styles */
+        #waveform {
+            width: 100%;
+            height: 100px;
+            background: #f8f9fa;
+            margin-bottom: 1rem;
+        }
+
+        .voice-recorder .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        #audioPreview {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .modal-dialog {
+            max-width: 600px;
+        }
+
+        .btn-record {
+            min-width: 120px;
+        }
     </style>
+    <script src="https://unpkg.com/wavesurfer.js"></script>
 
     <script>
         function openCalculationsModal() {
@@ -271,5 +467,222 @@
                 modal.style.display = 'none';
             }
         }
+
+        function attachVoiceIconListeners() {
+            document.querySelectorAll('.voice-icon').forEach(icon => {
+                icon.addEventListener('click', async (e) => {
+                    const target = e.currentTarget;
+                    const studentId = target.dataset.student;
+                    const assessmentType = target.dataset.assessment || 'average';
+                    const subtype = target.dataset.subtype || 'general';
+
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        mediaRecorder = new MediaRecorder(stream);
+
+                        mediaRecorder.ondataavailable = (event) => {
+                            audioChunks.push(event.data);
+                        };
+
+                        mediaRecorder.onstop = async () => {
+                            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                            currentAudioUrl = URL.createObjectURL(audioBlob);
+                            document.getElementById('audioPreview').src = currentAudioUrl;
+                            document.getElementById('playButton').disabled = false;
+                            document.getElementById('saveButton').disabled = false;
+                        };
+
+                        openVoiceModal();
+
+                    } catch (err) {
+                        console.error('Erreur d\'accès au microphone:', err);
+                        alert('L\'accès au microphone est requis pour cette fonctionnalité');
+                    }
+                });
+            });
+        }
+
+        document.getElementById('classFilter').addEventListener('change', function(e) {
+    const classId = e.target.value;
+
+    fetch(`/get-class-students/?class_id=${classId}`)
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.querySelector('.gradebook-table tbody');
+            tbody.innerHTML = ''; // Réinitialiser le tableau
+
+            data.students.forEach((student, index) => {
+                const row = `
+                    <tr class="${index % 2 === 0 ? 'colored-row' : 'white-row'}">
+                        <td>${student.name}</td>
+                        <td>
+                            ${student.average.toFixed(1)}%
+                            <i class="bi bi-mic voice-icon" data-student="${student.id}" data-type="average"></i>
+                        </td>
+                        <td>${student.exam_count || 0}</td>
+                        <td>${student.test_count || 0}</td>
+                        <td>${student.homework_count || 0}</td>
+                        <td class="actions">
+                            <div class="icon-group">
+                                <a href="#" class="icon-item" title="Modifier">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a href="#" class="icon-item text-danger" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                                <a href="#" class="icon-item" title="Détails">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+
+            // Réattacher les événements aux icônes après la mise à jour
+            attachVoiceIconListeners();
+        });
+});
+
+
+
+        function getGradeBadge(average) {
+            if (average >= 90) return '<span class="grade grade-a">A</span>';
+            if (average >= 80) return '<span class="grade grade-b">B</span>';
+            if (average >= 70) return '<span class="grade grade-c">C</span>';
+            if (average >= 55) return '<span class="grade grade-d">D</span>';
+            return '<span class="grade grade-f">F</span>';
+        }
+
+
+
+        // Gestion dynamique des colonnes
+        function updateTableColumns(classId) {
+            fetch(`/get_assessment_subtypes/?class_id=${classId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const subtypes = data.subtypes;
+                    // Mettre à jour les en-têtes dynamiquement
+                    updateHeaders(subtypes);
+                    // Mettre à jour les données du tableau
+                    updateTableData(subtypes);
+                });
+        }
+
+        // Exemple de menu d'actions amélioré
+        const actionMenuHTML = `
+        <div class="dropdown">
+            <button class="btn btn-action" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item text-primary" href="#">
+                        <i class="bi bi-pencil-square"></i> Modifier
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item text-danger" href="#">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#">
+                        <i class="bi bi-file-earmark-text"></i> Détails
+                    </a>
+                </li>
+            </ul>
+        </div>`;
+
+        // Variables globales pour l'enregistrement
+        let mediaRecorder;
+        let audioChunks = [];
+        let currentAudioUrl = null;
+
+        // Ouvrir le modal
+        function openVoiceModal() {
+            document.getElementById('voiceModal').classList.add('active');
+        }
+
+        // Fermer le modal
+        function closeVoiceModal() {
+            document.getElementById('voiceModal').classList.remove('active');
+        }
+
+        // Attacher les événements aux icônes vocales
+        document.querySelectorAll('.voice-icon').forEach(icon => {
+            icon.addEventListener('click', async (e) => {
+                const studentId = e.currentTarget.dataset.student;
+
+                // Demander l'accès au microphone
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        currentAudioUrl = URL.createObjectURL(audioBlob);
+                        document.getElementById('audioPreview').src = currentAudioUrl;
+                        document.getElementById('playButton').disabled = false;
+                        document.getElementById('saveButton').disabled = false;
+                    };
+
+                    // Ouvrir le modal
+                    openVoiceModal();
+                } catch (err) {
+                    alert('Erreur : accès au microphone requis.');
+                    console.error(err);
+                }
+            });
+        });
+
+        // Gestion des boutons d'enregistrement
+        document.getElementById('recordButton').addEventListener('click', () => {
+            if (mediaRecorder.state === 'inactive') {
+                audioChunks = [];
+                mediaRecorder.start();
+                document.getElementById('recordButton').innerHTML = '<i class="bi bi-stop-circle"></i> Arrêter';
+                document.getElementById('recordButton').classList.replace('btn-danger', 'btn-warning');
+            } else {
+                mediaRecorder.stop();
+                document.getElementById('recordButton').innerHTML = '<i class="bi bi-record-circle"></i> Démarrer';
+                document.getElementById('recordButton').classList.replace('btn-warning', 'btn-danger');
+            }
+        });
+
+        // Lecture du fichier audio
+        document.getElementById('playButton').addEventListener('click', () => {
+            const audioPlayer = document.getElementById('audioPreview');
+            audioPlayer.play();
+        });
+
+        // Fermer le modal avec le bouton
+        document.addEventListener('DOMContentLoaded', () => {
+            // Fermer le modal avec le bouton
+            const closeButton = document.getElementById('closeVoiceModal');
+            if (closeButton) {
+                closeButton.addEventListener('click', closeVoiceModal);
+            }
+        });
+
+        function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
     </script>
 {% endblock %}
