@@ -1,0 +1,101 @@
+{% extends "_partials/dashboard_teacher/layaout.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+    <!-- Titre de la section -->
+    <h4 class="text-color-pink">GRADEBOOK</h4>
+    <div class="gradebook-container">
+        <div class="content">
+            <div class="content-header">
+                <div class="button-group" id="button-group">
+                    <a href="{% url 'create_gradebook' %}">
+                        <button class="button button-add-new-item">
+                            <i class="bi bi-clipboard-data white"></i> <span>Add New Item</span>
+                        </button>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tableau des classes -->
+            <div class="table-container">
+                <table class="gradebook-table">
+                    <thead>
+                        <tr class="header-row">
+                            <th>CLASS</th>
+                            <th>AVERAGE</th>
+                            <th>NUMBER OF EXAMS</th>
+                            <th>NUMBER OF TESTS</th>
+                            <th>NUMBER OF HOMEWORKS</th>
+                            <th>TOTAL WORK</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in class_data %}
+                            <tr onclick="window.location.href='{% url 'get_gradebooks' %}?class_id={{ data.class_instance__id }}';" style="cursor: pointer;">
+                                <td>{{ data.class_instance__name }}</td>
+                                <td>{{ data.class_avg|floatformat:1 }}%</td>
+                                <td>{{ data.exam_count }}</td>
+                                <td>{{ data.test_count }}</td>
+                                <td>{{ data.homework_count }}</td>
+                                <td>{{ data.exam_count|add:data.test_count|add:data.homework_count }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Styles de base pour le tableau */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background: #f8f9fa;
+        }
+
+        /* Styles pour les boutons et actions */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #fff;
+            background: #007bff;
+        }
+        .button-add-new-item {
+            background: #28a745;
+        }
+        .icon-group {
+            display: flex;
+            gap: 8px;
+        }
+        .icon-item {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .icon-item.text-danger {
+            color: #dc3545;
+        }
+
+        /* Couleur du titre */
+        .text-color-pink {
+            color: #e91e63;
+            margin-top: 25px;
+            font-size: 18px;
+        }
+    </style>
+{% endblock %}

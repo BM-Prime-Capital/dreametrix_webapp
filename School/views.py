@@ -943,16 +943,82 @@ def delete_assignment_view(request, pk):
 #############################################################
 
 from django.shortcuts import get_object_or_404
+from django.db.models import Count, Case, When, Avg
 from django.shortcuts import render, redirect
-from .models import Gradebook, Student, Class
-from django.core.files.storage import FileSystemStorage
-from django.db.models import Count, Case, When, FloatField, F, Avg
-from django.http import JsonResponse
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
 from .models import Gradebook, Student, Class
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
+
+# Class view
+def gradebook_list_menu_classes(request):
+    selected_class_id = request.GET.get('class_id')
+
+    if selected_class_id:
+        # Récupération de la classe sélectionnée
+        selected_class = get_object_or_404(Class, id=selected_class_id)
+
+        # Récupération des étudiants avec leurs données détaillées
+        students = Student.objects.filter(classes=selected_class)
+        student_data = []
+
+        for student in students:
+            # Calcul de la moyenne générale
+            avg = Gradebook.objects.filter(
+                student=student,
+                class_instance=selected_class
+            ).aggregate(average=Avg('score'))['average'] or 0.0
+
+            # Récupération des counts par type d'évaluation
+            exam_count = Gradebook.objects.filter(
+                student=student,
+                class_instance=selected_class,
+                assessment_type='EXAM'
+            ).count()
+
+            test_count = Gradebook.objects.filter(
+                student=student,
+                class_instance=selected_class,
+                assessment_type='TEST'
+            ).count()
+
+            homework_count = Gradebook.objects.filter(
+                student=student,
+                class_instance=selected_class,
+                assessment_type='HOMEWORK'
+            ).count()
+
+            student_data.append({
+                'student': student,
+                'average': avg,
+                'exam_count': exam_count,
+                'test_count': test_count,
+                'homework_count': homework_count,
+            })
+
+        return render(request, 'dashboard/teacher/gradebook_menu.html', {
+            'student_data': student_data,
+            'classes': Class.objects.all(),
+            'selected_class_id': int(selected_class_id),
+            'has_selected_class': True,
+        })
+
+    else:
+        # Mode agrégation globale (non filtré par classe)
+        class_data = Gradebook.objects.values(
+            'class_instance__name'
+        ).annotate(
+            total_students=Count('student', distinct=True),
+            exam_count=Count(Case(When(assessment_type='EXAM', then=1))),
+            test_count=Count(Case(When(assessment_type='TEST', then=1))),
+            homework_count=Count(Case(When(assessment_type='HOMEWORK', then=1))),
+            class_avg=Avg('score')
+        ).order_by('class_instance__name')
+
+        return render(request, 'dashboard/teacher/gradebook_menu.html', {
+            'class_data': class_data,
+            'classes': Class.objects.all(),
+            'has_selected_class': False,
+        })
 
 # Function to list all entry of the gradebook
 # views.py

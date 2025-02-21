@@ -15,8 +15,8 @@
             </button>
         </a>
 
-        <a href="{% url 'get_gradebooks' %}">
-            <button class="btn {% if request.resolver_match.url_name == 'gradebook_teacher_dashboard' %}active{% endif %}">
+        <a href="{% url 'gradebook_list_menu_classes' %}">
+            <button class="btn {% if request.resolver_match.url_name == 'gradebook_list_menu_classes' %}active{% endif %}">
                 <i class="bi bi-book green"></i> GRADEBOOK
             </button>
         </a>
