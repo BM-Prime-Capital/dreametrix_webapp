@@ -948,64 +948,25 @@ from django.shortcuts import render, redirect
 from .models import Gradebook, Student, Class
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
+from django.shortcuts import redirect
 
-# Class view
+from django.shortcuts import redirect
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Count, Case, When, Avg
+from django.urls import reverse  # Importation de reverse
+from .models import Gradebook, Student, Class
+
 def gradebook_list_menu_classes(request):
     selected_class_id = request.GET.get('class_id')
 
     if selected_class_id:
-        # Récupération de la classe sélectionnée
-        selected_class = get_object_or_404(Class, id=selected_class_id)
-
-        # Récupération des étudiants avec leurs données détaillées
-        students = Student.objects.filter(classes=selected_class)
-        student_data = []
-
-        for student in students:
-            # Calcul de la moyenne générale
-            avg = Gradebook.objects.filter(
-                student=student,
-                class_instance=selected_class
-            ).aggregate(average=Avg('score'))['average'] or 0.0
-
-            # Récupération des counts par type d'évaluation
-            exam_count = Gradebook.objects.filter(
-                student=student,
-                class_instance=selected_class,
-                assessment_type='EXAM'
-            ).count()
-
-            test_count = Gradebook.objects.filter(
-                student=student,
-                class_instance=selected_class,
-                assessment_type='TEST'
-            ).count()
-
-            homework_count = Gradebook.objects.filter(
-                student=student,
-                class_instance=selected_class,
-                assessment_type='HOMEWORK'
-            ).count()
-
-            student_data.append({
-                'student': student,
-                'average': avg,
-                'exam_count': exam_count,
-                'test_count': test_count,
-                'homework_count': homework_count,
-            })
-
-        return render(request, 'dashboard/teacher/gradebook_menu.html', {
-            'student_data': student_data,
-            'classes': Class.objects.all(),
-            'selected_class_id': int(selected_class_id),
-            'has_selected_class': True,
-        })
-
+        # Rediriger vers la vue gradebook_list_view avec l'ID de la classe sélectionnée
+        return redirect(f"{reverse('gradebook_list_view')}?class_id={selected_class_id}")
     else:
         # Mode agrégation globale (non filtré par classe)
         class_data = Gradebook.objects.values(
-            'class_instance__name'
+            'class_instance__name', 'class_instance__id'  # Ajout de l'ID de la classe
         ).annotate(
             total_students=Count('student', distinct=True),
             exam_count=Count(Case(When(assessment_type='EXAM', then=1))),
@@ -1030,8 +991,7 @@ def gradebook_list_view(request):
         # Récupération de la classe sélectionnée
         selected_class = get_object_or_404(Class, id=selected_class_id)
 
-        # 1. Récupération des sous-types existants pour chaque type d'évaluation
-
+        # Récupération des sous-types existants pour chaque type d'évaluation
         exam_subtypes = Gradebook.objects.filter(
             class_instance=selected_class,
             assessment_type='EXAM'
@@ -1047,7 +1007,7 @@ def gradebook_list_view(request):
             assessment_type='HOMEWORK'
         ).exclude(subtype__isnull=True).values_list('subtype', flat=True).distinct()
 
-        # 2. Récupération des étudiants avec leurs données détaillées
+        # Récupération des étudiants avec leurs données détaillées
         students = Student.objects.filter(classes=selected_class)
         student_data = []
 
@@ -1101,7 +1061,7 @@ def gradebook_list_view(request):
             'student_data': student_data,
             'classes': Class.objects.all(),
             'selected_class_id': int(selected_class_id),
-            'exam_subtypes': list(exam_subtypes),  # Ensure this is a list
+            'exam_subtypes': list(exam_subtypes),
             'test_subtypes': list(test_subtypes),
             'homework_subtypes': list(homework_subtypes),
             'has_selected_class': True,

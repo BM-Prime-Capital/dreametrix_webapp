@@ -59,9 +59,9 @@ urlpatterns = [
     path('get-classes-by-grade/<str:grade>/', views.get_classes_by_grade, name='get_classes_by_grade'),
 
     #GRADEBOOK FUNCTIONALITIES
-    path('gradebook_list_menu_classes/', views.gradebook_list_menu_classes, name='gradebook_list_menu_classes'),
+    path('gradebook_menu/', views.gradebook_list_menu_classes, name='gradebook_menu'),
+    path('gradebook/', views.gradebook_list_view, name='gradebook_list_view'),
 
-    path('gradebook_list_view/', views.gradebook_list_view, name='get_gradebooks'),
     path('create-gradebook/', views.create_gradebook_view, name='create_gradebook'),
     path('get-students/', views.get_students, name='get_students'),
     path('get-average/', views.get_average, name='get_average'),

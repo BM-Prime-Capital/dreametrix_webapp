@@ -5,7 +5,11 @@
 
 {% block content %}
     <!-- Assistance Section -->
-    <h4 class="text-color-pink">GRADEBOOK</h4>
+    {% if has_selected_class %}
+        <h4 class="text-color-pink">GRADEBOOK - {{ selected_class.name }}</h4>
+    {% else %}
+        <h4 class="text-color-pink">GRADEBOOK</h4>
+    {% endif %}
     <div class="gradebook-container">
         <div class="content">
             <div class="content-header">
@@ -16,9 +20,14 @@
                         </button>
                     </a>
                     <!-- Modified Calculations Button -->
-                    <button class="button button-calculations" onclick="openCalculationsModal()">
-                        <i class="bi bi-gear white"></i> <span>Calculations</span>
-                    </button>
+                    <select id="classFilter" onchange="filterByClass(this.value)">
+                        <option value="">Toutes les classes</option>
+                        {% for class in classes %}
+                            <option value="{{ class.id }}" {% if selected_class_id == class.id %}selected{% endif %}>
+                                {{ class.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
                     <a href="">
                         <button class="button button-layout">
                             <i class="bi bi-layout-text-sidebar white"></i>
@@ -26,19 +35,6 @@
                         </button>
                     </a>
                 </div>
-                <p>Filter by Class here</p>
-                <select class="dropdown" id="classFilter">
-                    {% for class in classes %}
-                        <option value="{{ class.id }}" {% if class.id == selected_class_id %}selected{% endif %}>
-                            {{ class.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-                <a href="">
-                    <button class="button button-fa-sliders">
-                        <i class="bi bi-sliders noir"></i>
-                    </button>
-                </a>
             </div>
 
             <div class="table-container">
@@ -830,6 +826,10 @@ window.addEventListener('click', (event) => {
         closeVoiceModal();
     }
 });
-</script>
 
+
+    function filterByClass(classId) {
+        window.location.href = `{% url 'gradebook_list_view' %}?class_id=${classId}`;
+    }
+</script>
 {% endblock %}
