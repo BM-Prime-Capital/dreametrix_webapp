@@ -4,68 +4,79 @@
     <div class="left">
         <a href="{% url 'get_classes' %}">
             <button class="btn-1 btn {% if request.resolver_match.url_name == 'get_classes' %}active{% endif %}">
-                <i class="bi bi-house blue"></i> CLASSES
+                <img src="{% static 'img/icons/home.svg' %}" alt="Gradebook Icon" class="blue" style="width: 24px; height: auto; margin-right: 5px;">
+                CLASSES
             </button>
         </a>
 
 
         <a href="{% url 'generate_pdf' %}">
             <button class="btn {% if request.resolver_match.url_name == 'generate_pdf' %}active{% endif %}">
-                <i class="bi bi-clipboard-data orange"></i> DIGITAL LIBRARY
+               <img src="{% static 'img/icons/assigments.svg' %}" alt="Gradebook Icon" class="blue" style="width: 24px; height: auto; margin-right: 5px;">
+                DIGITAL LIBRARY
             </button>
         </a>
 
-        <a href="{% url 'gradebook_list_menu_classes' %}">
-            <button class="btn {% if request.resolver_match.url_name == 'gradebook_list_menu_classes' %}active{% endif %}">
-                <i class="bi bi-book green"></i> GRADEBOOK
+        <a href="{% url 'gradebook_menu' %}">
+            <button class="btn {% if request.resolver_match.url_name == 'gradebook_menu' %}active{% endif %}">
+                <img src="{% static 'img/icons/gradebook.svg' %}" alt="Gradebook Icon" class="blue" style="width: 24px; height: auto; margin-right: 5px;">
+                GRADEBOOK
             </button>
         </a>
 
         <a href="{% url 'attendance_teacher_dashboard' %}">
             <button class="btn {% if request.resolver_match.url_name == 'attendance_teacher_dashboard' %}active{% endif %}">
-                <i class="bi bi-person-check blue"></i> ATTENDANCE
+                <img src="{% static 'img/icons/attendance.svg' %}" alt="Gradebook Icon" class="blue" style="width: 24px; height: auto; margin-right: 5px;">
+                ATTENDANCE
             </button>
         </a>
 
         <a href="{% url 'character_teacher_dashboard' %}">
             <button class="btn {% if request.resolver_match.url_name == 'character_teacher_dashboard' %}active{% endif %}">
-                <i class="bi bi-map orange"></i> CHARACTER
+                <img src="{% static 'img/icons/map_route.svg' %}" alt="Gradebook Icon" class="blue" style="width: 24px; height: auto; margin-right: 5px;">
+                CHARACTER
             </button>
         </a>
 
         <a href="{% url 'seating_teacher_dashboard' %}">
             <button class="btn {% if request.resolver_match.url_name == 'seating_teacher_dashboard' %}active{% endif %}">
-                <i class="bi bi-people green"></i> SEATING
+                <img src="{% static 'img/icons/seating.svg' %}" alt="Gradebook Icon" class="blue" style="width: 24px; height: auto; margin-right: 5px;">
+                SEATING
             </button>
         </a>
 
         <a href="{% url 'communicate_teacher_dashboard' %}">
             <button class="btn-4 btn {% if request.resolver_match.url_name == 'communicate_teacher_dashboard' %}active{% endif %}">
-                <i class="bi bi-send blue"></i> COMMUNICATE
+                <img src="{% static 'img/icons/communicate.svg' %}" alt="Gradebook Icon" class="blue" style="width: 24px; height: auto; margin-right: 5px;">
+                COMMUNICATE
             </button>
         </a>
 
         <a href="{% url 'reports_teacher_dashboard' %}">
             <button class="btn {% if request.resolver_match.url_name == 'reports_teacher_dashboard' %}active{% endif %}">
-                <i class="bi bi-book orange"></i> REPORTS
+                <img src="{% static 'img/icons/reports.svg' %}" alt="Gradebook Icon" class="blue" style="width: 24px; height: auto; margin-right: 5px;">
+                REPORTS
             </button>
         </a>
 
         <a href="{% url 'teach_teacher_dashboard' %}">
             <button class="btn-4 btn {% if request.resolver_match.url_name == 'teach_teacher_dashboard' %}active{% endif %}">
-                <i class="bi bi-send green"></i> TEACH
+                <img src="{% static 'img/icons/teach.svg' %}" alt="Gradebook Icon" class="blue" style="width: 24px; height: auto; margin-right: 5px;">
+                TEACH
             </button>
         </a>
 
         <a href="{% url 'polis_teacher_dashboard' %}">
             <button class="btn {% if request.resolver_match.url_name == 'polis_teacher_dashboard' %}active{% endif %}">
-                <i class="bi bi-book blue"></i> POLLS
+                <img src="{% static 'img/icons/polls.svg' %}" alt="Gradebook Icon" class="blue" style="width: 24px; height: auto; margin-right: 5px;">
+                POLLS
             </button>
         </a>
 
         <a href="{% url 'ai_chat_teacher_dashboard' %}">
             <button class="btn {% if request.resolver_match.url_name == 'ai_chat_teacher_dashboard' %}active{% endif %}">
-                <i class="bi bi-book blue"></i> AI Chat
+                <img src="{% static 'img/icons/ai.svg' %}" alt="Gradebook Icon" class="blue" style="width: 24px; height: auto; margin-right: 5px;">
+                AI Chat
             </button>
         </a>
     </div>
