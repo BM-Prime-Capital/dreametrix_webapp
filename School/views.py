@@ -1061,6 +1061,7 @@ def gradebook_list_view(request):
             'student_data': student_data,
             'classes': Class.objects.all(),
             'selected_class_id': int(selected_class_id),
+            'selected_class': selected_class,  # Ajoutez cette ligne
             'exam_subtypes': list(exam_subtypes),
             'test_subtypes': list(test_subtypes),
             'homework_subtypes': list(homework_subtypes),

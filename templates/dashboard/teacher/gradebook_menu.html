@@ -4,24 +4,22 @@
 
 {% block content %}
     <!-- Titre de la section -->
-    <h4 class="text-color-pink">GRADEBOOK</h4>
+    <h6 class="gradebook-title">GRADEBOOK</h6>
     <div class="gradebook-container">
-        <div class="content">
-            <div class="content-header">
-                <div class="button-group" id="button-group">
-                    <a href="{% url 'create_gradebook' %}">
-                        <button class="button button-add-new-item">
-                            <i class="bi bi-clipboard-data white"></i> <span>Add New Item</span>
-                        </button>
-                    </a>
+        <div class="gradebook-content">
+            <div class="gradebook-header">
+                <div class="gradebook-button-group">
+                    <button class="gradebook-button gradebook-button-add" onclick="openAddGradebookModal()">
+                        <i class="bi bi-clipboard-data white"></i> <span>Add New Item</span>
+                    </button>
                 </div>
             </div>
 
             <!-- Tableau des classes -->
-            <div class="table-container">
+            <div class="gradebook-table-container">
                 <table class="gradebook-table">
                     <thead>
-                        <tr class="header-row">
+                        <tr class="gradebook-table-header">
                             <th>CLASS</th>
                             <th>AVERAGE</th>
                             <th>NUMBER OF EXAMS</th>
@@ -32,7 +30,7 @@
                     </thead>
                     <tbody>
                         {% for data in class_data %}
-                            <tr onclick="window.location.href='{% url 'gradebook_list_view' %}?class_id={{ data.class_instance__id }}';" style="cursor: pointer;">
+                            <tr class="gradebook-table-row" onclick="window.location.href='{% url 'gradebook_list_view' %}?class_id={{ data.class_instance__id }}';">
                                 <td>{{ data.class_instance__name }}</td>
                                 <td>{{ data.class_avg|floatformat:1 }}%</td>
                                 <td>{{ data.exam_count }}</td>
@@ -47,55 +45,212 @@
         </div>
     </div>
 
+    <!-- Modal for Add New Gradebook Entry -->
+    <div id="gradebookModal" class="gradebook-modal">
+        <div class="gradebook-modal-overlay"></div>
+        <div class="gradebook-modal-content">
+            <div class="gradebook-modal-header">
+                <h5 class="gradebook-modal-title">Add New Gradebook Entry</h5>
+                <button type="button" class="gradebook-modal-close" onclick="closeGradebookModal()">&times;</button>
+            </div>
+            <div class="gradebook-modal-body">
+                <!-- Include the form from the other page -->
+                {% include "dashboard/teacher/add_gradebook_form.html" %}
+            </div>
+        </div>
+    </div>
+
     <style>
-        /* Styles de base pour le tableau */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-        th {
-            background: #f8f9fa;
+        /* Titre de la section */
+        .gradebook-title {
+            color: #e91e63;
+            margin-top: 25px;
+            font-size: 19px;
+            font-weight: 600;
         }
 
-        /* Styles pour les boutons et actions */
-        .button-group {
-            display: flex;
-            gap: 10px;
+        /* Conteneur principal */
+        .gradebook-container {
+            padding: 20px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* En-tête avec boutons */
+        .gradebook-header {
             margin-bottom: 20px;
         }
-        .button {
-            padding: 8px 16px;
+
+        .gradebook-button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .gradebook-button {
+            padding: 10px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             color: #fff;
             background: #007bff;
-        }
-        .button-add-new-item {
-            background: #28a745;
-        }
-        .icon-group {
-            display: flex;
-            gap: 8px;
-        }
-        .icon-item {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .icon-item.text-danger {
-            color: #dc3545;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
-        /* Couleur du titre */
-        .text-color-pink {
-            color: #e91e63;
-            margin-top: 25px;
-            font-size: 18px;
+        .gradebook-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .gradebook-button:active {
+            transform: translateY(0);
+        }
+
+        .gradebook-button-add {
+            background: #28a745;
+        }
+
+        .gradebook-button-add:hover {
+            background-color: #218838;
+        }
+
+        /* Tableau */
+        .gradebook-table-container {
+            overflow-x: auto;
+        }
+
+        .gradebook-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .gradebook-table-header th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            padding: 12px;
+            border: 1px solid #ddd;
+        }
+
+        .gradebook-table-row td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+            color: #555;
+            transition: background-color 0.3s ease;
+        }
+
+        .gradebook-table-row:hover {
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+
+        /* Modal */
+        .gradebook-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .gradebook-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        .gradebook-modal-content {
+            position: relative;
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 30px;
+            width: 50%;
+            max-width: 600px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .gradebook-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .gradebook-modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .gradebook-modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #aaa;
+            transition: color 0.3s ease;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .gradebook-modal-close:hover {
+            color: #000;
+            background-color: rgba(0, 0, 0, 0.1);
         }
     </style>
+    <script>
+        // Ouvrir le modal
+        function openGradebookModal() {
+            document.getElementById('gradebookModal').style.display = 'block';
+        }
+
+        // Fermer le modal
+        function closeGradebookModal() {
+            document.getElementById('gradebookModal').style.display = 'none';
+        }
+
+        // Fermer le modal si on clique en dehors du contenu
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('gradebookModal');
+            if (event.target === modal) {
+                closeGradebookModal();
+            }
+        });
+    </script>
 {% endblock %}

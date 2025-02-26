@@ -1,0 +1,275 @@
+<!-- dashboard/teacher/add_gradebook_form.html -->
+<style>
+    /* Modal Styles */
+    #addGradebookModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: -1;
+    }
+
+    .modal-content {
+        position: relative;
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 30px;
+        width: 50%;
+        max-width: 600px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #aaa;
+        transition: color 0.3s ease;
+        position: absolute; /* Position absolue pour un placement précis */
+        top: 15px; /* Position par rapport au haut */
+        right: 15px; /* Position par rapport à la droite */
+        padding: 5px; /* Espacement interne */
+        border-radius: 50%; /* Forme ronde */
+        width: 32px; /* Largeur fixe */
+        height: 32px; /* Hauteur fixe */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.05); /* Fond léger */
+    }
+
+    .modal-close:hover {
+        color: #000;
+        background-color: rgba(0, 0, 0, 0.1); /* Fond plus visible au survol */
+    }
+
+    /* Form Styles */
+    .form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 20px;
+    }
+
+    .half-width {
+        width: 48%;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: #555;
+    }
+
+    .custom-select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        background-color: #f9f9f9;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .custom-select:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    /* File Upload Styles */
+    .file-upload-container {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .file-upload-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .file-upload-label:hover {
+        background-color: #e9e9e9;
+        border-color: #ccc;
+    }
+
+    .file-upload-text {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .file-upload-button {
+        background-color: #007bff;
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+    }
+
+    .file-upload-button:hover {
+        background-color: #0056b3;
+    }
+
+    .file-upload-input {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Submit Button Styles */
+    .button-apply {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 12px;
+        background-color: #28a745;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .button-apply:hover {
+        background-color: #218838;
+        transform: translateY(-2px);
+    }
+
+    .button-apply:active {
+        transform: translateY(0);
+    }
+
+    .button-apply i {
+        margin-right: 8px;
+    }
+
+    /* Error Message Styles */
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #f5c6cb;
+        margin-top: 20px;
+        font-size: 14px;
+    }
+</style>
+
+<form method="POST" action="{% url 'create_gradebook' %}" enctype="multipart/form-data" class="form-container">
+    {% csrf_token %}
+    <input type="hidden" id="class_instance" name="class_instance">
+    <input type="hidden" id="assessment_type" name="assessment_type">
+
+    <!-- Class and Assessment Type Selection -->
+    <div class="form-row">
+        <div class="form-group half-width">
+            <label for="class_selector" class="form-label">Class:</label>
+            <select id="class_selector" name="class_instance" class="form-control custom-select">
+                <option value="">Select a class</option>
+                {% for class in classes %}
+                    <option value="{{ class.id }}">{{ class.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group half-width">
+            <label for="assessment_type_selector" class="form-label">Assessment Type:</label>
+            <select id="assessment_type_selector" name="assessment_type" class="form-control custom-select">
+                <option value="">Select assessment type</option>
+                {% for assessment in ASSESSMENT_TYPES %}
+                    <option value="{{ assessment.0 }}">{{ assessment.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- Feedback File Upload -->
+    <div class="form-group">
+        <label for="feedback_file" class="form-label">Feedback File:</label>
+        <div class="file-upload-container">
+            <label for="feedback_file" class="file-upload-label">
+                <span class="file-upload-text">Choose a file</span>
+                <span class="file-upload-button">Browse</span>
+            </label>
+            <input type="file" id="feedback_file" name="feedback_file" class="form-control file-upload-input" required>
+        </div>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="button button-apply">
+        <i class="bi bi-plus-circle"></i> Add to the gradebook
+    </button>
+</form>
+
+{% if error %}
+    <div class="alert alert-danger mt-3">{{ error }}</div>
+{% endif %}
