@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
         # Dictionnaire des sous-types possibles par type d'évaluation
         ASSESSMENT_SUBTYPES = {
-            'EXAM': ['Midterm', 'Final', 'Practical'],
+            'EXAM': ['Spring', 'Semester', 'Final'],
             'TEST': ['Unit 1', 'Unit 2', 'Quiz', 'Pop Quiz'],
             'HOMEWORK': ['Chapter 3', 'Project', 'Essay', 'Worksheet']
         }

@@ -6,7 +6,15 @@
 {% block content %}
     <!-- Assistance Section -->
     {% if has_selected_class %}
-        <h4 class="text-color-pink">GRADEBOOK - {{ selected_class.name }}</h4>
+    <h4 class="text-color-pink">
+        GRADEBOOK :
+        {% if selected_class %}
+            {{ selected_class.name }}
+        {% else %}
+            No class selected
+        {% endif %}
+
+    </h4>
     {% else %}
         <h4 class="text-color-pink">GRADEBOOK</h4>
     {% endif %}
@@ -19,127 +27,133 @@
                             <i class="bi bi-clipboard-data white"></i> <span>Add New Item</span>
                         </button>
                     </a>
-                    <!-- Modified Calculations Button -->
-                    <select id="classFilter" onchange="filterByClass(this.value)">
-                        <option value="">Toutes les classes</option>
-                        {% for class in classes %}
-                            <option value="{{ class.id }}" {% if selected_class_id == class.id %}selected{% endif %}>
-                                {{ class.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
                     <a href="">
                         <button class="button button-layout">
                             <i class="bi bi-layout-text-sidebar white"></i>
                             <span>Layout</span>
                         </button>
                     </a>
+                    <!-- Modified Calculations Button -->
+                    <select id="classFilter" onchange="filterByClass(this.value)" class="class-filter">
+                        <option value="">All classes</option>
+                        {% for class in classes %}
+                            <option value="{{ class.id }}" {% if selected_class_id == class.id %}selected{% endif %}>
+                                {{ class.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
                 </div>
             </div>
 
             <div class="table-container">
                 <table class="gradebook-table">
-                    <!-- Dans l'en-tête du tableau -->
-                    <!-- En-tête dynamique -->
-                    <thead>
-                        <tr class="header-row">
-                            <th rowspan="2">STUDENT</th>
-                            <th rowspan="2">AVERAGE</th>
+    <!-- En-tête du tableau -->
+    <thead>
+        <tr class="header-row">
+            <!-- Colonne STUDENT avec rowspan pour fusionner les cellules vides -->
+            <th rowspan="2">STUDENT</th>
 
-                            <!-- Colonnes dynamiques pour EXAM -->
-                            <th colspan="{{ exam_subtypes|length }}">EXAM</th>
+            <!-- Colonne AVERAGE avec rowspan pour fusionner les cellules vides -->
+            <th rowspan="2">AVERAGE</th>
 
-                            <!-- Colonnes dynamiques pour TEST -->
-                            <th colspan="{{ test_subtypes|length }}">TEST</th>
+            <!-- Colonnes dynamiques pour EXAM -->
+            <th colspan="{{ exam_subtypes|length }}">EXAM</th>
 
-                            <!-- Colonnes dynamiques pour HOMEWORK -->
-                            <th colspan="{{ homework_subtypes|length }}">HOMEWORK</th>
+            <!-- Colonnes dynamiques pour TEST -->
+            <th colspan="{{ test_subtypes|length }}">TEST</th>
 
-                            <th rowspan="2">ACTIONS</th>
-                        </tr>
-                        <tr class="sub-header-row">
+            <!-- Colonnes dynamiques pour HOMEWORK -->
+            <th colspan="{{ homework_subtypes|length }}">HOMEWORK</th>
 
-                        </tr>
-                    <tr class="sub-header-row">
-                        {% for subtype in exam_subtypes %}
-                            <th>{{ subtype }}</th>
-                        {% endfor %}
-                        {% for subtype in test_subtypes %}
-                            <th>{{ subtype }}</th>
-                        {% endfor %}
-                        {% for subtype in homework_subtypes %}
-                            <th>{{ subtype }}</th>
-                        {% endfor %}
-                    </tr>
+            <!-- Colonne ACTIONS avec rowspan pour fusionner les cellules vides -->
+            <th rowspan="2">ACTIONS</th>
+        </tr>
+        <tr class="sub-header-row">
+            <!-- Sous-en-têtes pour EXAM -->
+            {% for subtype in exam_subtypes %}
+                <th>{{ subtype }}</th>
+            {% endfor %}
 
-                    </thead>
+            <!-- Sous-en-têtes pour TEST -->
+            {% for subtype in test_subtypes %}
+                <th>{{ subtype }}</th>
+            {% endfor %}
 
-                    <!-- Corps du tableau -->
-                    <tbody>
-                        {% for data in student_data %}
-                            <tr>
-                                <!-- Nom étudiant -->
-                                <td>{{ data.student.user.get_full_name }}</td>
+            <!-- Sous-en-têtes pour HOMEWORK -->
+            {% for subtype in homework_subtypes %}
+                <th>{{ subtype }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
 
-                                <td class="average-cell">
-                                    {{ data.average|floatformat:1 }}%
-                                    <i class="bi bi-mic voice-icon"
-                                       data-student="{{ data.student.id }}"
-                                       data-type="average"
-                                       style="font-size: 1.2rem; margin-left: 8px;"></i>
-                                </td>
+    <!-- Corps du tableau -->
+    <tbody>
+        {% for data in student_data %}
+            <tr>
+                <!-- Nom étudiant -->
+                <td>{{ data.student.user.get_full_name }}</td>
 
-                                <!-- Données EXAM par sous-type -->
-                                {% for subtype in exam_subtypes %}
-                                    <td>
-                                        {{ data.exam_counts|get_item:subtype|default:0 }}
-                                        <i class="bi bi-mic"
-                                           data-student="{{ data.student.id }}"
-                                           data-assessment="EXAM"
-                                           data-subtype="{{ subtype }}"></i>
-                                    </td>
-                                {% endfor %}
+                <!-- Moyenne de l'étudiant -->
+                <td class="average-cell">
+                    {{ data.average|floatformat:1 }}%
+                    <i class="bi bi-mic voice-icon"
+                       data-student="{{ data.student.id }}"
+                       data-type="average"
+                       style="font-size: 1.2rem; margin-left: 8px;"></i>
+                </td>
 
-                                <!-- Données TEST par sous-type -->
-                                {% for subtype in test_subtypes %}
-                                    <td>
-                                        {{ data.test_counts|get_item:subtype|default:0 }}
-                                        <i class="bi bi-mic"
-                                           data-student="{{ data.student.id }}"
-                                           data-assessment="TEST"
-                                           data-subtype="{{ subtype }}"></i>
-                                    </td>
-                                {% endfor %}
+                <!-- Données EXAM par sous-type -->
+                {% for subtype in exam_subtypes %}
+                    <td>
+                        {{ data.exam_counts|get_item:subtype|default:0 }}
+                        <i class="bi bi-mic"
+                           data-student="{{ data.student.id }}"
+                           data-assessment="EXAM"
+                           data-subtype="{{ subtype }}"></i>
+                    </td>
+                {% endfor %}
 
-                                <!-- Données HOMEWORK par sous-type -->
-                                {% for subtype in homework_subtypes %}
-                                    <td>
-                                        {{ data.homework_counts|get_item:subtype|default:0 }}
-                                        <i class="bi bi-mic"
-                                           data-student="{{ data.student.id }}"
-                                           data-assessment="HOMEWORK"
-                                           data-subtype="{{ subtype }}"></i>
-                                    </td>
-                                {% endfor %}
+                <!-- Données TEST par sous-type -->
+                {% for subtype in test_subtypes %}
+                    <td>
+                        {{ data.test_counts|get_item:subtype|default:0 }}
+                        <i class="bi bi-mic"
+                           data-student="{{ data.student.id }}"
+                           data-assessment="TEST"
+                           data-subtype="{{ subtype }}"></i>
+                    </td>
+                {% endfor %}
 
-                                <!-- Menu d'actions amélioré -->
-                               <td class="actions">
-                                    <div class="icon-group">
-                                        <a href="#" class="icon-item" title="Modifier">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </a>
-                                        <a href="#" class="icon-item text-danger" title="Supprimer">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
-                                        <a href="#" class="icon-item" title="Détails">
-                                            <i class="bi bi-file-earmark-text"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <!-- Données HOMEWORK par sous-type -->
+                {% for subtype in homework_subtypes %}
+                    <td>
+                        {{ data.homework_counts|get_item:subtype|default:0 }}
+                        <i class="bi bi-mic"
+                           data-student="{{ data.student.id }}"
+                           data-assessment="HOMEWORK"
+                           data-subtype="{{ subtype }}"></i>
+                    </td>
+                {% endfor %}
+
+                <!-- Menu d'actions -->
+                <td class="actions">
+                    <div class="icon-group">
+                        <a href="#" class="icon-item" title="Modifier">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <a href="#" class="icon-item text-danger" title="Supprimer">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                        <a href="#" class="icon-item" title="Détails">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
             </div>
             <!-- Calculations Modal -->
             <div id="calculationsModal" class="modal-gradebook">
@@ -219,7 +233,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Voice Recording</h5>
-                <button type="button" class="modal-close" onclick="closeVoiceModal()">&times;</button>
+                <button type="button" class="gradebook-modal-close" onclick="closeVoiceModal()">&times;</button>
 
             </div>
             <div class="modal-body">
@@ -244,6 +258,38 @@
 
 
     <style>
+        .gradebook-modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #aaa;
+            transition: color 0.3s ease;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .gradebook-modal-close:hover {
+            color: #000;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .class-filter {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
         /* Style des sous-colonnes */
         .sub-header-row th {
             background: #f8f9fa;
@@ -251,18 +297,56 @@
             padding: 8px;
         }
 
-        /* Style des icônes vocales */
-        .voice-icon {
-            color: #2196F3;
-            cursor: pointer;
-            margin-left: 8px;
-            transition: transform 0.2s;
-        }
+         #voiceModal .modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    width: 40%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
 
-        .voice-icon:hover {
-            transform: scale(1.2);
-            color: #1976D2;
-        }
+#voiceModal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+#voiceModal .modal-body {
+    padding: 20px 0;
+}
+
+#voiceModal .controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+#voiceModal .btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#voiceModal .btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+#voiceModal .btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+#voiceModal .btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
 
         /* Style des menus déroulants */
         .dropdown-menu {
