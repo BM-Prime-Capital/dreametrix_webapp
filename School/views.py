@@ -1161,15 +1161,9 @@ def create_gradebook_view(request):
             class_id = request.POST.get('class_instance')
             assessment_type = request.POST.get('assessment_type')
             feedback_file = request.FILES.get('feedback_image')
-            student_ids = request.POST.getlist('students')
 
-            if not all([class_id, assessment_type, feedback_file, student_ids]):
-                raise ValueError("Tous les champs requis ne sont pas remplis")
-
-            for student_id in student_ids:
-                student = Student.objects.get(id=student_id)
-                fs = FileSystemStorage(location='media/feedback')
-                filename = fs.save(f"{student_id}_{feedback_file.name}", feedback_file)
+            if not all([class_id, assessment_type, feedback_file]):
+                raise ValueError("Sorry, you need to select all the field")
 
                 Gradebook.objects.create(
                     class_instance_id=class_id,
@@ -1183,7 +1177,7 @@ def create_gradebook_view(request):
 
         except Exception as e:
             classes = Class.objects.all()
-            return render(request, 'dashboard/teacher/add_new_item_gradebook.html', {
+            return render(request, 'dashboard/teacher/gradebook_menu.html', {
                 'error': str(e),
                 'classes': classes,
                 'ASSESSMENT_TYPES': Gradebook.ASSESSMENT_TYPES,
