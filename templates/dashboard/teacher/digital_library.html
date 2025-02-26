@@ -87,7 +87,7 @@
 <div id="previewModal" class="modal" style="display: none;">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h3>Preview</h3>
+        <h3 class="preview-center">Preview</h3>
         <iframe id="previewFrame" style="width: 100%; height: 500px; border: none;"></iframe>
         <div class="modal-buttons">
             <button id="downloadButton" class="generate-button">Download</button>
@@ -97,6 +97,17 @@
 </div>
 
     <style>
+        .generate-button {
+            flex: 3;
+            margin: 0 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+        .preview-center {
+            text-align: center;
+        }
         .classes-radio-container {
             margin: 20px 0;
             width: 100%;
@@ -228,6 +239,8 @@
         display: flex;
         justify-content: space-between;
         margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
     }
     </style>
 

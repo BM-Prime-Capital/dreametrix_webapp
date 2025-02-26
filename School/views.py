@@ -389,59 +389,70 @@ def generate_pdf(links, selected_class, subject, grade, teacher_name, student_id
 
     # === Page de couverture ===
     cover = doc.new_page(width=595, height=842)
-    text_params = {"fontname": "helv", "fontsize": 20, "color": (0, 0, 0)}
-    cover.insert_text((200, 200), f"GRADE {grade} {subject.upper()}", **text_params)
-    cover.insert_text((225, 250), f" Mr. {teacher_name}", fontsize=14)
-    cover.insert_text((175, 300), f"{assignment_type} : {domain}", fontsize=16)
+
+    # Fonction pour centrer le texte
+    def center_text(page, text, y, fontsize, fontname="helv", color=(0, 0, 0)):
+        text_width = fitz.get_text_length(text, fontname=fontname, fontsize=fontsize)
+        x = (page.rect.width - text_width) / 2  # Centrer horizontalement
+        page.insert_text((x, y), text, fontsize=fontsize, fontname=fontname, color=color)
+
+    # Ajouter les éléments centrés
+    center_text(cover, f"GRADE {grade} {subject.upper()}", 200, fontsize=20)
+    center_text(cover, f"Mr. {teacher_name}", 250, fontsize=14)
+    center_text(cover, f"{assignment_type} : {domain}", 300, fontsize=16)
     cover.insert_text((100, 650), f"Name: {student_name}", fontsize=12)
     cover.insert_text((100, 680), f"Class: {selected_class}", fontsize=12)
 
     # === Pages de questions ===
-    current_page = doc.new_page(width=595, height=842)
-    x, y = 50, 50  # Position initiale
     question_number = 1
-
     if isinstance(links, list):
         for i, link in enumerate(links):
             link = link.replace("dl=0", "raw=1")
 
-            if i % 2 == 0 and i != 0:
+            # Créer une nouvelle page après chaque deuxième question
+            if i % 2 == 0:
                 current_page = doc.new_page(width=595, height=842)
-                y = 50  # Reset Y position
+                y_top = 50  # Position Y pour la première question
+                y_bottom = 421  # Position Y pour la deuxième question (50% de la hauteur)
 
             try:
                 response = requests.get(link)
                 image = BytesIO(response.content)
 
+                # === Définir l'espace pour la question ===
+                if i % 2 == 0:
+                    y = y_top  # Première question en haut
+                else:
+                    y = y_bottom  # Deuxième question en bas
+
                 # === Ajout du fond gris pour le numéro ===
                 num_size = 18
                 rect_size = 25  # Taille du carré de fond
-                rect = fitz.Rect(x, y, x + rect_size, y + rect_size)
+                rect = fitz.Rect(50, y, 50 + rect_size, y + rect_size)
                 current_page.draw_rect(rect, color=(0.8, 0.8, 0.8), fill=(0.8, 0.8, 0.8))
 
                 # === Insérer le numéro de la question au centre du carré ===
                 question_text = f"{question_number}"
-                text_x = x + 7  # Ajustement pour centrer le texte
+                text_x = 50 + 7  # Ajustement pour centrer le texte
                 text_y = y + 17
-                current_page.insert_text((text_x, text_y), question_text, fontsize=num_size, color=(0, 0, 0))
+                current_page.insert_text((text_x, text_y), question_text, fontsize=num_size, color=(0, 0, 0), fontname="Helvetica-Bold")
 
-                # === Insérer l’image à côté du numéro ===
-                img_width, img_height = 480, 240
-                image_position = (x + 35, y - 3)
+                # === Définir l'espace pour l'image ===
+                img_x = 50 + rect_size + 10  # Espace entre le numéro et l'image (aligné à gauche)
+                img_y = y - 3  # Alignement vertical avec le numéro
+                img_width = 480  # Largeur fixe pour l'image
+                img_height = 340  # Hauteur fixe pour l'image (50% de la hauteur de la page moins les marges)
 
-                rect = fitz.Rect(image_position[0], image_position[1],
-                                 image_position[0] + img_width, image_position[1] + img_height)
-
+                # === Insérer l’image (alignée à gauche) ===
+                rect = fitz.Rect(img_x, img_y, img_x + img_width, img_y + img_height)
                 current_page.insert_image(rect, stream=image)
 
-                y += img_height + 40  # Ajustement vertical
                 question_number += 1
 
             except Exception as e:
                 raise ValueError(e)
 
     # === Ajout du QR Code ===
-
     class_instance = Class.objects.get(name=selected_class)
     qr_data = f"student_id:{student_id}|class_id:{class_instance.id}|assignment_type:{assignment_type}"
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=6, border=2)
@@ -727,7 +738,7 @@ def get_domains(request, subject, grade):
 
     return JsonResponse({'domains': domains})
 
-# Specific Standard
+# Specifique Standards
 def get_standards(request, subject, grade, domain):
     # Déterminer le bon fichier Excel selon le sujet
     if subject == "Math":
@@ -735,21 +746,26 @@ def get_standards(request, subject, grade, domain):
     else:  # Language
         file_path = "Dreametrix excel.xlsx"
 
+    # Lire le fichier Excel
     df = pd.read_excel(file_path)
 
-    # Ajouter le filtre Domain
+    # Nettoyer les espaces dans la colonne "Specific Standard"
+    df["Specific Standard"] = df["Specific Standard"].str.strip()
+
+    # Filtrer le DataFrame
     filtered_df = df[
         (df["Subject"] == subject) &
         (df["Grade"] == int(grade)) &
         (df["Domain"] == domain)
-        ]
+    ]
 
+    # Récupérer les standards uniques
     if filtered_df.empty:
-        available_standars = []  # Handle empty DataFrame case
+        available_standards = []  # Gérer le cas où le DataFrame est vide
     else:
-        available_standars = filtered_df["Specific Standard"].unique().tolist()
-    return JsonResponse({'standards': available_standars})
+        available_standards = filtered_df["Specific Standard"].unique().tolist()
 
+    return JsonResponse({'standards': available_standards})
 
 # API to get_links containings questions based on subject, year, grade and standars in the digital library form
 def get_links(request, subject, grade, domain, standards, kind ):
