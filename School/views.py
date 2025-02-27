@@ -309,6 +309,9 @@ def teach_teacher_dashboard(request):
 #######                                             #########
 #############################################################
 
+import qrcode
+from PIL import Image, ImageDraw, ImageFilter
+
 # Function to filter the questions from the EXCEL SHEET OF MATHEMATICS
 def filter_math_question(subject, number, grade, domain, kind):
 
@@ -452,26 +455,114 @@ def generate_pdf(links, selected_class, subject, grade, teacher_name, student_id
             except Exception as e:
                 raise ValueError(e)
 
-    # === Ajout du QR Code ===
-    class_instance = Class.objects.get(name=selected_class)
-    qr_data = f"student_id:{student_id}|class_id:{class_instance.id}|assignment_type:{assignment_type}"
-    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=6, border=2)
-    qr.add_data(qr_data)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
+        # === Génération du QR Code personnalisé ===
+        try:
+            class_instance = Class.objects.get(name=selected_class)
+            qr_data = f"student_id:{student_id}|class_id:{class_instance.id}|assignment_type:{assignment_type}"
 
-    qr_bytes = BytesIO()
-    img.save(qr_bytes, format='PNG')
-    qr_bytes.seek(0)
+            # Création du QR Code de base
+            qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=6, border=2)
+            qr.add_data(qr_data)
+            qr.make(fit=True)
 
-    for page in doc:
-        page.insert_image(fitz.Rect(521, 768, 571, 818), stream=qr_bytes)
-        qr_bytes.seek(0)
+            # Création de l'image QR code avec couleur personnalisée
+            qr_img = qr.make_image(fill_color=(62, 179, 227), back_color="white").convert("RGBA")
 
-    pdf_filename = f"test_{student_name}.pdf"
-    logger.info(f"PDF généré : {pdf_filename}")
-    doc.save(pdf_filename)
-    return pdf_filename
+            # Ajout d'un léger dégradé aux modules du QR Code (couleurs plus lumineuses)
+            width, height = qr_img.size
+            data = qr_img.getdata()
+
+            new_data = []
+            for item in data:
+                r, g, b, a = item
+                # Créer un léger dégradé vers une couleur plus claire
+                if r == 62 and g == 179 and b == 227:  # Pour les modules de couleur de base
+                    new_data.append((100, 190, 255, 255))  # Dégradé vers une couleur plus claire
+                else:
+                    new_data.append(item)
+            qr_img.putdata(new_data)
+
+            # Création d'un effet de bordure artistique (bordure avec ombre légère)
+            border_color = (100, 150, 200)
+            border_thickness = 10
+            border = Image.new("RGBA", (width + 2 * border_thickness, height + 2 * border_thickness), border_color)
+            border.paste(qr_img, (border_thickness, border_thickness))
+
+            # Ajout d'un halo lumineux autour du QR Code pour un effet esthétique
+            halo = Image.new("RGBA", border.size, (0, 0, 0, 0))  # Image vide pour l'halo
+            halo_draw = ImageDraw.Draw(halo)
+            halo_draw.ellipse(
+                (border_thickness - 20, border_thickness - 20, width + border_thickness + 20,
+                 height + border_thickness + 20),
+                fill=(62, 179, 227, 80)  # Couleur de l'halo (semi-transparent)
+            )
+            halo = halo.filter(ImageFilter.GaussianBlur(radius=15))  # Application du flou pour un halo doux
+            border = Image.alpha_composite(halo, border)
+
+            # Ajout de motifs subtils derrière le QR code (fond géométrique ou lignes courbes)
+            motif = Image.new("RGBA", border.size, (255, 255, 255, 0))  # Fond transparent
+            motif_draw = ImageDraw.Draw(motif)
+            motif_draw.line([(0, 0), (border.width, border.height)], fill=(62, 179, 227, 20), width=5)
+            motif_draw.line([(border.width, 0), (0, border.height)], fill=(62, 179, 227, 20), width=5)
+            motif = motif.filter(ImageFilter.GaussianBlur(radius=8))  # Flou doux sur le motif
+            border = Image.alpha_composite(border, motif)
+
+            # Ajout d'un logo au centre du QR Code (réduit la taille du logo)
+            image_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'logo.png')
+            logo = Image.open(image_path).convert("RGBA")
+            logo = logo.resize((80, 80))  # Réduit la taille du logo
+
+            # Calcul de la position exacte du logo au centre du QR code
+            logo_x = (width - logo.width) // 2
+            logo_y = (height - logo.height) // 2
+
+            # Création d'un masque pour arrondir les coins avec un rayon plus doux
+            mask = Image.new("L", border.size, 0)
+            mask_draw = ImageDraw.Draw(mask)
+            corner_radius = 20  # Rayon des coins arrondis plus modéré
+            mask_draw.rectangle([0, 0, border.width, border.height], fill=255)
+            mask_draw.rectangle([0, 0, corner_radius, corner_radius], fill=0)
+            mask_draw.rectangle([border.width - corner_radius, 0, border.width, corner_radius], fill=0)
+            mask_draw.rectangle([0, border.height - corner_radius, corner_radius, border.height], fill=0)
+            mask_draw.rectangle(
+                [border.width - corner_radius, border.height - corner_radius, border.width, border.height], fill=0)
+            border.putalpha(mask)
+
+            # Ajouter une ombre douce au logo pour un effet artistique
+            shadow = Image.new("RGBA", border.size, (0, 0, 0, 0))
+            shadow.paste(logo, (logo_x + 8, logo_y + 8), logo)  # Ombre décalée
+            shadow = shadow.filter(ImageFilter.GaussianBlur(radius=15))  # Flou plus important pour une ombre plus douce
+            border = Image.alpha_composite(border, shadow)
+
+            # Ajouter le logo sur le QR code
+            border.paste(logo, (logo_x, logo_y), logo)
+
+            # Création d'un éclat lumineux autour du logo pour ajouter du dynamisme
+            light_glow = Image.new("RGBA", border.size, (0, 0, 0, 0))
+            light_glow_draw = ImageDraw.Draw(light_glow)
+            light_glow_draw.ellipse(
+                (logo_x - 10, logo_y - 10, logo_x + logo.width + 10, logo_y + logo.height + 10),
+                fill=(62, 179, 227, 100)  # Eclat lumineux autour du logo
+            )
+            light_glow = light_glow.filter(ImageFilter.GaussianBlur(radius=25))  # Un éclat doux et flou
+            border = Image.alpha_composite(border, light_glow)
+
+            # Convertir l'image en BytesIO pour une insertion dans un PDF
+            qr_bytes = BytesIO()
+            border.save(qr_bytes, format='PNG')
+            qr_bytes.seek(0)
+
+        except Exception as e:
+            logger.error(f"Erreur lors de la création du QR code stylisé : {e}")
+
+        for page in doc:
+            page.insert_image(fitz.Rect(521, 768, 571, 818), stream=qr_bytes)
+            qr_bytes.seek(0)
+
+        pdf_filename = f"test_{student_name}.pdf"
+        logger.info(f"PDF généré : {pdf_filename}")
+        doc.save(pdf_filename)
+        return pdf_filename
 
 # =============================== #
 # Vue Django pour la génération   #
