@@ -30,7 +30,7 @@
                     </thead>
                     <tbody>
                         {% for data in class_data %}
-                            <tr onclick="window.location.href='{% url 'gradebook_list_view' %}?class_id={{ data.class_instance__id }}';" style="cursor: pointer;">
+                            <tr class="{% if forloop.counter|divisibleby:2 %}white-row{% else %}colored-row{% endif %}" onclick="window.location.href='{% url 'gradebook_list_view' %}?class_id={{ data.class_instance__id }}';" style="cursor: pointer;">
                                 <td>{{ data.class_instance__name }}</td>
                                 <td>{{ data.class_avg|floatformat:1 }}%</td>
                                 <td>{{ data.exam_count }}</td>

@@ -45,8 +45,8 @@
             </button>
         </a>
 
-        <a href="{% url 'communicate_teacher_dashboard' %}">
-            <button class="btn-4 btn {% if request.resolver_match.url_name == 'communicate_teacher_dashboard' %}active{% endif %}">
+        <a href="{% url 'reports_teacher_dashboard' %}">
+            <button class="btn {% if request.resolver_match.url_name == 'communicate_teacher_dashboard' %}active{% endif %}">
                 <img src="{% static 'img/icons/communicate.svg' %}" alt="Gradebook Icon" class="blue" style="width: 24px; height: auto; margin-right: 5px;">
                 COMMUNICATE
             </button>
@@ -60,7 +60,7 @@
         </a>
 
         <a href="{% url 'teach_teacher_dashboard' %}">
-            <button class="btn-4 btn {% if request.resolver_match.url_name == 'teach_teacher_dashboard' %}active{% endif %}">
+            <button class="btn {% if request.resolver_match.url_name == 'teach_teacher_dashboard' %}active{% endif %}">
                 <img src="{% static 'img/icons/teach.svg' %}" alt="Gradebook Icon" class="blue" style="width: 24px; height: auto; margin-right: 5px;">
                 TEACH
             </button>

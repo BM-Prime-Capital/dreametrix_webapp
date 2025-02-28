@@ -587,6 +587,7 @@
     const downloadButton = document.getElementById('downloadButton');
     const sendToClassButton = document.getElementById('sendToClassButton');
     const loadingIndicator = document.getElementById('loadingIndicator');
+    const modalButtons = document.querySelector('.modal-buttons'); // Sélectionnez le conteneur des boutons
 
     // Prevent form submission
     form.addEventListener('submit', function (event) {
@@ -602,9 +603,10 @@
         // Show the modal
         previewModal.style.display = 'block';
 
-        // Show the loading indicator
+        // Show the loading indicator and hide the buttons
         loadingIndicator.style.display = 'block';
         previewFrame.style.display = 'none';
+        modalButtons.style.display = 'none'; // Cacher les boutons
 
         // Fetch a preview file (e.g., the first PDF)
         fetchPreviewFile();
@@ -646,9 +648,10 @@
                 const url = URL.createObjectURL(blob);
                 previewFrame.src = url; // Display the PDF in the iframe
 
-                // Hide the loading indicator and show the iframe
+                // Hide the loading indicator and show the iframe and buttons
                 loadingIndicator.style.display = 'none';
                 previewFrame.style.display = 'block';
+                modalButtons.style.display = 'flex'; // Afficher les boutons à nouveau
             })
             .catch(error => {
                 console.error('Error fetching preview:', error);
@@ -656,6 +659,7 @@
 
                 // Hide the loading indicator in case of error
                 loadingIndicator.style.display = 'none';
+                modalButtons.style.display = 'flex'; // Afficher les boutons même en cas d'erreur
             });
     }
 });
