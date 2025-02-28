@@ -90,7 +90,7 @@
     <!-- Corps du tableau -->
     <tbody>
         {% for data in student_data %}
-            <tr>
+            <tr class="{% if forloop.counter|divisibleby:2 %}white-row{% else %}colored-row{% endif %}">
                 <!-- Nom étudiant -->
                 <td>{{ data.student.user.get_full_name }}</td>
 
