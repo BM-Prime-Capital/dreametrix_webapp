@@ -3,8 +3,22 @@
 
 {% block content %}
     <h4 class="text-color-pink">CREATE SHEET</h4>
+
     <form action="{% url 'generate_pdf' %}" method="POST" id="pdfForm" class="form-container">
+
+
         {% csrf_token %}
+         <div class="checkbox-container">
+        <label>
+            <input type="checkbox" id="checkbox1" onchange="handleCheckboxChange(this)">
+            Actual release Questions
+        </label>
+        <label>
+            <input type="checkbox" id="checkbox2" onchange="handleCheckboxChange(this)">
+            Or DreaMetrix Bank of questions
+        </label>
+    </div>
+        <p style="padding: 10px"></p>
         <div class="input-container">
             <label for="subject">Subject:</label>
             <select id="subject" name="subject" required onchange="updateOptions('subject')">
@@ -105,6 +119,12 @@
 </div>
 
     <style>
+        checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 5px; /* Space between checkboxes */
+            padding: 10px;
+        }
         .modal-content {
             background-color: #fff;
             margin: 5% auto; /* Centrer le modal */
@@ -663,5 +683,13 @@
             });
     }
 });
+        function handleCheckboxChange(checkbox) {
+            const checkboxes = document.querySelectorAll('.checkbox-container input[type="checkbox"]');
+            checkboxes.forEach((cb) => {
+                if (cb !== checkbox) {
+                    cb.checked = false;
+                }
+            });
+        }
     </script>
 {% endblock %}
