@@ -6,18 +6,20 @@
 
     <form action="{% url 'generate_pdf' %}" method="POST" id="pdfForm" class="form-container">
 
-
         {% csrf_token %}
          <div class="checkbox-container">
-        <label>
-            <input type="checkbox" id="checkbox1" onchange="handleCheckboxChange(this)">
-            Actual release Questions
-        </label>
-        <label>
-            <input type="checkbox" id="checkbox2" onchange="handleCheckboxChange(this)">
-            Or DreaMetrix Bank of questions
-        </label>
-    </div>
+    <label>
+        <input type="checkbox" id="checkbox1" onchange="handleCheckboxChange(this)">
+        Actual release Questions
+    </label>
+    <label>
+        <input type="checkbox" id="checkbox2" onchange="handleCheckboxChange(this)" checked>
+        Or DreaMetrix Bank of questions
+    </label>
+</div>
+        <div id="functionality-message" style="display: none; color: red; margin-top: 10px;">
+            Functionality not yet available.
+        </div>
         <p style="padding: 10px"></p>
         <div class="input-container">
             <label for="subject">Subject:</label>
@@ -119,6 +121,11 @@
 </div>
 
     <style>
+        #functionality-message {
+            color: red;
+            margin-top: 10px;
+            font-weight: bold;
+        }
         checkbox-container {
             display: flex;
             align-items: center;
@@ -684,12 +691,49 @@
     }
 });
         function handleCheckboxChange(checkbox) {
-            const checkboxes = document.querySelectorAll('.checkbox-container input[type="checkbox"]');
-            checkboxes.forEach((cb) => {
-                if (cb !== checkbox) {
-                    cb.checked = false;
-                }
-            });
+    const checkboxes = document.querySelectorAll('.checkbox-container input[type="checkbox"]');
+    const functionalityMessage = document.getElementById('functionality-message');
+    const formFields = document.querySelectorAll('#pdfForm input:not(.checkbox-container input), #pdfForm select, #pdfForm button');
+
+    checkboxes.forEach((cb) => {
+        if (cb !== checkbox) {
+            cb.checked = false;
         }
+    });
+
+    if (checkbox.id === 'checkbox1' && checkbox.checked) {
+        // Désactiver tous les champs du formulaire SAUF les checkboxes
+        formFields.forEach(field => {
+            field.disabled = true;
+        });
+        functionalityMessage.style.display = 'block';
+
+        // Appeler la fonction pour scraper les questions sur Internet
+        scrapeQuestionsFromInternet();
+    } else if (checkbox.id === 'checkbox2' && checkbox.checked) {
+        // Réactiver tous les champs du formulaire
+        formFields.forEach(field => {
+            field.disabled = false;
+        });
+        functionalityMessage.style.display = 'none';
+
+        // Continuer avec la logique actuelle
+        continueWithCurrentLogic();
+    } else {
+        // Si aucune case n'est cochée, réactiver les champs et cacher le message
+        formFields.forEach(field => {
+            field.disabled = false;
+        });
+        functionalityMessage.style.display = 'none';
+    }
+}
+
+function continueWithCurrentLogic() {
+    // Ici, vous pouvez continuer avec la logique actuelle
+    console.log("Continuing with current logic...");
+    // Exemple : charger les standards, vérifier les liens disponibles, etc.
+    loadStandards();
+    checkAvailableLinks();
+}
     </script>
 {% endblock %}
