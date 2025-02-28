@@ -244,7 +244,7 @@
         <div class="form-group half-width">
             <label for="assessment_type_selector" class="form-label">Assessment Type:</label>
             <select id="assessment_type_selector" name="assessment_type" class="form-control custom-select">
-                <option value="">Select assessment type</option>
+                <option value="">Select Assignment type</option>
                 {% for assessment in ASSESSMENT_TYPES %}
                     <option value="{{ assessment.0 }}">{{ assessment.1 }}</option>
                 {% endfor %}
@@ -254,7 +254,7 @@
 
     <!-- Feedback File Upload -->
     <div class="form-group">
-        <label for="feedback_file" class="form-label">Feedback File:</label>
+        <label for="feedback_file" class="form-label">Assignment:</label>
         <div class="file-upload-container">
             <label for="feedback_file" class="file-upload-label">
                 <span class="file-upload-text">Choose a file</span>
@@ -263,7 +263,9 @@
             <input type="file" id="feedback_file" name="feedback_file" class="form-control file-upload-input" required>
         </div>
     </div>
-
+        <div class="register-link">
+        Do you want to use DreaMetrix bank questions? <a href="{% url 'generate_pdf' %}">Go to the digital libray</a>.
+    </div>
     <!-- Submit Button -->
     <button type="submit" class="button button-apply">
         <i class="bi bi-plus-circle"></i> Add to the gradebook
