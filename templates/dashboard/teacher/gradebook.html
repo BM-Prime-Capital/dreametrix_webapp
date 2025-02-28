@@ -61,7 +61,7 @@
             <th colspan="{{ exam_subtypes|length }}">EXAM</th>
 
             <!-- Colonnes dynamiques pour TEST -->
-            <th colspan="{{ test_subtypes|length }}">TEST</th>
+            <th colspan="{{ test_subtypes|length }}">QUIZ</th>
 
             <!-- Colonnes dynamiques pour HOMEWORK -->
             <th colspan="{{ homework_subtypes|length }}">HOMEWORK</th>
@@ -100,7 +100,8 @@
                     <i class="bi bi-mic voice-icon"
                        data-student="{{ data.student.id }}"
                        data-type="average"
-                       style="font-size: 1.2rem; margin-left: 8px;"></i>
+                       style="font-size: 1.3rem; margin-left: 3px; color: red;">
+                    </i>
                 </td>
 
                 <!-- Données EXAM par sous-type -->
@@ -110,7 +111,10 @@
                         <i class="bi bi-mic"
                            data-student="{{ data.student.id }}"
                            data-assessment="EXAM"
-                           data-subtype="{{ subtype }}"></i>
+                           data-subtype="{{ subtype }}"
+                        style="font-size: 1.0rem; margin-left: 3px; color: red;">
+
+                        </i>
                     </td>
                 {% endfor %}
 
@@ -121,7 +125,8 @@
                         <i class="bi bi-mic"
                            data-student="{{ data.student.id }}"
                            data-assessment="TEST"
-                           data-subtype="{{ subtype }}"></i>
+                           data-subtype="{{ subtype }}"
+                        style="font-size: 1.0rem; margin-left: 3px; color: red;"></i>
                     </td>
                 {% endfor %}
 
@@ -132,7 +137,8 @@
                         <i class="bi bi-mic"
                            data-student="{{ data.student.id }}"
                            data-assessment="HOMEWORK"
-                           data-subtype="{{ subtype }}"></i>
+                           data-subtype="{{ subtype }}"
+                        style="font-size: 1.0rem; margin-left: 3px; color: red;"></i>
                     </td>
                 {% endfor %}
 
