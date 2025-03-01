@@ -564,10 +564,79 @@ def generate_pdf(links, selected_class, subject, grade, teacher_name, student_id
         doc.save(pdf_filename)
         return pdf_filename
 
+import fitz
+from django.shortcuts import get_object_or_404
+from .models import Student
+import logging
+from datetime import date  # Importer la date
+
+logger = logging.getLogger(__name__)
+
+def generate_answer_sheet(student_id, date):
+    """ Génère une feuille de réponses pour un élève spécifique """
+    logger.info('Génération de la feuille de réponses pour un élève spécifique')
+
+    student = get_object_or_404(Student, id=student_id)
+    student_name = f"{student.user.first_name} {student.user.last_name}"
+
+    doc = fitz.open()
+    page = doc.new_page(width=595, height=842)  # Format A4
+
+    # === Informations sur l'étudiant ===
+    page.insert_text((50, 30), f"Name: {student_name}", fontsize=12, fontname="helv", color=(0, 0, 0))
+    page.insert_text((50, 50), "Class: ______________________", fontsize=12, fontname="helv", color=(0, 0, 0))
+    page.insert_text((50, 70), f"Date: {date}", fontsize=12, fontname="helv", color=(0, 0, 0))
+
+    # === Grille de réponses en deux colonnes ===
+    start_y = 110  # Position Y de départ pour les questions
+    increment_y = 30  # Espacement vertical entre les questions
+    num_questions = 30  # Nombre total de questions
+    questions_per_column = num_questions // 2  # Nombre de questions par colonne
+
+    # Colonne 1
+    for i in range(questions_per_column):
+        question_number = i + 1
+        page.insert_text((50, start_y + i * increment_y), f"{question_number}.", fontsize=12, fontname="helv", color=(0, 0, 0))
+        page.insert_text((100, start_y + i * increment_y), "A    B    C    D", fontsize=12, fontname="helv", color=(0, 0, 0))
+
+    # Colonne 2
+    for i in range(questions_per_column, num_questions):
+        question_number = i + 1
+        page.insert_text((300, start_y + (i - questions_per_column) * increment_y), f"{question_number}.", fontsize=12, fontname="helv", color=(0, 0, 0))
+        page.insert_text((350, start_y + (i - questions_per_column) * increment_y), "A    B    C    D", fontsize=12, fontname="helv", color=(0, 0, 0))
+
+    # === Section pour les remarques ===
+    page.insert_text((50, start_y + questions_per_column * increment_y + 20), "Remarks: __________________________________________________", fontsize=12, fontname="helv", color=(0, 0, 0))
+
+    pdf_filename = f"answer_sheet_{student_name}.pdf"
+    logger.info(f"PDF généré : {pdf_filename}")
+    doc.save(pdf_filename)
+    return pdf_filename
+
 # =============================== #
 # Vue Django pour la génération   #
 # =============================== #
 # Configuration du logger
+
+from django.shortcuts import get_object_or_404, render
+from .models import Student, Class
+import logging
+import fitz
+import requests
+from io import BytesIO
+import qrcode
+from PIL import Image, ImageDraw, ImageFilter
+import os
+from django.conf import settings
+from django.db import connection
+from django.http import HttpResponse
+import zipfile
+from zipfile import ZipFile
+import shutil
+from datetime import date
+from django.contrib import messages
+
+logger = logging.getLogger(__name__)
 
 def generate_pdf_view(request):
     logger.info("LOG Requête reçue pour la génération du PDF")
@@ -587,6 +656,7 @@ def generate_pdf_view(request):
         kind = request.POST['kind']
         domain = request.POST['domain']
         assignment_type = request.POST.get('assignment_type', 'Quiz')
+        generate_answer_sheet_flag = request.POST.get('generateAnswerSheet', True) == 'on'
 
         try:
             # Générer les liens de questions selon la matière
@@ -599,31 +669,26 @@ def generate_pdf_view(request):
             temp_dir = f"quiz_class_{selected_class}"  # Dossier temporaire pour stocker les PDFs
             os.makedirs(temp_dir, exist_ok=True)
 
-                        # Générer les fichiers PDF pour chaque élève
-            # Get the class instance based on selected_class
+            # Générer les fichiers PDF pour chaque élève
             class_instance = Class.objects.get(name=selected_class)
             logger.info(f"Classe sélectionnée : {selected_class}")
             logger.info(f"Classe ID : {class_instance.id}")
 
             with connection.cursor() as cursor:
-                # Exécution de la requête SQL brute
                 cursor.execute("""
                     SELECT sc."student_id"
                     FROM "public"."Authentication_user" AS u
                     INNER JOIN "public"."Authentication_student" AS s ON u."id" = s."user_id"
                     INNER JOIN "public"."School_class_students" AS sc ON s."id" = sc."student_id"
                     WHERE sc."class_id" = %s;
-                """, [class_instance.id])  # Utilisation du paramètre 'class_id' de manière sécurisée pour éviter les injections SQL
+                """, [class_instance.id])
 
-                # Récupérer tous les résultats
                 results = cursor.fetchall()
-
-
                 logger.info(f"Nombre d'étudiants récupérés : {len(results)}")
 
-            # Now iterate over students_in_class
+            # Générer les PDFs pour les quiz
             for student in results:
-                student_id = student[0]   # Access the related student object and then the id
+                student_id = student[0]
                 logger.info(f"Début de génération du PDF pour l'élève ID : {student_id}")
                 pdf_filename = generate_pdf(
                     links=links,
@@ -634,7 +699,6 @@ def generate_pdf_view(request):
                     student_id=student_id,
                     domain=domain,
                     assignment_type=assignment_type,
-
                 )
                 if not os.path.exists(pdf_filename) or os.path.getsize(pdf_filename) == 0:
                     logger.error(f"Le fichier PDF {pdf_filename} est vide ou corrompu !")
@@ -643,7 +707,24 @@ def generate_pdf_view(request):
                     pdf_files.append(pdf_filename)
                     shutil.move(pdf_filename, os.path.join(temp_dir, os.path.basename(pdf_filename)))
 
-                        # Vérification : A-t-on au moins un fichier PDF valide ?
+            # Générer les feuilles de réponses si le checkbox est coché
+            if generate_answer_sheet_flag:
+                for student in results:
+                    student_id = student[0]
+                    logger.info(f"Début de génération de la feuille de réponses pour l'élève ID : {student_id}")
+                    answer_sheet_filename = generate_answer_sheet(
+                        student_id=student_id,
+                        date=date.today().strftime("%Y-%m-%d"),
+                        selected_class=selected_class,
+                    )
+                    if not os.path.exists(answer_sheet_filename) or os.path.getsize(answer_sheet_filename) == 0:
+                        logger.error(f"La feuille de réponses {answer_sheet_filename} est vide ou corrompue !")
+                    else:
+                        logger.info(f"Feuille de réponses générée avec succès : {answer_sheet_filename}")
+                        pdf_files.append(answer_sheet_filename)
+                        shutil.move(answer_sheet_filename, os.path.join(temp_dir, os.path.basename(answer_sheet_filename)))
+
+            # Vérification : A-t-on au moins un fichier PDF valide ?
             if not pdf_files:
                 messages.error(request, "Some issues occured : No valide PDF generated.")
                 shutil.rmtree(temp_dir)  # Nettoyage
@@ -676,6 +757,66 @@ def generate_pdf_view(request):
             return render(request, 'dashboard/teacher/digital_library.html')
 
     return render(request, 'dashboard/teacher/digital_library.html')
+def generate_answer_sheet(student_id, date, selected_class):
+    """ Génère une feuille de réponses pour un élève spécifique """
+    logger.info('Génération de la feuille de réponses pour un élève spécifique')
+
+    student = get_object_or_404(Student, id=student_id)
+    student_name = f"{student.user.first_name} {student.user.last_name}"
+
+    doc = fitz.open()
+    page = doc.new_page(width=595, height=842)  # Format A4
+
+    # === Informations sur l'étudiant ===
+    page.insert_text((50, 30), f"Name: {student_name}", fontsize=12, fontname="helv", color=(0, 0, 0))
+    page.insert_text((50, 50), f"Class: {selected_class}", fontsize=12, fontname="helv", color=(0, 0, 0))
+    page.insert_text((50, 70), f"Date: {date}", fontsize=12, fontname="helv", color=(0, 0, 0))
+
+    # === Grille de réponses en deux colonnes ===
+    start_y = 110  # Position Y de départ pour les questions
+    increment_y = 30  # Espacement vertical entre les questions
+    num_questions = 30  # Nombre total de questions
+    questions_per_column = num_questions // 2  # Nombre de questions par colonne
+
+    # Colonne 1
+    for i in range(questions_per_column):
+        question_number = i + 1
+        page.insert_text((50, start_y + i * increment_y), f"{question_number}.", fontsize=12, fontname="helv", color=(0, 0, 0))
+        page.insert_text((100, start_y + i * increment_y), "A    B    C    D", fontsize=12, fontname="helv", color=(0, 0, 0))
+
+    # Colonne 2
+    for i in range(questions_per_column, num_questions):
+        question_number = i + 1
+        page.insert_text((300, start_y + (i - questions_per_column) * increment_y), f"{question_number}.", fontsize=12, fontname="helv", color=(0, 0, 0))
+        page.insert_text((350, start_y + (i - questions_per_column) * increment_y), "A    B    C    D", fontsize=12, fontname="helv", color=(0, 0, 0))
+
+    # === Section pour les remarques ===
+    page.insert_text((50, start_y + questions_per_column * increment_y + 20), "Remarks: __________________________________________________", fontsize=12, fontname="helv", color=(0, 0, 0))
+
+    # === Génération du QR Code ===
+    try:
+        class_instance = Class.objects.get(name=selected_class)
+        qr_data = f"student_id:{student_id}|class_id:{class_instance.id}|date:{date}"
+
+        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=6, border=2)
+        qr.add_data(qr_data)
+        qr.make(fit=True)
+
+        qr_img = qr.make_image(fill_color=(62, 179, 227), back_color="white").convert("RGBA")
+        qr_bytes = BytesIO()
+        qr_img.save(qr_bytes, format='PNG')
+        qr_bytes.seek(0)
+
+        # Insérer le QR Code dans le PDF
+        page.insert_image(fitz.Rect(450, 750, 550, 850), stream=qr_bytes)
+
+    except Exception as e:
+        logger.error(f"Erreur lors de la création du QR code : {e}")
+
+    pdf_filename = f"answer_sheet_{student_name}.pdf"
+    logger.info(f"PDF généré : {pdf_filename}")
+    doc.save(pdf_filename)
+    return pdf_filename
 
 from django.http import HttpResponse
 from django.shortcuts import render
