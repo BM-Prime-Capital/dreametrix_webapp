@@ -1,23 +1,13 @@
 
 import os
-import shutil
-from zipfile import ZipFile
-import zipfile
-from django.db import connection
 from django.http import HttpResponse
-import requests
-import fitz
 from django.conf import settings
 import pandas as pd
 import random
 from openpyxl import load_workbook
-from django.contrib import messages
 from django.http import HttpResponseBadRequest
 import openai
-import qrcode
-from io import BytesIO
 import logging
-from django.db.models import Prefetch
 
 # Configuration du logger
 
@@ -309,8 +299,16 @@ def teach_teacher_dashboard(request):
 #######                                             #########
 #############################################################
 
+import fitz
+import requests
+from io import BytesIO
 import qrcode
-from PIL import Image, ImageDraw, ImageFilter
+from django.db import connection
+import zipfile
+from zipfile import ZipFile
+import shutil
+from datetime import date
+from django.contrib import messages
 
 # Function to filter the questions from the EXCEL SHEET OF MATHEMATICS
 def filter_math_question(subject, number, grade, domain, kind):
@@ -381,7 +379,7 @@ def filter_lang_question(subject, number, grade, domain,  kind):
 
     return story_links
 
-def generate_pdf(links, selected_class, subject, grade, teacher_name, student_id, assignment_type, domain):
+def generate_pdf(links, selected_class, subject, grade, teacher_name, student_id, assignment_type, domain, generate_answer_sheet_flag=False):
     """ Génère un PDF pour un élève spécifique """
     logger.info('Génération du PDF pour un élève spécifique')
 
@@ -468,175 +466,57 @@ def generate_pdf(links, selected_class, subject, grade, teacher_name, student_id
             # Création de l'image QR code avec couleur personnalisée
             qr_img = qr.make_image(fill_color=(62, 179, 227), back_color="white").convert("RGBA")
 
-            # Ajout d'un léger dégradé aux modules du QR Code (couleurs plus lumineuses)
-            width, height = qr_img.size
-            data = qr_img.getdata()
-
-            new_data = []
-            for item in data:
-                r, g, b, a = item
-                # Créer un léger dégradé vers une couleur plus claire
-                if r == 62 and g == 179 and b == 227:  # Pour les modules de couleur de base
-                    new_data.append((100, 190, 255, 255))  # Dégradé vers une couleur plus claire
-                else:
-                    new_data.append(item)
-            qr_img.putdata(new_data)
-
-            # Création d'un effet de bordure artistique (bordure avec ombre légère)
-            border_color = (100, 150, 200)
-            border_thickness = 10
-            border = Image.new("RGBA", (width + 2 * border_thickness, height + 2 * border_thickness), border_color)
-            border.paste(qr_img, (border_thickness, border_thickness))
-
-            # Ajout d'un halo lumineux autour du QR Code pour un effet esthétique
-            halo = Image.new("RGBA", border.size, (0, 0, 0, 0))  # Image vide pour l'halo
-            halo_draw = ImageDraw.Draw(halo)
-            halo_draw.ellipse(
-                (border_thickness - 20, border_thickness - 20, width + border_thickness + 20,
-                 height + border_thickness + 20),
-                fill=(62, 179, 227, 80)  # Couleur de l'halo (semi-transparent)
-            )
-            halo = halo.filter(ImageFilter.GaussianBlur(radius=15))  # Application du flou pour un halo doux
-            border = Image.alpha_composite(halo, border)
-
-            # Ajout de motifs subtils derrière le QR code (fond géométrique ou lignes courbes)
-            motif = Image.new("RGBA", border.size, (255, 255, 255, 0))  # Fond transparent
-            motif_draw = ImageDraw.Draw(motif)
-            motif_draw.line([(0, 0), (border.width, border.height)], fill=(62, 179, 227, 20), width=5)
-            motif_draw.line([(border.width, 0), (0, border.height)], fill=(62, 179, 227, 20), width=5)
-            motif = motif.filter(ImageFilter.GaussianBlur(radius=8))  # Flou doux sur le motif
-            border = Image.alpha_composite(border, motif)
-
-            # Ajout d'un logo au centre du QR Code (réduit la taille du logo)
-            image_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'logo.png')
-            logo = Image.open(image_path).convert("RGBA")
-            logo = logo.resize((80, 80))  # Réduit la taille du logo
-
-            # Calcul de la position exacte du logo au centre du QR code
-            logo_x = (width - logo.width) // 2
-            logo_y = (height - logo.height) // 2
-
-            # Création d'un masque pour arrondir les coins avec un rayon plus doux
-            mask = Image.new("L", border.size, 0)
-            mask_draw = ImageDraw.Draw(mask)
-            corner_radius = 20  # Rayon des coins arrondis plus modéré
-            mask_draw.rectangle([0, 0, border.width, border.height], fill=255)
-            mask_draw.rectangle([0, 0, corner_radius, corner_radius], fill=0)
-            mask_draw.rectangle([border.width - corner_radius, 0, border.width, corner_radius], fill=0)
-            mask_draw.rectangle([0, border.height - corner_radius, corner_radius, border.height], fill=0)
-            mask_draw.rectangle(
-                [border.width - corner_radius, border.height - corner_radius, border.width, border.height], fill=0)
-            border.putalpha(mask)
-
-            # Ajouter une ombre douce au logo pour un effet artistique
-            shadow = Image.new("RGBA", border.size, (0, 0, 0, 0))
-            shadow.paste(logo, (logo_x + 8, logo_y + 8), logo)  # Ombre décalée
-            shadow = shadow.filter(ImageFilter.GaussianBlur(radius=15))  # Flou plus important pour une ombre plus douce
-            border = Image.alpha_composite(border, shadow)
-
-            # Ajouter le logo sur le QR code
-            border.paste(logo, (logo_x, logo_y), logo)
-
-            # Création d'un éclat lumineux autour du logo pour ajouter du dynamisme
-            light_glow = Image.new("RGBA", border.size, (0, 0, 0, 0))
-            light_glow_draw = ImageDraw.Draw(light_glow)
-            light_glow_draw.ellipse(
-                (logo_x - 10, logo_y - 10, logo_x + logo.width + 10, logo_y + logo.height + 10),
-                fill=(62, 179, 227, 100)  # Eclat lumineux autour du logo
-            )
-            light_glow = light_glow.filter(ImageFilter.GaussianBlur(radius=25))  # Un éclat doux et flou
-            border = Image.alpha_composite(border, light_glow)
-
             # Convertir l'image en BytesIO pour une insertion dans un PDF
             qr_bytes = BytesIO()
-            border.save(qr_bytes, format='PNG')
+            qr_img.save(qr_bytes, format='PNG')
             qr_bytes.seek(0)
 
         except Exception as e:
             logger.error(f"Erreur lors de la création du QR code stylisé : {e}")
 
+        # === Ajouter le QR Code à chaque page ===
         for page in doc:
             page.insert_image(fitz.Rect(521, 768, 571, 818), stream=qr_bytes)
             qr_bytes.seek(0)
+
+        # === Ajouter la feuille de réponses si la case est cochée ===
+        if generate_answer_sheet_flag:
+            answer_sheet_page = doc.new_page(width=595, height=842)
+            answer_sheet_page.insert_text((50, 30), f"Name: {student_name}", fontsize=12, fontname="helv", color=(0, 0, 0))
+            answer_sheet_page.insert_text((50, 50), f"Class: {selected_class}", fontsize=12, fontname="helv", color=(0, 0, 0))
+            answer_sheet_page.insert_text((50, 70), f"Date: {date.today().strftime('%Y-%m-%d')}", fontsize=12, fontname="helv", color=(0, 0, 0))
+
+            start_y = 110  # Position Y de départ pour les questions
+            increment_y = 30  # Espacement vertical entre les questions
+            num_questions = len(links)  # Nombre de questions dynamique
+            questions_per_column = (num_questions + 1) // 2  # Nombre de questions par colonne
+
+            # Colonne 1
+            for i in range(questions_per_column):
+                question_number = i + 1
+                answer_sheet_page.insert_text((50, start_y + i * increment_y), f"{question_number}.", fontsize=12, fontname="helv", color=(0, 0, 0))
+                answer_sheet_page.insert_text((100, start_y + i * increment_y), "A    B    C    D", fontsize=12, fontname="helv", color=(0, 0, 0))
+
+            # Colonne 2
+            for i in range(questions_per_column, num_questions):
+                question_number = i + 1
+                answer_sheet_page.insert_text((300, start_y + (i - questions_per_column) * increment_y), f"{question_number}.", fontsize=12, fontname="helv", color=(0, 0, 0))
+                answer_sheet_page.insert_text((350, start_y + (i - questions_per_column) * increment_y), "A    B    C    D", fontsize=12, fontname="helv", color=(0, 0, 0))
+
+            # Section pour les remarques
+            answer_sheet_page.insert_text((50, start_y + questions_per_column * increment_y + 20), "Remarks: __________________________________________________", fontsize=12, fontname="helv", color=(0, 0, 0))
+
+            # Ajouter le QR Code à la dernière page (answer sheet)
+            answer_sheet_page.insert_image(fitz.Rect(521, 768, 571, 818), stream=qr_bytes)
 
         pdf_filename = f"test_{student_name}.pdf"
         logger.info(f"PDF généré : {pdf_filename}")
         doc.save(pdf_filename)
         return pdf_filename
 
-import fitz
-from django.shortcuts import get_object_or_404
-from .models import Student
-import logging
-from datetime import date  # Importer la date
-
-logger = logging.getLogger(__name__)
-
-def generate_answer_sheet(student_id, date):
-    """ Génère une feuille de réponses pour un élève spécifique """
-    logger.info('Génération de la feuille de réponses pour un élève spécifique')
-
-    student = get_object_or_404(Student, id=student_id)
-    student_name = f"{student.user.first_name} {student.user.last_name}"
-
-    doc = fitz.open()
-    page = doc.new_page(width=595, height=842)  # Format A4
-
-    # === Informations sur l'étudiant ===
-    page.insert_text((50, 30), f"Name: {student_name}", fontsize=12, fontname="helv", color=(0, 0, 0))
-    page.insert_text((50, 50), "Class: ______________________", fontsize=12, fontname="helv", color=(0, 0, 0))
-    page.insert_text((50, 70), f"Date: {date}", fontsize=12, fontname="helv", color=(0, 0, 0))
-
-    # === Grille de réponses en deux colonnes ===
-    start_y = 110  # Position Y de départ pour les questions
-    increment_y = 30  # Espacement vertical entre les questions
-    num_questions = 30  # Nombre total de questions
-    questions_per_column = num_questions // 2  # Nombre de questions par colonne
-
-    # Colonne 1
-    for i in range(questions_per_column):
-        question_number = i + 1
-        page.insert_text((50, start_y + i * increment_y), f"{question_number}.", fontsize=12, fontname="helv", color=(0, 0, 0))
-        page.insert_text((100, start_y + i * increment_y), "A    B    C    D", fontsize=12, fontname="helv", color=(0, 0, 0))
-
-    # Colonne 2
-    for i in range(questions_per_column, num_questions):
-        question_number = i + 1
-        page.insert_text((300, start_y + (i - questions_per_column) * increment_y), f"{question_number}.", fontsize=12, fontname="helv", color=(0, 0, 0))
-        page.insert_text((350, start_y + (i - questions_per_column) * increment_y), "A    B    C    D", fontsize=12, fontname="helv", color=(0, 0, 0))
-
-    # === Section pour les remarques ===
-    page.insert_text((50, start_y + questions_per_column * increment_y + 20), "Remarks: __________________________________________________", fontsize=12, fontname="helv", color=(0, 0, 0))
-
-    pdf_filename = f"answer_sheet_{student_name}.pdf"
-    logger.info(f"PDF généré : {pdf_filename}")
-    doc.save(pdf_filename)
-    return pdf_filename
-
 # =============================== #
 # Vue Django pour la génération   #
 # =============================== #
-# Configuration du logger
-
-from django.shortcuts import get_object_or_404, render
-from .models import Student, Class
-import logging
-import fitz
-import requests
-from io import BytesIO
-import qrcode
-from PIL import Image, ImageDraw, ImageFilter
-import os
-from django.conf import settings
-from django.db import connection
-from django.http import HttpResponse
-import zipfile
-from zipfile import ZipFile
-import shutil
-from datetime import date
-from django.contrib import messages
-
-logger = logging.getLogger(__name__)
 
 def generate_pdf_view(request):
     logger.info("LOG Requête reçue pour la génération du PDF")
@@ -656,7 +536,7 @@ def generate_pdf_view(request):
         kind = request.POST['kind']
         domain = request.POST['domain']
         assignment_type = request.POST.get('assignment_type', 'Quiz')
-        generate_answer_sheet_flag = request.POST.get('generateAnswerSheet', True) == 'on'
+        generate_answer_sheet_flag = request.POST.get('generateAnswerSheet', False) == 'on'
 
         try:
             # Générer les liens de questions selon la matière
@@ -699,6 +579,7 @@ def generate_pdf_view(request):
                     student_id=student_id,
                     domain=domain,
                     assignment_type=assignment_type,
+                    generate_answer_sheet_flag=generate_answer_sheet_flag
                 )
                 if not os.path.exists(pdf_filename) or os.path.getsize(pdf_filename) == 0:
                     logger.error(f"Le fichier PDF {pdf_filename} est vide ou corrompu !")
@@ -706,23 +587,6 @@ def generate_pdf_view(request):
                     logger.info(f"PDF généré avec succès : {pdf_filename}")
                     pdf_files.append(pdf_filename)
                     shutil.move(pdf_filename, os.path.join(temp_dir, os.path.basename(pdf_filename)))
-
-            # Générer les feuilles de réponses si le checkbox est coché
-            if generate_answer_sheet_flag:
-                for student in results:
-                    student_id = student[0]
-                    logger.info(f"Début de génération de la feuille de réponses pour l'élève ID : {student_id}")
-                    answer_sheet_filename = generate_answer_sheet(
-                        student_id=student_id,
-                        date=date.today().strftime("%Y-%m-%d"),
-                        selected_class=selected_class,
-                    )
-                    if not os.path.exists(answer_sheet_filename) or os.path.getsize(answer_sheet_filename) == 0:
-                        logger.error(f"La feuille de réponses {answer_sheet_filename} est vide ou corrompue !")
-                    else:
-                        logger.info(f"Feuille de réponses générée avec succès : {answer_sheet_filename}")
-                        pdf_files.append(answer_sheet_filename)
-                        shutil.move(answer_sheet_filename, os.path.join(temp_dir, os.path.basename(answer_sheet_filename)))
 
             # Vérification : A-t-on au moins un fichier PDF valide ?
             if not pdf_files:
@@ -757,75 +621,6 @@ def generate_pdf_view(request):
             return render(request, 'dashboard/teacher/digital_library.html')
 
     return render(request, 'dashboard/teacher/digital_library.html')
-def generate_answer_sheet(student_id, date, selected_class):
-    """ Génère une feuille de réponses pour un élève spécifique """
-    logger.info('Génération de la feuille de réponses pour un élève spécifique')
-
-    student = get_object_or_404(Student, id=student_id)
-    student_name = f"{student.user.first_name} {student.user.last_name}"
-
-    doc = fitz.open()
-    page = doc.new_page(width=595, height=842)  # Format A4
-
-    # === Informations sur l'étudiant ===
-    page.insert_text((50, 30), f"Name: {student_name}", fontsize=12, fontname="helv", color=(0, 0, 0))
-    page.insert_text((50, 50), f"Class: {selected_class}", fontsize=12, fontname="helv", color=(0, 0, 0))
-    page.insert_text((50, 70), f"Date: {date}", fontsize=12, fontname="helv", color=(0, 0, 0))
-
-    # === Grille de réponses en deux colonnes ===
-    start_y = 110  # Position Y de départ pour les questions
-    increment_y = 30  # Espacement vertical entre les questions
-    num_questions = 30  # Nombre total de questions
-    questions_per_column = num_questions // 2  # Nombre de questions par colonne
-
-    # Colonne 1
-    for i in range(questions_per_column):
-        question_number = i + 1
-        page.insert_text((50, start_y + i * increment_y), f"{question_number}.", fontsize=12, fontname="helv", color=(0, 0, 0))
-        page.insert_text((100, start_y + i * increment_y), "A    B    C    D", fontsize=12, fontname="helv", color=(0, 0, 0))
-
-    # Colonne 2
-    for i in range(questions_per_column, num_questions):
-        question_number = i + 1
-        page.insert_text((300, start_y + (i - questions_per_column) * increment_y), f"{question_number}.", fontsize=12, fontname="helv", color=(0, 0, 0))
-        page.insert_text((350, start_y + (i - questions_per_column) * increment_y), "A    B    C    D", fontsize=12, fontname="helv", color=(0, 0, 0))
-
-    # === Section pour les remarques ===
-    page.insert_text((50, start_y + questions_per_column * increment_y + 20), "Remarks: __________________________________________________", fontsize=12, fontname="helv", color=(0, 0, 0))
-
-    # === Génération du QR Code ===
-    try:
-        class_instance = Class.objects.get(name=selected_class)
-        qr_data = f"student_id:{student_id}|class_id:{class_instance.id}|date:{date}"
-
-        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=6, border=2)
-        qr.add_data(qr_data)
-        qr.make(fit=True)
-
-        qr_img = qr.make_image(fill_color=(62, 179, 227), back_color="white").convert("RGBA")
-        qr_bytes = BytesIO()
-        qr_img.save(qr_bytes, format='PNG')
-        qr_bytes.seek(0)
-
-        # Insérer le QR Code dans le PDF
-        page.insert_image(fitz.Rect(450, 750, 550, 850), stream=qr_bytes)
-
-    except Exception as e:
-        logger.error(f"Erreur lors de la création du QR code : {e}")
-
-    pdf_filename = f"answer_sheet_{student_name}.pdf"
-    logger.info(f"PDF généré : {pdf_filename}")
-    doc.save(pdf_filename)
-    return pdf_filename
-
-from django.http import HttpResponse
-from django.shortcuts import render
-from django.conf import settings
-import os
-
-import logging
-
-logger = logging.getLogger(__name__)
 
 def generate_pdf_preview(request):
     if request.method == "POST":
@@ -839,6 +634,7 @@ def generate_pdf_preview(request):
             kind = request.POST['kind']
             domain = request.POST['domain']
             teacher_name = request.user.get_full_name() or request.user.username
+            generate_answer_sheet_flag = request.POST.get('generateAnswerSheet', False) == 'on'  # Récupérer la valeur du checkbox
 
             logger.info(f"Données du formulaire : subject={subject}, number={number}, grade={grade}, kind={kind}, domain={domain}")
 
@@ -890,6 +686,7 @@ def generate_pdf_preview(request):
                 student_id=student_id,  # Utiliser l'ID de l'étudiant ou None
                 domain=domain,
                 assignment_type="Quiz",
+                generate_answer_sheet_flag=generate_answer_sheet_flag  # Passer le flag pour inclure la feuille de réponses
             )
 
             logger.info(f"Fichier PDF généré : {preview_pdf}")
@@ -909,6 +706,10 @@ def generate_pdf_preview(request):
             return HttpResponse(f"Erreur lors de la génération du preview : {str(e)}", status=500)
 
     return HttpResponse("Invalid request method.", status=400)
+
+# =============================== #
+# Vue Django pour les Elements qui permet les donnEes dynamiques dans la génération   #
+# =============================== #
 
 def get_classes(request):
     classes = Class.objects.values('name', 'subject', 'grade')
@@ -1048,8 +849,6 @@ def gradebook_calculation(request):
 
 # Function that return the list of all classes in the app
 def class_list_view(request):
-    print(Class._meta.get_field('students').remote_field.through._meta.db_table)  # Devrait afficher "School_class_students"
-    """Affiche la liste des classes, avec option de filtrage."""
     classes = Class.objects.all()  # Récupérer toutes les classes
 
     # Récupérer les filtres de la requête
@@ -1134,9 +933,7 @@ def delete_class_view(request, pk):
 #######                                             #########
 #############################################################
 
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Assignment, School_class_students
-from .serializers import AssignmentSerializer
+from .models import Assignment
 
 def assignment_list_view(request):
     """Render the template to list all assignments."""
@@ -1190,16 +987,7 @@ def delete_assignment_view(request, pk):
 #######                                             #########
 #############################################################
 
-from django.shortcuts import get_object_or_404
-from django.db.models import Count, Case, When, Avg
-from django.shortcuts import render, redirect
-from .models import Gradebook, Student, Class
-from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
-from django.shortcuts import redirect
-
-from django.shortcuts import redirect
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count, Case, When, Avg
 from django.urls import reverse  # Importation de reverse
