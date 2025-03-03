@@ -480,39 +480,68 @@ def generate_pdf(links, selected_class, subject, grade, teacher_name, student_id
             qr_bytes.seek(0)
 
         # === Ajouter la feuille de réponses si la case est cochée ===
-        if generate_answer_sheet_flag:
-            answer_sheet_page = doc.new_page(width=595, height=842)
-            answer_sheet_page.insert_text((50, 30), f"Name: {student_name}", fontsize=12, fontname="helv", color=(0, 0, 0))
-            answer_sheet_page.insert_text((50, 50), f"Class: {selected_class}", fontsize=12, fontname="helv", color=(0, 0, 0))
-            answer_sheet_page.insert_text((50, 70), f"Date: {date.today().strftime('%Y-%m-%d')}", fontsize=12, fontname="helv", color=(0, 0, 0))
+            # === Ajouter la feuille de réponses si la case est cochée ===
+            if generate_answer_sheet_flag:
+                answer_sheet_page = doc.new_page(width=595, height=842)
+                answer_sheet_page.insert_text((50, 30), f"Name: {student_name}", fontsize=12, fontname="helv",
+                                              color=(0, 0, 0))
+                answer_sheet_page.insert_text((50, 50), f"Class: {selected_class}", fontsize=12, fontname="helv",
+                                              color=(0, 0, 0))
+                answer_sheet_page.insert_text((50, 70), f"Date: {date.today().strftime('%Y-%m-%d')}", fontsize=12,
+                                              fontname="helv", color=(0, 0, 0))
 
-            start_y = 110  # Position Y de départ pour les questions
-            increment_y = 30  # Espacement vertical entre les questions
-            num_questions = len(links)  # Nombre de questions dynamique
-            questions_per_column = (num_questions + 1) // 2  # Nombre de questions par colonne
+                start_y = 110  # Position Y de départ pour les questions
+                increment_y = 30  # Espacement vertical entre les questions
+                num_questions = len(links)  # Nombre de questions dynamique
+                questions_per_column = (num_questions + 1) // 2  # Nombre de questions par colonne
 
-            # Colonne 1
-            for i in range(questions_per_column):
-                question_number = i + 1
-                answer_sheet_page.insert_text((50, start_y + i * increment_y), f"{question_number}.", fontsize=12, fontname="helv", color=(0, 0, 0))
-                answer_sheet_page.insert_text((100, start_y + i * increment_y), "A    B    C    D", fontsize=12, fontname="helv", color=(0, 0, 0))
+                # Colonne 1
+                for i in range(questions_per_column):
+                    question_number = i + 1
+                    answer_sheet_page.insert_text((50, start_y + i * increment_y), f"{question_number}.", fontsize=12,
+                                                  fontname="helv", color=(0, 0, 0))
 
-            # Colonne 2
-            for i in range(questions_per_column, num_questions):
-                question_number = i + 1
-                answer_sheet_page.insert_text((300, start_y + (i - questions_per_column) * increment_y), f"{question_number}.", fontsize=12, fontname="helv", color=(0, 0, 0))
-                answer_sheet_page.insert_text((350, start_y + (i - questions_per_column) * increment_y), "A    B    C    D", fontsize=12, fontname="helv", color=(0, 0, 0))
+                    # Ajouter les cases carrées avec les lettres A, B, C, D
+                    square_size = 15  # Taille de chaque case
+                    letters = ['A', 'B', 'C', 'D']
+                    for j, letter in enumerate(letters):
+                        x = 100 + j * (square_size + 10)  # Espacement horizontal entre les cases
+                        y = start_y + i * increment_y - 5  # Ajustement vertical pour aligner avec le texte
+                        rect = fitz.Rect(x, y, x + square_size, y + square_size)
+                        answer_sheet_page.draw_rect(rect, color=(0, 0, 0), fill=None)  # Contour noir
+                        answer_sheet_page.insert_text((x + 5, y + 10), letter, fontsize=10, fontname="helv",
+                                                      color=(0, 0, 0))  # Lettre au centre
 
-            # Section pour les remarques
-            answer_sheet_page.insert_text((50, start_y + questions_per_column * increment_y + 20), "Remarks: __________________________________________________", fontsize=12, fontname="helv", color=(0, 0, 0))
+                # Colonne 2
+                for i in range(questions_per_column, num_questions):
+                    question_number = i + 1
+                    answer_sheet_page.insert_text((300, start_y + (i - questions_per_column) * increment_y),
+                                                  f"{question_number}.", fontsize=12, fontname="helv", color=(0, 0, 0))
 
-            # Ajouter le QR Code à la dernière page (answer sheet)
-            answer_sheet_page.insert_image(fitz.Rect(521, 768, 571, 818), stream=qr_bytes)
+                    # Ajouter les cases carrées avec les lettres A, B, C, D
+                    square_size = 15  # Taille de chaque case
+                    letters = ['A', 'B', 'C', 'D']
+                    for j, letter in enumerate(letters):
+                        x = 350 + j * (square_size + 10)  # Espacement horizontal entre les cases
+                        y = start_y + (
+                                    i - questions_per_column) * increment_y - 5  # Ajustement vertical pour aligner avec le texte
+                        rect = fitz.Rect(x, y, x + square_size, y + square_size)
+                        answer_sheet_page.draw_rect(rect, color=(0, 0, 0), fill=None)  # Contour noir
+                        answer_sheet_page.insert_text((x + 5, y + 10), letter, fontsize=10, fontname="helv",
+                                                      color=(0, 0, 0))  # Lettre au centre
 
-        pdf_filename = f"test_{student_name}.pdf"
-        logger.info(f"PDF généré : {pdf_filename}")
-        doc.save(pdf_filename)
-        return pdf_filename
+                # Section pour les remarques
+                answer_sheet_page.insert_text((50, start_y + questions_per_column * increment_y + 20),
+                                              "Remarks: __________________________________________________",
+                                              fontsize=12, fontname="helv", color=(0, 0, 0))
+
+                # Ajouter le QR Code à la dernière page (answer sheet)
+                answer_sheet_page.insert_image(fitz.Rect(521, 768, 571, 818), stream=qr_bytes)
+
+            pdf_filename = f"test_{student_name}.pdf"
+            logger.info(f"PDF généré : {pdf_filename}")
+            doc.save(pdf_filename)
+            return pdf_filename
 
 # =============================== #
 # Vue Django pour la génération   #
